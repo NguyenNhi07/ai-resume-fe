@@ -1,9 +1,10 @@
-import { UserButton } from "@clerk/clerk-react";
+import Header from "@/components/custom/Header";
 
 export default function Home () {
-    return <>
-        <div className="p-8">
-            <UserButton/>
+    return (
+        <div>
+            <Header/>
+            Home
         </div>
-    </>
+    )
 }
