@@ -1,0 +1,15 @@
+{
+  "dashboard": "Dashboard",
+  "started": "Started",
+  "your_resume_created_successfully": "Your resume created successfully.",
+  "success": "Success",
+  "error": "Error",
+  "something_went_wrong": "Something went wrong. Please try again.",
+  "create_new_resume": "Create New Resume",
+  "add_a_title_for_your_new_resume": "Add a title for your new resume",
+  "ex_full_stack_resume": "Ex.Full Stack resume",
+  "cancel": "Cancel",
+  "create": "Create",
+  "my_resume": "My Resume",
+  "start_creating_AI_resume_to_your_next_Job_role": "Start Creating AI resume to your next Job role"
+}

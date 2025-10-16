@@ -14,6 +14,7 @@ import GlobalApi from "../../../service/GlobalApi";
 import { useUser } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/custom/Toast";
+import { useTranslation } from "react-i18next";
 
 export function AddResume() {
     const { toast } = useToast()
@@ -22,6 +23,7 @@ export function AddResume() {
     const [loading, setLoading] = useState(false)
     const { user } = useUser()
     const navigation = useNavigate()
+    const { t } = useTranslation();
 
     const onCreate = () => {
         setLoading(true)
@@ -41,8 +43,8 @@ export function AddResume() {
                 setLoading(false)
                 navigation(`/dashboard/resume/${reponse.data.data.documentId}/edit`)
                 toast({
-                    title: "Success!",
-                    message: "Your resume created successfully.",
+                    title: t('success'),
+                    message: t('your_resume_created_successfully'),
                     variant: "success",
                 })
             }
@@ -50,8 +52,8 @@ export function AddResume() {
             setLoading(false)
             console.log(error)
             toast({
-                title: "Error!",
-                message: "Something went wrong. Please try again.",
+                title: t('error'),
+                message: t('something_went_wrong'),
                 variant: "error",
             })
         })
@@ -69,14 +71,14 @@ export function AddResume() {
             <Dialog open={openDialog}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Create New Resume</DialogTitle>
+                        <DialogTitle>{t('create_new_resume')}</DialogTitle>
                         <DialogDescription>
-                            <p>Add a title for your new resume</p>
-                            <Input onChange={(e: any) => setResumeTitle(e.target.value)} className="my-2" placeholder="Ex.Full Stack resume" />
+                            <p>{t('add_a_title_for_your_new_resume')}</p>
+                            <Input onChange={(e: any) => setResumeTitle(e.target.value)} className="my-2" placeholder={t('ex_full_stack_resume')} />
                         </DialogDescription>
                         <div className="flex justify-end gap-4">
-                            <Button onClick={() => setOpenDialog(false)} variant='ghost'>Cancel</Button>
-                            <Button disabled={!resumeTitle || loading} onClick={onCreate}>{loading ? <Loader2 className="animate-spin" /> : 'Create'}</Button>
+                            <Button onClick={() => setOpenDialog(false)} variant='ghost'>{t('cancel')}</Button>
+                            <Button disabled={!resumeTitle || loading} onClick={onCreate}>{loading ? <Loader2 className="animate-spin" /> : t('create')}</Button>
                         </div>
                     </DialogHeader>
                 </DialogContent>

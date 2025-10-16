@@ -1,0 +1,15 @@
+{
+  "dashboard": "Bảng điều khiển",
+  "started": "Bắt đầu",
+  "your_resume_created_successfully": "Hồ sơ của bạn đã được tạo thành công.",
+  "success": "Thành công",
+  "error": "Lỗi",
+  "something_went_wrong": "Đã xảy ra sự cố. Vui lòng thử lại.",
+  "create_new_resume": "Tạo hồ sơ mới",
+  "add_a_title_for_your_new_resume": "Thêm tiêu đề cho hồ sơ mới của bạn",
+  "ex_full_stack_resume": "Ví dụ: Hồ sơ Full Stack",
+  "cancel": "Hủy",
+  "create": "Tạo",
+    "my_resume": "Hồ sơ của tôi",
+  "start_creating_AI_resume_to_your_next_Job_role": "Bắt đầu tạo hồ sơ AI cho vị trí công việc tiếp theo của bạn"
+}
