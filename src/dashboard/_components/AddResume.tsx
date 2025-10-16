@@ -12,12 +12,14 @@ import { Input } from "@/components/ui/input";
 import { v4 as uuidv4 } from 'uuid'
 import GlobalApi from "../../../service/GlobalApi";
 import { useUser } from "@clerk/clerk-react";
+import { useNavigate } from "react-router-dom";
 
 export function AddResume() {
     const [openDialog, setOpenDialog] = useState(false)
     const [resumeTitle, setResumeTitle] = useState()
     const [loading, setLoading] = useState(false)
     const { user } = useUser()
+    const navigation = useNavigate()
 
     const onCreate = () => {
         setLoading(true)
@@ -25,7 +27,7 @@ export function AddResume() {
 
         const data = {
             data: {
-                title: resumeTitle,
+                title: resumeTitle ?? '',
                 resumeId: uuid,
                 userEmail: user?.primaryEmailAddress?.emailAddress,
                 userName: user?.fullName
@@ -36,6 +38,7 @@ export function AddResume() {
             console.log(reponse)
             if (reponse) {
                 setLoading(false)
+                navigation(`/dashboard/resume/${uuid}/edit`)
             }
         }, (error) => {
             console.log(error)
@@ -46,7 +49,7 @@ export function AddResume() {
 
     return (
         <div>
-            <div className="p-14 py-24 border items-center flex justify-center bg-secondary rounded-lg h-[280px] hover:scale-105 transition-all hover:shadow-md cursor-pointer border-dashed"
+            <div className="p-14 py-24 border items-center flex justify-center bg-secondary rounded-lg h-[280px] hover:scale-102 transition-all hover:shadow-md cursor-pointer border-dashed"
                 onClick={() => setOpenDialog(true)}
             >
                 <PlusSquare />

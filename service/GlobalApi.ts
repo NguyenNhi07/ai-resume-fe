@@ -1,4 +1,5 @@
 import axios from 'axios'
+import type { CreateResume } from './GlobalType'
 
 const API_KEY = import.meta.env.VITE_STRAPI_API_KEY
 
@@ -10,8 +11,11 @@ const axiosClient = axios.create({
   }
 })
 
-const CreateNewResume = (data: any) => axiosClient.post('/user-resumes', data)
+const CreateNewResume = (data: CreateResume) => axiosClient.post('/user-resumes', data)
+
+const GetUserResume = (userEmail?: string) => axiosClient.get(`/user-resumes?filters[userEmail][$eq]=${userEmail}`)
 
 export default{
-    CreateNewResume
+    CreateNewResume,
+    GetUserResume
 }
