@@ -1,22 +1,28 @@
-import { Navigate, Outlet } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import './App.css'
-import { useUser } from '@clerk/clerk-react'
-import Header from './components/custom/Header'
-import { ToastProvider } from './components/custom/Toast'
+import Dashboard from './pages/Dashboard'
+import Home from './pages/Home'
+import Layout from './pages/Layout'
+import Preview from './pages/Preview'
+import ResumeBuilder from './pages/ResumeBuilder'
+import Login from './pages/Login'
 
 function App() {
-  const { user, isSignedIn, isLoaded } = useUser()
-
-  if (!isSignedIn && isLoaded) {
-    return <Navigate to='/auth/sign-in' />
-  }
 
   return (
     <>
-      <ToastProvider>
-        <Header />
-        <Outlet />
-      </ToastProvider>
+      <Routes>
+        <Route path='/' element={<Home/>} />
+
+        <Route path='app' element={<Layout/>}>
+          <Route index element={<Dashboard/>}/>
+          <Route path='builder/:resumeId' element={<ResumeBuilder/>}/>
+        </Route>
+
+        <Route path='view/:resumeId' element={<Preview/>} />
+        <Route path='login' element={<Login/>} />
+
+      </Routes>
     </>
   )
 }

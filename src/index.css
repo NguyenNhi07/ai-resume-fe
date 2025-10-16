@@ -1,10 +1,11 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "Outfit", sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -167,6 +168,7 @@ button {
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    font-family: "Outfit", sans-serif;
   }
   body {
     @apply bg-background text-foreground;
