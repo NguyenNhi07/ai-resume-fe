@@ -13,8 +13,10 @@ import { v4 as uuidv4 } from 'uuid'
 import GlobalApi from "../../../service/GlobalApi";
 import { useUser } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/components/custom/Toast";
 
 export function AddResume() {
+    const { toast } = useToast()
     const [openDialog, setOpenDialog] = useState(false)
     const [resumeTitle, setResumeTitle] = useState()
     const [loading, setLoading] = useState(false)
@@ -35,14 +37,23 @@ export function AddResume() {
         }
 
         GlobalApi.CreateNewResume(data).then(reponse => {
-            console.log(reponse)
             if (reponse) {
                 setLoading(false)
-                navigation(`/dashboard/resume/${uuid}/edit`)
+                navigation(`/dashboard/resume/${reponse.data.data.documentId}/edit`)
+                toast({
+                    title: "Success!",
+                    message: "Your resume created successfully.",
+                    variant: "success",
+                })
             }
         }, (error) => {
-            console.log(error)
             setLoading(false)
+            console.log(error)
+            toast({
+                title: "Error!",
+                message: "Something went wrong. Please try again.",
+                variant: "error",
+            })
         })
         setOpenDialog(false)
     }
