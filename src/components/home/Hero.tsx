@@ -17,7 +17,7 @@ export const Hero = () => {
         <>
             <div className="min-h-screen pb-20">
                 {/* Navbar */}
-                <nav className="z-50 flex items-center justify-between w-full py-4 px-6 md:px-16 lg:px-24 xl:px-40 text-sm">
+                <nav className="fixed top-10 left-0 right-0 z-40 flex items-center justify-between w-full py-4 px-6 md:px-16 lg:px-24 xl:px-40 text-sm bg-white/80 backdrop-blur border-b border-slate-200">
                     <a href="https://prebuiltui.com">
                         <img src="/logo.svg" alt="logo" className="h-11 w-auto"/>
                     </a>
@@ -50,7 +50,7 @@ export const Hero = () => {
                     <a href="#" className="text-white">Home</a>
                     <a href="#features" className="text-white">Features</a>
                     <a href="#testimonials" className="text-white">Testimonials</a>
-                    <a href="#contact" className="text-white">Contact</a>
+                    <a href="#cta" className="text-white">Contact</a>
                     <button onClick={() => setMenuOpen(false)} className="active:ring-3 active:ring-white aspect-square size-10 p-1 items-center justify-center bg-purple-600 hover:bg-purple-700 transition text-white rounded-md flex" >
                         X
                     </button>

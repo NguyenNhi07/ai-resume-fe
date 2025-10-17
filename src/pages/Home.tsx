@@ -7,7 +7,7 @@ import { Testimonials } from "@/components/home/Testimonials";
 
 export default function Home () {
     return (
-        <div>
+        <div className="pt-[88px]">
             <Banner />
             <Hero />
             <Feature />
