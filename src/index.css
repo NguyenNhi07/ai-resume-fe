@@ -59,7 +59,7 @@ h1 {
   font-size: 3.2em;
   line-height: 1.1;
 }
-
+/* 
 button {
   border-radius: 8px;
   border: 1px solid transparent;
@@ -69,7 +69,7 @@ button {
   font-family: inherit;
   cursor: pointer;
   transition: border-color 0.25s;
-}
+} */
 
 @media (prefers-color-scheme: light) {
   :root {
@@ -167,3 +167,44 @@ html {
     @apply cursor-pointer;
   }
 }
+
+@keyframes scroll-infinite {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+@keyframes scroll-infinite-reverse {
+  0% {
+    transform: translateY(-50%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.animate-scroll-infinite,
+.animate-scroll-infinite-reverse {
+  animation-duration: 100s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.animate-scroll-infinite {
+  animation-name: scroll-infinite;
+}
+
+.animate-scroll-infinite-reverse {
+  animation-name: scroll-infinite-reverse;
+}
+
+.animate-scroll-infinite:hover,
+.animate-scroll-infinite-reverse:hover {
+  animation-play-state: paused;
+}
+
+
+
