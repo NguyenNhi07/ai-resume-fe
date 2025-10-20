@@ -3,6 +3,7 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App.tsx'
 import './i18n/i18n'
 import './index.css'
+import 'antd/dist/reset.css'
 
 createRoot(document.getElementById('root')!).render(
   <BrowserRouter>

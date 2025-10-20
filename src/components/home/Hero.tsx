@@ -1,8 +1,14 @@
+import { Globe } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
+import { Button, Select } from 'antd'
+import { LANGUAGE_OPTIONS } from "@/constants/languageOptions";
+import { useTranslation } from "react-i18next";
 
 export const Hero = () => {
+    const { t, i18n } = useTranslation();
     const [menuOpen, setMenuOpen] = React.useState(false);
+    const [language, setLanguage] = React.useState<string>(LANGUAGE_OPTIONS[0].value as string);
 
     const logos = [
         'https://saasly.prebuiltui.com/assets/companies-logo/instagram.svg',
@@ -36,6 +42,18 @@ export const Hero = () => {
                         <Link to={'/app?state=login'} className="hidden md:block px-6 py-2 border active:scale-95 hover:bg-slate-50 transition-all rounded-full text-slate-700 hover:text-slate-900" >
                             Login
                         </Link>
+                        <div className="flex items-center justify-center">
+                            <Select
+                                style={{ width: "150px" }}
+                                value={language}
+                                onChange={(value) => {
+                                    setLanguage(value);
+                                    i18n.changeLanguage(value);
+                                }}
+                                options={LANGUAGE_OPTIONS}
+                                suffixIcon={<Globe size={18} color="rgba(0,0,0,0.6)" />}
+                            />
+                        </div>
                     </div>
 
                     <button onClick={() => setMenuOpen(true)} className="md:hidden active:scale-90 transition" >
