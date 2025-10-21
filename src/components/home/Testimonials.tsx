@@ -1,7 +1,9 @@
 import { BookUserIcon } from "lucide-react"
 import { Title } from "./Title"
+import { useTranslation } from "react-i18next"
 
 export const Testimonials = () => {
+    const { t } = useTranslation()
     const cardsData = [
         {
             image: 'https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=200',
@@ -39,7 +41,7 @@ export const Testimonials = () => {
                     <span className="text-xs text-slate-500">{card.handle}</span>
                 </div>
             </div>
-            <p className="text-sm py-4 text-gray-800">Radiant made undercutting all of our competitors an absolute breeze.</p>
+            <p className="text-sm py-4 text-gray-800">{t('radiantMadeUndercuttingAllOfOurCompetitorsAnAbsoluteBreeze')}</p>
         </div>
     );
 
@@ -48,9 +50,9 @@ export const Testimonials = () => {
             <div id='testimonials' className="flex flex-col items-center my-10 scroll-mt-12">
                 <div className="flex items-center gap-2 text-sm text-purple-800 bg-purple-400/10 rounded-full px-6 py-1.5">
                     <BookUserIcon className="size-4.5 stroke-purple-600" />
-                    <span>Testimonials</span>
+                    <span>{t('testimonials')}</span>
                 </div>
-                <Title title="Dont't just take our words" description="Hear what our users say about us. We're always looking for aways to improve. If you have a positive experience with us, leave a review." />
+                <Title title={t('dontJustTakeOurWords')} description={t('hearWhatOurUsersSayAboutUsWeAreAlwaysLookingForAWaysToImproveIfYouHaveAPositiveExperienceWithUsLeaveAReview')} />
 
 
             </div>
