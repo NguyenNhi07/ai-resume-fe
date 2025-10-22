@@ -9,14 +9,17 @@ export const dummyResumeData = [
   {
     id: "1",
     title: "Frontend Developer Resume",
-    image: 'https://avatars.githubusercontent.com/u/9919?v=4',
     personal_info: {
       full_name: "Nguyen Van A",
       email: "nguyenvana@example.com",
+      birthDate: '07/11/2003',
+      gender: 'Female',
       phone: "+84 912 345 678",
-      address: "123 Le Duan, Hanoi, Vietnam",
+      location: "123 Le Duan, Hanoi, Vietnam",
       website: "https://nguyenvana.dev",
       linkedin: "https://linkedin.com/in/nguyenvana",
+      image: 'https://avatars.githubusercontent.com/u/9919?v=4',
+      profession: "Frontend Developer"
     },
     professional_sumary:
       "Frontend Developer with 3+ years of experience building responsive, scalable web apps using React and TypeScript.",
@@ -54,14 +57,17 @@ export const dummyResumeData = [
   {
     id: "2",
     title: "Backend Developer Resume",
-    image: 'https://avatars.githubusercontent.com/u/9919?v=4',
     personal_info: {
       full_name: "Tran Thi B",
       email: "tranthib@example.com",
+      birthDate: '07/11/2003',
+      gender: 'Female',
       phone: "+84 988 765 432",
-      address: "456 Nguyen Trai, Hanoi, Vietnam",
+      location: "456 Nguyen Trai, Hanoi, Vietnam",
       website: "https://tranthib.dev",
       linkedin: "https://linkedin.com/in/tranthib",
+      image: 'https://avatars.githubusercontent.com/u/9919?v=4',
+      profession: "Backend Developer"
     },
     professional_sumary:
       "Backend Developer with expertise in Node.js, Express, and MongoDB, focused on building secure and efficient APIs.",
@@ -99,14 +105,17 @@ export const dummyResumeData = [
   {
     id: "3",
     title: "UI/UX Designer Resume",
-    image: 'https://avatars.githubusercontent.com/u/9919?v=4',
     personal_info: {
       full_name: "Le Thi C",
       email: "lethic@example.com",
+      birthDate: '07/11/2003',
+      gender: 'Female',
       phone: "+84 933 456 789",
-      address: "789 Tran Hung Dao, Ho Chi Minh City, Vietnam",
+      location: "789 Tran Hung Dao, Ho Chi Minh City, Vietnam",
       website: "https://lethic.design",
       linkedin: "https://linkedin.com/in/lethic",
+      image: 'https://avatars.githubusercontent.com/u/9919?v=4',
+      profession: "Creative UI/UX Designer"
     },
     professional_sumary:
       "Creative UI/UX Designer with 4 years of experience designing user-centered digital products and improving usability through research and testing.",

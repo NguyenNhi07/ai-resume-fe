@@ -4,6 +4,17 @@ import { ArrowLeftIcon, FileText, User, Briefcase, GraduationCap, FolderIcon, Sp
 import { useEffect, useState } from "react"
 import { Link, useParams } from "react-router-dom"
 import { useTranslation } from "react-i18next"
+import { PersonalInfoForm } from "@/components/PersonalInfoForm"
+import { Form } from "antd"
+import { profileDefault } from "@/lib/constant"
+import dayjs, { Dayjs } from 'dayjs'
+
+// Interface cho form data với dayjs object
+interface FormResume extends Omit<Resume, 'personal_info'> {
+    personal_info: Omit<Resume['personal_info'], 'birthDate'> & {
+        birthDate?: Dayjs
+    }
+}
 
 export default function ResumeBuilder () {
     const { t } = useTranslation()
@@ -22,6 +33,9 @@ export default function ResumeBuilder () {
         accent_color: "#3B82F6",
         public: false
     })
+    console.log("🚀 ~ ResumeBuilder ~ resumeData:", resumeData)
+
+    const [form] = Form.useForm<FormResume>()
 
     const loadExitstingResume = async () => {
         const resume = dummyResumeData.find(resume => resume.id === resumeId)
@@ -48,6 +62,21 @@ export default function ResumeBuilder () {
     useEffect(() => {
         loadExitstingResume()
     },[])
+
+    // Cập nhật form values khi resumeData thay đổi
+    useEffect(() => {
+        if (resumeData && Object.keys(resumeData).length > 0) {
+            // Chuyển đổi birthDate từ string sang dayjs object
+            const formData = {
+                ...resumeData,
+                personal_info: {
+                    ...resumeData.personal_info,
+                    birthDate: resumeData.personal_info?.birthDate ? dayjs(resumeData.personal_info.birthDate, 'DD/MM/YYYY') : undefined
+                }
+            }
+            form.setFieldsValue(formData)
+        }
+    }, [resumeData, form])
 
     return (
         <div>
@@ -83,13 +112,18 @@ export default function ResumeBuilder () {
                             </div>
 
                             {/* form content */}
-                            <div className="space-y-6">
-                                {activeSection.id === 'personal' && (
-                                    <div>
-                                        
-                                    </div>
-                                )}
-                            </div>
+                            <Form<FormResume>
+                                form={form}
+                                layout="vertical"
+                                initialValues={resumeData ? resumeData : profileDefault}
+                                autoComplete="off"
+                            >
+                                <div className="space-y-6">
+                                    {activeSection.id === 'personal' && (
+                                        <PersonalInfoForm data={resumeData.personal_info} onChange={(data) => setResumeData(prev => ({...prev, personal_info: data}))} removeBackground={removeBackground} setRemoveBackground={setRemoveBackground}/>
+                                    )}
+                                </div>
+                            </Form>
                         </div>
                     </div>
 
