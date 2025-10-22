@@ -5,6 +5,7 @@ import { useEffect, useState } from "react"
 import { Link, useParams } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { PersonalInfoForm } from "@/components/PersonalInfoForm"
+import { ResumePreview } from "@/components/ResumePreview"
 import { Form } from "antd"
 import { profileDefault } from "@/lib/constant"
 import dayjs, { Dayjs } from 'dayjs'
@@ -63,10 +64,8 @@ export default function ResumeBuilder () {
         loadExitstingResume()
     },[])
 
-    // Cập nhật form values khi resumeData thay đổi
     useEffect(() => {
         if (resumeData && Object.keys(resumeData).length > 0) {
-            // Chuyển đổi birthDate từ string sang dayjs object
             const formData = {
                 ...resumeData,
                 personal_info: {
@@ -127,9 +126,28 @@ export default function ResumeBuilder () {
                         </div>
                     </div>
 
-                    {/* right form */}
-                    <div>
-
+                    {/* right preview */}
+                    <div className="lg:col-span-7 max-lg:mt-6">
+                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-semibold text-gray-900">Preview</h3>
+                                <div className="flex gap-2">
+                                    <button className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded transition-colors">
+                                        Download PDF
+                                    </button>
+                                    <button className="px-3 py-1 text-sm bg-blue-100 hover:bg-blue-200 text-blue-700 rounded transition-colors">
+                                        Print
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <ResumePreview 
+                                data={resumeData} 
+                                template={resumeData.template} 
+                                accentColor={resumeData.accent_color || '#3B82F6'}
+                                classes="shadow-lg"
+                            />
+                        </div>
                     </div>
                 </div>
             </div>

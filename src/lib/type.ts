@@ -22,6 +22,7 @@ export interface PersonalInfo {
   website?: string;
   linkedin?: string;
   image?: string;
+  profession?: string;
 }
 
 export interface Experience { 
