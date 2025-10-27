@@ -12,8 +12,19 @@ export const ModernTemplate = ({ data, accentColor }: { data: Resume, accentColo
             {/* Header với background gradient */}
             <div className="relative" style={{ background: `linear-gradient(135deg, ${accentColor} 0%, ${accentColor}dd 100%)` }}>
                 <div className="relative p-8 text-white">
-                    <h1 className="text-4xl font-bold mb-2">{data.personal_info?.full_name}</h1>
-                    <p className="text-xl opacity-90 mb-6">{data.personal_info?.profession}</p>
+                    <div className="flex items-start gap-6 mb-6">
+                        {data.personal_info?.image && (
+                            <img 
+                                src={data.personal_info.image} 
+                                alt={data.personal_info.full_name}
+                                className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-lg flex-shrink-0"
+                            />
+                        )}
+                        <div className="flex-1">
+                            <h1 className="text-4xl font-bold mb-2">{data.personal_info?.full_name}</h1>
+                            <p className="text-xl opacity-90">{data.personal_info?.profession}</p>
+                        </div>
+                    </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
                         {data.personal_info?.birthDate && (

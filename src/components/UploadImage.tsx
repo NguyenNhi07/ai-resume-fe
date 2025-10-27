@@ -3,7 +3,7 @@ import React from "react"
 
 interface UploadImageProps {
   imageFile: File | string | null
-  onChange: (file: File | null) => void
+  onChange: (file: File | string | null) => void
   removeBackground: boolean
   setRemoveBackground: React.Dispatch<React.SetStateAction<boolean>>
 }

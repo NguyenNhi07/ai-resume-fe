@@ -11,6 +11,17 @@ export const ClassicTemplate = ({ data, accentColor }: { data: Resume, accentCol
         <div className="bg-white p-8 max-w-4xl mx-auto" style={{ fontFamily: 'Times New Roman, serif' }}>
             {/* Header */}
             <div className="text-center mb-8 border-b-2 pb-6" style={{ borderColor: accentColor }}>
+                {/* Avatar */}
+                {data.personal_info?.image && (
+                    <div className="mb-4 flex justify-center">
+                        <img 
+                            src={data.personal_info.image} 
+                            alt={data.personal_info.full_name}
+                            className="w-24 h-24 rounded-full object-cover border-2"
+                            style={{ borderColor: accentColor }}
+                        />
+                    </div>
+                )}
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">{data.personal_info?.full_name}</h1>
                 <p className="text-lg text-gray-700 mb-4">{data.personal_info?.profession}</p>
 

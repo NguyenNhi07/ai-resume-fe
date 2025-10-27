@@ -28,7 +28,16 @@ export const PersonalInfoForm = ({ data, onChange, removeBackground, setRemoveBa
     const [errorPhone, setErrorPhone] = useState(false)
 
     const handleChange = (field: string, value: any) => {
-        onChange({ ...data, [field]: value })
+        // Convert File to base64 if it's an image field and value is a File
+        if (field === 'image' && value instanceof File) {
+            const reader = new FileReader()
+            reader.onloadend = () => {
+                onChange({ ...data, [field]: reader.result as string })
+            }
+            reader.readAsDataURL(value)
+        } else {
+            onChange({ ...data, [field]: value })
+        }
     }
 
     const validateAge = (_: any, value: any) => {

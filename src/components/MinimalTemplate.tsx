@@ -11,6 +11,17 @@ export const MinimalTemplate = ({ data, accentColor }: { data: Resume, accentCol
         <div className="bg-white p-8 max-w-4xl mx-auto" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
             {/* Header - Minimal */}
             <div className="text-center mb-12">
+                {/* Avatar */}
+                {data.personal_info?.image && (
+                    <div className="mb-6 flex justify-center">
+                        <img 
+                            src={data.personal_info.image} 
+                            alt={data.personal_info.full_name}
+                            className="w-24 h-24 rounded-full object-cover border-2"
+                            style={{ borderColor: accentColor }}
+                        />
+                    </div>
+                )}
                 <h1 className="text-3xl font-light text-gray-900 mb-2">{data.personal_info?.full_name}</h1>
                 <p className="text-lg font-light text-gray-600 mb-6">{data.personal_info?.profession}</p>
                 
