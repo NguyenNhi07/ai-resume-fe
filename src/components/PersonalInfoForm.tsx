@@ -49,12 +49,7 @@ export const PersonalInfoForm = ({ data, onChange, removeBackground, setRemoveBa
         <div>
             <h3 className="text-lg font-semibold text-gray-900">{t('personalInfomation')}</h3>
             <p className="text-sm text-gray-600">{t('getStartedWithThePersonalInfomation')}</p>
-            <Form.Item
-                name={['personal_info', 'image']}
-                valuePropName="file"
-                required={false}
-                rules={[{ required: true, message: t('this_field_is_required') }]}
-            >
+            <div className="mb-4">
                 <UploadImage
                     imageFile={data.image || null}
                     onChange={(file) => {
@@ -63,7 +58,7 @@ export const PersonalInfoForm = ({ data, onChange, removeBackground, setRemoveBa
                     removeBackground={removeBackground}
                     setRemoveBackground={setRemoveBackground}
                 />
-            </Form.Item>
+            </div>
 
             <Form.Item
                 label={

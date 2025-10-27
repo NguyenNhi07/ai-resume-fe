@@ -1,7 +1,7 @@
 import type { Resume } from "@/lib/type"
 import { dummyResumeData } from "@/lib/utils"
 import { ArrowLeftIcon, FileText, User, Briefcase, GraduationCap, FolderIcon, Sparkles, ChevronLeft, ChevronRight } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { Link, useParams } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { PersonalInfoForm } from "@/components/PersonalInfoForm"
@@ -34,15 +34,17 @@ export default function ResumeBuilder () {
         accent_color: "#3B82F6",
         public: false
     })
-    console.log("🚀 ~ ResumeBuilder ~ resumeData:", resumeData)
 
     const [form] = Form.useForm<FormResume>()
+    const isFormInitialized = useRef(false)
+    const currentResumeId = useRef(resumeId)
 
     const loadExitstingResume = async () => {
         const resume = dummyResumeData.find(resume => resume.id === resumeId)
         if (resume) { 
             setResumeData(resume)
             document.title = resume.title
+            currentResumeId.current = resumeId
         }
     }
 
@@ -62,10 +64,15 @@ export default function ResumeBuilder () {
 
     useEffect(() => {
         loadExitstingResume()
-    },[])
+    },[resumeId])
 
     useEffect(() => {
-        if (resumeData && Object.keys(resumeData).length > 0) {
+        if (resumeId !== currentResumeId.current) {
+            isFormInitialized.current = false
+            currentResumeId.current = resumeId
+        }
+        
+        if (!isFormInitialized.current && resumeData && resumeData.id === resumeId && Object.keys(resumeData.personal_info || {}).length > 0) {
             const formData = {
                 ...resumeData,
                 personal_info: {
@@ -74,8 +81,9 @@ export default function ResumeBuilder () {
                 }
             }
             form.setFieldsValue(formData)
+            isFormInitialized.current = true
         }
-    }, [resumeData, form])
+    }, [resumeId, resumeData, form])
 
     return (
         <div>
@@ -116,10 +124,40 @@ export default function ResumeBuilder () {
                                 layout="vertical"
                                 initialValues={resumeData ? resumeData : profileDefault}
                                 autoComplete="off"
+                                onValuesChange={(_, allValues) => {
+                                    console.log('Form values changed:', allValues)
+                                    const formData: Resume = { 
+                                        ...allValues,
+                                        personal_info: {
+                                            ...allValues.personal_info,
+                                            birthDate: allValues.personal_info?.birthDate 
+                                                ? (typeof allValues.personal_info.birthDate === 'string' 
+                                                    ? allValues.personal_info.birthDate 
+                                                    : allValues.personal_info.birthDate.format('DD/MM/YYYY'))
+                                                : undefined
+                                        }
+                                    }
+                                    console.log('Setting resumeData:', formData)
+                                    setResumeData(formData)
+                                }}
                             >
                                 <div className="space-y-6">
                                     {activeSection.id === 'personal' && (
-                                        <PersonalInfoForm data={resumeData.personal_info} onChange={(data) => setResumeData(prev => ({...prev, personal_info: data}))} removeBackground={removeBackground} setRemoveBackground={setRemoveBackground}/>
+                                        <PersonalInfoForm 
+                                            data={resumeData.personal_info} 
+                                            onChange={(data) => {
+                                                const updatedResume: Resume = {
+                                                    ...resumeData,
+                                                    personal_info: data
+                                                }
+                                                setResumeData(updatedResume)
+                                                form.setFieldsValue({
+                                                    personal_info: data
+                                                })
+                                            }} 
+                                            removeBackground={removeBackground} 
+                                            setRemoveBackground={setRemoveBackground}
+                                        />
                                     )}
                                 </div>
                             </Form>

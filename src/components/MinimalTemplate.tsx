@@ -1,6 +1,6 @@
 import type { Resume } from "@/lib/type"
-import { Mail, Phone, MapPin, Globe, Linkedin } from "lucide-react"
 import dayjs from 'dayjs'
+import { CalendarDays, Globe, Linkedin, Mail, MapPin, Mars, Phone, Venus, VenusAndMars } from "lucide-react"
 
 export const MinimalTemplate = ({ data, accentColor }: { data: Resume, accentColor: string }) => {
     const formatDate = (date: string) => {
@@ -15,6 +15,26 @@ export const MinimalTemplate = ({ data, accentColor }: { data: Resume, accentCol
                 <p className="text-lg font-light text-gray-600 mb-6">{data.personal_info?.profession}</p>
                 
                 <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-500">
+                    {data.personal_info?.birthDate && (
+                        <div className="flex items-center gap-1">
+                            <CalendarDays className="w-3 h-3" />
+                            <span>{data.personal_info.birthDate}</span>
+                        </div>
+                    )}
+                    {data.personal_info?.gender && (
+                        <div className="flex items-center gap-1">
+                            {
+                                data.personal_info.gender === "Female" ? (
+                                    <Venus className="w-3 h-3" />
+                                ) : data.personal_info.gender === "Male" ? (
+                                    <Mars className="w-3 h-3" />
+                                ) : (
+                                    <VenusAndMars className="w-3 h-3" />
+                                )
+                            }
+                            <span>{data.personal_info.gender}</span>
+                        </div>
+                    )}
                     {data.personal_info?.email && (
                         <div className="flex items-center gap-1">
                             <Mail className="w-3 h-3" />

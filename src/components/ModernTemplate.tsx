@@ -1,6 +1,6 @@
 import type { Resume } from "@/lib/type"
-import { Mail, Phone, MapPin, Globe, Linkedin } from "lucide-react"
 import dayjs from 'dayjs'
+import { CalendarDays, Globe, Linkedin, Mail, MapPin, Mars, Phone, Venus, VenusAndMars } from "lucide-react"
 
 export const ModernTemplate = ({ data, accentColor }: { data: Resume, accentColor: string }) => {
     const formatDate = (date: string) => {
@@ -14,8 +14,28 @@ export const ModernTemplate = ({ data, accentColor }: { data: Resume, accentColo
                 <div className="relative p-8 text-white">
                     <h1 className="text-4xl font-bold mb-2">{data.personal_info?.full_name}</h1>
                     <p className="text-xl opacity-90 mb-6">{data.personal_info?.profession}</p>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+                        {data.personal_info?.birthDate && (
+                            <div className="flex items-center gap-2">
+                                <CalendarDays className="w-4 h-4" />
+                                <span>{data.personal_info.birthDate}</span>
+                            </div>
+                        )}
+                        {data.personal_info?.gender && (
+                            <div className="flex items-center gap-2">
+                                {
+                                    data.personal_info.gender === "Female" ? (
+                                        <Venus className="w-4 h-4" />
+                                    ) : data.personal_info.gender === "Male" ? (
+                                        <Mars className="w-4 h-4" />
+                                    ) : (
+                                        <VenusAndMars className="w-4 h-4" />
+                                    )
+                                }
+                                <span className="font-medium">{data.personal_info.gender}</span>
+                            </div>
+                        )}
                         {data.personal_info?.email && (
                             <div className="flex items-center gap-2">
                                 <Mail className="w-4 h-4" />
