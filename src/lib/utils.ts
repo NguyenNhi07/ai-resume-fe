@@ -21,7 +21,7 @@ export const dummyResumeData = [
       image: 'https://avatars.githubusercontent.com/u/9919?v=4',
       profession: "Frontend Developer"
     },
-    professional_sumary:
+    professional_summary:
       "Frontend Developer with 3+ years of experience building responsive, scalable web apps using React and TypeScript.",
     experience: [
       {
@@ -35,10 +35,11 @@ export const dummyResumeData = [
     ],
     education: [
       {
-        school: "Hanoi University of Science and Technology",
+        institution: "Hanoi University of Science and Technology",
         degree: "Bachelor of Information Technology",
-        start_date: "2018-09-01",
-        end_date: "2022-06-01",
+        field: "Bachelor of Information Technology",
+        graduation_date: "Bachelor of Information Technology",
+        gpa: '6.0'
       },
     ],
     project: [
@@ -69,7 +70,7 @@ export const dummyResumeData = [
       image: 'https://avatars.githubusercontent.com/u/9919?v=4',
       profession: "Backend Developer"
     },
-    professional_sumary:
+    professional_summary:
       "Backend Developer with expertise in Node.js, Express, and MongoDB, focused on building secure and efficient APIs.",
     experience: [
       {
@@ -83,10 +84,11 @@ export const dummyResumeData = [
     ],
     education: [
       {
-        school: "University of Information Technology (UIT)",
-        degree: "Bachelor of Software Engineering",
-        start_date: "2018-09-01",
-        end_date: "2022-06-01",
+        institution: "Hanoi University of Science and Technology",
+        degree: "Bachelor of Information Technology",
+        field: "Bachelor of Information Technology",
+        graduation_date: "Bachelor of Information Technology",
+        gpa: '6.0'
       },
     ],
     project: [
@@ -117,7 +119,7 @@ export const dummyResumeData = [
       image: 'https://avatars.githubusercontent.com/u/9919?v=4',
       profession: "Creative UI/UX Designer"
     },
-    professional_sumary:
+    professional_summary:
       "Creative UI/UX Designer with 4 years of experience designing user-centered digital products and improving usability through research and testing.",
     experience: [
       {
@@ -131,10 +133,11 @@ export const dummyResumeData = [
     ],
     education: [
       {
-        school: "RMIT Vietnam",
-        degree: "Bachelor of Design",
-        start_date: "2017-09-01",
-        end_date: "2021-06-01",
+        institution: "Hanoi University of Science and Technology",
+        degree: "Bachelor of Information Technology",
+        field: "Bachelor of Information Technology",
+        graduation_date: "Bachelor of Information Technology",
+        gpa: '6.0'
       },
     ],
     project: [

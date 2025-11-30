@@ -2,7 +2,7 @@ export interface Resume {
   id?: string;
   title: string;
   personal_info: PersonalInfo;
-  professional_sumary: string;
+  professional_summary: string;
   experience: Experience[];
   education: Education[];
   project: Project[];
@@ -10,9 +10,9 @@ export interface Resume {
   template?: string;
   accent_color?: string;
   public?: boolean;
-};
+}
 
-export interface PersonalInfo { 
+export interface PersonalInfo {
   full_name?: string;
   birthDate?: string;
   gender?: string;
@@ -25,22 +25,24 @@ export interface PersonalInfo {
   profession?: string;
 }
 
-export interface Experience { 
+export interface Experience {
   company?: string;
   position?: string;
   start_date?: string;
   end_date?: string;
   description?: string;
+  is_current?: boolean;
 }
 
-export interface Education { 
-  school?: string;
+export interface Education {
+  institution?: string;
   degree?: string;
-  start_date?: string;
-  end_date?: string;
+  field?: string;
+  graduation_date?: string;
+  gpa?: string;
 }
 
-export interface Project { 
+export interface Project {
   name?: string;
   description?: string;
   technologies?: string[];
