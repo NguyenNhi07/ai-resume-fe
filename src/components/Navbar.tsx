@@ -1,11 +1,17 @@
-import { Link, useNavigate } from "react-router-dom"
-import { useTranslation } from "react-i18next"
+import { cn } from "@/lib/utils"
+import {
+    DownOutlined
+} from '@ant-design/icons'
+import { Popover } from "antd"
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
+import { Link, useNavigate } from "react-router-dom"
 
 export const Navbar = () => {
     const { t } = useTranslation()
     const navigate = useNavigate()
-    const [user, setUser] = useState<{ name: string; email: string } | null>(null)
+    const [open, setOpen] = useState(false)
+    const [user, setUser] = useState<{ name: string; email: string; avatarUrl?: string } | null>(null)
 
     useEffect(() => {
         const userStr = localStorage.getItem('user')
@@ -30,11 +36,61 @@ export const Navbar = () => {
                 <Link to={'/'}>
                     <img src="/logo.svg" alt="logo" className="h-11 w-auto" />
                 </Link>
-                <div className="flex items-center gap-4 text-sm">
-                    {user && (
-                        <p className="max-sm:hidden !mb-0">{t('hi')}, {user.name}</p>
-                    )}
-                    <button onClick={logoutUser} className="bg-white hover:bg-scale-50 border border-gray-300 px-7 py-1.5 rounded-full active:scale-95 transition-all">{t('logout')}</button>
+                <div className="flex">
+                    <div className="flex items-center gap-4 text-sm">
+                        {user && (
+                            <p className="max-sm:hidden !mb-0">{t('hi')}, {user.name}</p>
+                        )}
+                    </div>
+                    <Popover
+                        open={open}
+                        onOpenChange={setOpen}
+                        content={
+                            <div>
+                                <div
+                                    className="text-black/85 text-sm leading-[22px] font-normal font-roboto py-1 px-3 text-center cursor-pointer hover:!bg-gray-50"
+                                    onClick={() => navigate('/setting')}
+                                >
+                                    {t('Profile Management')}
+                                </div>
+                                <div
+                                    className="text-black/85 text-sm leading-[22px] font-normal font-roboto py-1 px-3 text-center cursor-pointer hover:!bg-gray-50"
+                                    onClick={() => navigate('/setting/changePassword')}
+                                >
+                                    {t('Change Password')}
+                                </div>
+                                <div
+                                    className="text-black/85 text-sm leading-[22px] font-normal font-roboto py-1 px-3 text-center cursor-pointer hover:!bg-gray-50"
+                                    onClick={logoutUser}
+                                >
+                                    {t('Logout')}
+                                </div>
+                            </div>
+                        }
+                        trigger="click"
+                        className="cursor-pointer"
+                        arrow={false}
+                    >
+                        <div
+                            className={cn('px-4 py-3 flex items-center gap-2 h-full rounded-lg')}
+                        >
+                            {user?.avatarUrl ? (
+                                <img
+                                    src={user.avatarUrl}
+                                    alt="User Avatar"
+                                    className="rounded-full w-6 h-6 object-cover"
+                                />
+                            ) : (
+                                <div className="rounded-full w-6 h-6 bg-purple-500 text-white flex items-center justify-center text-xs font-medium">
+                                    {(user?.name || user?.email || 'U').charAt(0).toUpperCase()}
+                                </div>
+                            )}
+                            {/* <div className="font-poppins text-sm font-normal text-black/85 leading-[22px]">
+                                {user?.name || 'User'}
+                            </div> */}
+                            <DownOutlined style={{ fontSize: 12, color: '#00000080' }} />
+                        </div>
+                    </Popover>
                 </div>
             </nav>
         </div>

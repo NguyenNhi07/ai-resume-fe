@@ -4,9 +4,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { authApi } from "@/lib/api";
 import { Button, message } from "antd";
+import { useToast } from "@/hooks/useToast";
 
 export default function Login() {
   const { t } = useTranslation();
+  const toast = useToast()
   const navigate = useNavigate();
   const query = new URLSearchParams(window.location.search);
   const urlState = query.get("state");
@@ -42,20 +44,20 @@ export default function Login() {
       localStorage.setItem("token", response.token);
       localStorage.setItem("user", JSON.stringify(response.user));
 
-      message.success(
-        state === "login" ? t("loginSuccess") || "Đăng nhập thành công!" : t("registerSuccess") || "Đăng ký thành công!"
+      toast.success(
+        state === "login" ? t("Login Success!") : t("Register Success!")
       );
 
-      // Redirect to dashboard
-      navigate("/app");
+      // Redirect to home
+      navigate("/");
     } catch (error: any) {
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
         (state === "login"
-          ? t("loginFailed") || "Đăng nhập thất bại!"
-          : t("registerFailed") || "Đăng ký thất bại!");
-      message.error(errorMessage);
+          ? t("Login Failed")
+          : t("Register Failed"));
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -212,7 +214,7 @@ export default function Login() {
             htmlType="submit"
             disabled={loading}
             size="large"
-            className="!text-white !bg-purple-500 w-full !my-3"
+            className="!text-white !bg-purple-500 w-full !my-3 disabled:!text-white-65"
           >
             {loading
               ? t("Loading")

@@ -1,14 +1,41 @@
 import { LANGUAGE_OPTIONS } from "@/constants/languageOptions";
-import { Select } from 'antd';
+import { Button, Popover, Select } from "antd";
 import { Globe } from "lucide-react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import {
+    DownOutlined
+} from '@ant-design/icons'
+import { cn } from "@/lib/utils";
 
 export const Hero = () => {
     const { t, i18n } = useTranslation();
     const [menuOpen, setMenuOpen] = React.useState(false);
     const [language, setLanguage] = React.useState<string>(LANGUAGE_OPTIONS[0].value as string);
+    const [isLoggedIn, setIsLoggedIn] = React.useState<boolean>(() => !!localStorage.getItem("token"));
+    const navigate = useNavigate();
+    const [open, setOpen] = useState(false)
+
+    const checkAuthStatus = React.useCallback(() => {
+        setIsLoggedIn(!!localStorage.getItem("token"));
+    }, []);
+
+    React.useEffect(() => {
+        checkAuthStatus();
+        const storageHandler = () => checkAuthStatus();
+        window.addEventListener("storage", storageHandler);
+        return () => {
+            window.removeEventListener("storage", storageHandler);
+        };
+    }, [checkAuthStatus]);
+
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        setIsLoggedIn(false);
+        navigate("/login");
+    };
 
     const logos = [
         'https://saasly.prebuiltui.com/assets/companies-logo/instagram.svg',
@@ -18,14 +45,27 @@ export const Hero = () => {
         'https://saasly.prebuiltui.com/assets/companies-logo/walmart.svg',
     ]
 
-    
+    const [user, setUser] = useState<{ name: string; email: string; avatarUrl?: string } | null>(null)
+
+    useEffect(() => {
+        const userStr = localStorage.getItem('user')
+        if (userStr) {
+            try {
+                setUser(JSON.parse(userStr))
+            } catch (error) {
+                console.error('Error parsing user data:', error)
+            }
+        }
+    }, [])
+
+
     return (
         <>
             <div className="min-h-screen pb-20">
                 {/* Navbar */}
                 <nav className="fixed top-10 left-0 right-0 z-40 flex items-center justify-between w-full py-4 px-6 md:px-16 lg:px-24 xl:px-40 text-sm bg-white/80 backdrop-blur border-b border-slate-200">
                     <a href="https://prebuiltui.com">
-                        <img src="/logo.svg" alt="logo" className="h-11 w-auto"/>
+                        <img src="/logo.svg" alt="logo" className="h-11 w-auto" />
                     </a>
 
                     <div className="hidden md:flex items-center gap-8 transition duration-500 text-slate-800">
@@ -35,13 +75,19 @@ export const Hero = () => {
                         <a href="#cta" className="hover:text-purple-600 transition">{t('contact')}</a>
                     </div>
 
-                    <div className="flex gap-2">
-                        <Link to={'/app?state=register'} className="hidden md:block px-6 py-2 bg-purple-500 hover:bg-purple-700 active:scale-95 transition-all rounded-full text-white">
-                            {t('getStarted')}
-                        </Link>
-                        <Link to={'/app?state=login'} className="hidden md:block px-6 py-2 border active:scale-95 hover:bg-slate-50 transition-all rounded-full text-slate-700 hover:text-slate-900" >
-                            {t('login')}
-                        </Link>
+                    <div className="flex gap-2 items-center">
+                        <Button
+                            onClick={() => {
+                                if (isLoggedIn) {
+                                    navigate('/app')
+                                } else {
+                                    navigate('/app?state=login')
+                                }
+                            }}
+                            className="!bg-purple-500 !rounded-lg !text-white"
+                        >
+                            {isLoggedIn ? t('dashboard') : t('getStarted')}
+                        </Button>
                         <div className="flex items-center justify-center">
                             <Select
                                 style={{ width: "150px" }}
@@ -54,6 +100,55 @@ export const Hero = () => {
                                 suffixIcon={<Globe size={18} color="rgba(0,0,0,0.6)" />}
                             />
                         </div>
+                        <Popover
+                            open={open}
+                            onOpenChange={setOpen}
+                            content={
+                                <div>
+                                    <div
+                                        className="text-black/85 text-sm leading-[22px] font-normal font-roboto py-1 px-3 text-center cursor-pointer hover:!bg-gray-50"
+                                        onClick={() => navigate('/setting')}
+                                    >
+                                        {t('Profile Management')}
+                                    </div>
+                                    <div
+                                        className="text-black/85 text-sm leading-[22px] font-normal font-roboto py-1 px-3 text-center cursor-pointer hover:!bg-gray-50"
+                                        onClick={() => navigate('/setting/changePassword')}
+                                    >
+                                        {t('Change Password')}
+                                    </div>
+                                    <div
+                                        className="text-black/85 text-sm leading-[22px] font-normal font-roboto py-1 px-3 text-center cursor-pointer hover:!bg-gray-50"
+                                        onClick={handleLogout}
+                                    >
+                                        {t('Logout')}
+                                    </div>
+                                </div>
+                            }
+                            trigger="click"
+                            className="cursor-pointer"
+                            arrow={false}
+                        >
+                            <div
+                                className={cn('px-4 py-3 flex items-center gap-2 h-full rounded-lg')}
+                            >
+                                {user?.avatarUrl ? (
+                                    <img
+                                        src={user.avatarUrl}
+                                        alt="User Avatar"
+                                        className="rounded-full w-6 h-6 object-cover"
+                                    />
+                                ) : (
+                                    <div className="rounded-full w-6 h-6 bg-purple-500 text-white flex items-center justify-center text-xs font-medium">
+                                        {(user?.name || user?.email || 'U').charAt(0).toUpperCase()}
+                                    </div>
+                                )}
+                                <div className="font-poppins text-sm font-normal text-black/85 leading-[22px]">
+                                    {user?.name || 'User'}
+                                </div>
+                                <DownOutlined style={{ fontSize: 12, color: '#00000080' }} />
+                            </div>
+                        </Popover>
                     </div>
 
                     <button onClick={() => setMenuOpen(true)} className="md:hidden active:scale-90 transition" >

@@ -1,0 +1,53 @@
+.custom-menu .ant-menu-light {
+    background-color: transparent !important;
+}
+
+.custom-menu .ant-menu-light .ant-menu-item-selected {
+    background-color: transparent !important;
+}
+
+.custom-menu .ant-menu-light.ant-menu-root.ant-menu-inline {
+    border-inline-end: none;
+}
+
+.ant-menu-light.ant-menu-inline
+    .ant-menu-sub.ant-menu-inline {
+        background-color: transparent !important;
+    }
+
+.custom-menu .ant-menu-submenu-title {
+    gap: 12px;
+    padding-left: 0 !important;
+}
+
+.custom-menu .ant-menu-item {
+    /* padding-left: 36px !important; */
+}
+
+.custom-menu .ant-menu-submenu-title .ant-menu-title-content {
+    font-size: 16px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.85);
+}
+
+.custom-menu .ant-menu-item-selected .ant-menu-title-content {
+    font-size: 16px;
+    font-weight: 500;
+    color: #393CE5 !important;
+}
+
+.custom-menu .ant-menu-item-only-child .ant-menu-title-content {
+    font-size: 16px;
+    font-weight: 400;
+    color: rgba(0, 0, 0, 0.65);
+}
+
+.custom-menu .ant-menu-submenu-title .ant-menu-submenu-arrow {
+    display: none;
+}
+
+.custom-menu .ant-menu-sub {
+    background-color: transparent !important;
+}
+
+/* radio */
