@@ -10,13 +10,18 @@ import {
   Sparkles,
   ChevronLeft,
   ChevronRight,
+  AlertCircle,
+  Share2Icon,
+  EyeIcon,
+  EyeOffIcon,
+  DownloadIcon,
 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { PersonalInfoForm } from "@/components/PersonalInfoForm";
 import { ResumePreview } from "@/components/ResumePreview";
-import { Form } from "antd";
+import { Button, Form, Modal } from "antd";
 import { profileDefault } from "@/lib/constant";
 import dayjs, { Dayjs } from "dayjs";
 import { TemplateSelector } from "@/components/TemplateSelector";
@@ -26,6 +31,7 @@ import { ExperienceForm } from "@/components/ExperienceForm";
 import { EducationForm } from "@/components/EducationForm";
 import { ProjectForm } from "@/components/ProjectForm";
 import { SkillsForm } from "@/components/SkillsForm";
+import ShareDialog from "@/components/ShareDialog";
 
 // Interface cho form data với dayjs object
 interface FormResume
@@ -53,6 +59,7 @@ interface FormResume
 export default function ResumeBuilder() {
   const { t } = useTranslation();
   const { resumeId } = useParams();
+  const navigate = useNavigate()
 
   const [resumeData, setResumeData] = useState<Resume>({
     id: "",
@@ -71,13 +78,37 @@ export default function ResumeBuilder() {
   const [form] = Form.useForm<FormResume>();
   const isFormInitialized = useRef(false);
   const currentResumeId = useRef(resumeId);
+  const [isDirty, setIsDirty] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
+  const initialFormData = useRef<Resume | null>(null);
+  const [showShareDialog, setShowShareDialog] = useState(false);
 
   const loadExitstingResume = async () => {
     const resume = dummyResumeData.find((resume) => resume.id === resumeId);
     if (resume) {
       setResumeData(resume);
+      initialFormData.current = { ...resume };
       document.title = resume.title;
       currentResumeId.current = resumeId;
+      setIsDirty(false);
+    } else {
+      // New resume
+      const newResume: Resume = {
+        id: "",
+        title: "",
+        personal_info: {},
+        professional_summary: "",
+        experience: [],
+        education: [],
+        project: [],
+        skills: [],
+        template: "classic",
+        accent_color: "#3B82F6",
+        public: false,
+      };
+      initialFormData.current = { ...newResume };
+      setIsDirty(false);
     }
   };
 
@@ -122,38 +153,83 @@ export default function ResumeBuilder() {
         },
         experience: resumeData.experience
           ? resumeData.experience.map((exp) => ({
-              ...exp,
-              start_date: exp.start_date
-                ? dayjs(exp.start_date, "MM/YYYY")
-                : undefined,
-              end_date: exp.end_date
-                ? dayjs(exp.end_date, "MM/YYYY")
-                : undefined,
-            }))
+            ...exp,
+            start_date: exp.start_date
+              ? dayjs(exp.start_date, "MM/YYYY")
+              : undefined,
+            end_date: exp.end_date
+              ? dayjs(exp.end_date, "MM/YYYY")
+              : undefined,
+          }))
           : [],
         education: resumeData.education
           ? resumeData.education.map((edu) => ({
-              ...edu,
-              graduation_date: edu.graduation_date
-                ? dayjs(edu.graduation_date, "MM/YYYY")
-                : undefined,
-            }))
+            ...edu,
+            graduation_date: edu.graduation_date
+              ? dayjs(edu.graduation_date, "MM/YYYY")
+              : undefined,
+          }))
           : [],
       };
       form.setFieldsValue(formData);
+      initialFormData.current = { ...resumeData };
       isFormInitialized.current = true;
+      setIsDirty(false);
     }
   }, [resumeId, resumeData, form]);
+
+  const handleCancel = () => {
+    if (isDirty) {
+      setPendingAction(() => () => navigate("/app"));
+      setShowConfirmModal(true);
+    } else {
+      navigate("/app");
+    }
+  };
+
+  const handleBackToDashboard = () => {
+    if (isDirty) {
+      setPendingAction(() => () => navigate("/app"));
+      setShowConfirmModal(true);
+    } else {
+      navigate("/app");
+    }
+  };
+
+  const handleConfirmExit = () => {
+    if (pendingAction) {
+      pendingAction();
+    }
+    setShowConfirmModal(false);
+    setPendingAction(null);
+  };
+
+  const handleCancelExit = () => {
+    setShowConfirmModal(false);
+    setPendingAction(null);
+  };
+
+  const changeResumeVisibility = async () => {
+    setResumeData({...resumeData, public: !resumeData.public})
+  }
+
+  const handleShare = () => {
+    setShowShareDialog(true);
+  }
+
+  const downloadResume = () => {
+    window.print();
+  }
 
   return (
     <div>
       <div className="max-w-7xl mx-auto px-4 py-6">
-        <Link
-          to={"/app"}
-          className="inline-flex gap-2 items-center text-slate-500"
+        <Button
+          onClick={handleBackToDashboard}
+          className="!border-0 !bg-[#f9fafb]"
         >
           <ArrowLeftIcon className="size-4" /> {t("backToDashboard")}
-        </Link>
+        </Button>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 pb-8">
@@ -166,9 +242,8 @@ export default function ResumeBuilder() {
               <hr
                 className="absolute top-0 left-0 h-1 bg-gradient-to-r from-purple-500 to-purple-600 border-none transition-all duration-2000"
                 style={{
-                  width: `${
-                    (activeSectionIndex * 100) / (sections.length - 1)
-                  }%`,
+                  width: `${(activeSectionIndex * 100) / (sections.length - 1)
+                    }%`,
                 }}
               />
 
@@ -236,9 +311,8 @@ export default function ResumeBuilder() {
                         );
                       }
                     }}
-                    className={`flex items-center gap-1 p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all ${
-                      activeSectionIndex === sections.length - 1 && "opacity-50"
-                    }`}
+                    className={`flex items-center gap-1 p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all ${activeSectionIndex === sections.length - 1 && "opacity-50"
+                      }`}
                     disabled={activeSectionIndex === sections.length - 1}
                   >
                     {t("next")} <ChevronRight className="size-4" />
@@ -249,11 +323,17 @@ export default function ResumeBuilder() {
               {/* form content */}
               <Form<FormResume>
                 form={form}
+                className="flex flex-col gap-4"
                 layout="vertical"
                 initialValues={resumeData ? resumeData : profileDefault}
                 autoComplete="off"
                 onValuesChange={(changedValues, allValues) => {
                   console.log("Form values changed:", changedValues, allValues);
+
+                  // Mark form as dirty when any value changes (only if form is initialized)
+                  if (isFormInitialized.current) {
+                    setIsDirty(true);
+                  }
 
                   // Check if is_current was changed and clear end_date if needed
                   if (changedValues.experience) {
@@ -286,8 +366,8 @@ export default function ResumeBuilder() {
                         ? typeof allValues.personal_info.birthDate === "string"
                           ? allValues.personal_info.birthDate
                           : allValues.personal_info.birthDate.format(
-                              "DD/MM/YYYY"
-                            )
+                            "DD/MM/YYYY"
+                          )
                         : resumeData.personal_info?.birthDate,
                     },
                     professional_summary:
@@ -296,54 +376,54 @@ export default function ResumeBuilder() {
                         : resumeData.professional_summary,
                     experience: allValues.experience
                       ? allValues.experience.map((exp) => {
-                          const startDate = exp.start_date
-                            ? typeof exp.start_date === "string"
-                              ? exp.start_date
-                              : (exp.start_date as Dayjs).format("MM/YYYY")
-                            : "";
-                          // Clear end_date if is_current is true
-                          const endDate = exp.is_current
-                            ? ""
-                            : exp.end_date
+                        const startDate = exp.start_date
+                          ? typeof exp.start_date === "string"
+                            ? exp.start_date
+                            : (exp.start_date as Dayjs).format("MM/YYYY")
+                          : "";
+                        // Clear end_date if is_current is true
+                        const endDate = exp.is_current
+                          ? ""
+                          : exp.end_date
                             ? typeof exp.end_date === "string"
                               ? exp.end_date
                               : (exp.end_date as Dayjs).format("MM/YYYY")
                             : "";
-                          return {
-                            company: exp.company,
-                            position: exp.position,
-                            description: exp.description,
-                            is_current: exp.is_current || false,
-                            start_date: startDate,
-                            end_date: endDate,
-                          };
-                        })
+                        return {
+                          company: exp.company,
+                          position: exp.position,
+                          description: exp.description,
+                          is_current: exp.is_current || false,
+                          start_date: startDate,
+                          end_date: endDate,
+                        };
+                      })
                       : resumeData.experience || [],
                     education: allValues.education
                       ? allValues.education.map((edu) => {
-                          const graduationDate = edu.graduation_date
-                            ? typeof edu.graduation_date === "string"
-                              ? edu.graduation_date
-                              : (edu.graduation_date as Dayjs).format("MM/YYYY")
-                            : "";
-                          return {
-                            institution: edu.institution,
-                            degree: edu.degree,
-                            field: edu.field,
-                            graduation_date: graduationDate,
-                            gpa: edu.gpa,
-                          };
-                        })
+                        const graduationDate = edu.graduation_date
+                          ? typeof edu.graduation_date === "string"
+                            ? edu.graduation_date
+                            : (edu.graduation_date as Dayjs).format("MM/YYYY")
+                          : "";
+                        return {
+                          institution: edu.institution,
+                          degree: edu.degree,
+                          field: edu.field,
+                          graduation_date: graduationDate,
+                          gpa: edu.gpa,
+                        };
+                      })
                       : resumeData.education || [],
                     project: allValues.project
                       ? allValues.project.map((proj) => ({
-                          name: proj.name,
-                          description: proj.description,
-                          technologies: proj.technologies || [],
-                        }))
+                        name: proj.name,
+                        description: proj.description,
+                        technologies: proj.technologies || [],
+                      }))
                       : resumeData.project || [],
                     skills:
-                      allValues.skills !== undefined
+                      allValues.skills !== undefined && Array.isArray(allValues.skills)
                         ? allValues.skills
                         : resumeData.skills || [],
                   };
@@ -425,23 +505,37 @@ export default function ResumeBuilder() {
                     />
                   )}
                 </div>
+
+                <div className="flex gap-2 justify-end">
+                  <Button onClick={handleCancel}>
+                    {t("Cancel")}
+                  </Button>
+                  <Button disabled={!isDirty} color="default" variant="solid" className="flex mt-4 !bg-purple-600 max-w-fit disabled:!text-white/75">
+                    {t("Save changes")}
+                  </Button>
+                </div>
               </Form>
             </div>
           </div>
 
           {/* right preview */}
           <div className="lg:col-span-7 max-lg:mt-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Preview</h3>
-                <div className="flex gap-2">
-                  <button className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded transition-colors">
-                    Download PDF
-                  </button>
-                  <button className="px-3 py-1 text-sm bg-blue-100 hover:bg-blue-200 text-blue-700 rounded transition-colors">
-                    Print
-                  </button>
-                </div>
+              <div className="relavite w-full">
+                  <div className="absolute top-24 left-0 right-4.5 flex items-center justify-end gap-2">
+                    {resumeData.public && (
+                      <Button onClick={handleShare} className="!bg-gradient-to-br !from-blue-100 !to-blue-200 !text-blue-600 hover:!border-blue-400">
+                        <Share2Icon className="size-4" /> {t("Share")}
+                      </Button>
+                    )}
+                    <Button onClick={changeResumeVisibility} className="!bg-gradient-to-br !from-purple-100 !to-purple-200 !text-purple-600 hover:!border-purple-400">
+                      {resumeData.public ? <EyeIcon className="size-4" /> : <EyeOffIcon className="size-4" />}
+                      {resumeData.public ? t("Public") : t("Private")}
+                    </Button>
+
+                    <Button onClick={downloadResume} className="!bg-gradient-to-br !from-green-100 !to-green-200 !text-green-600 hover:!border-green-400">
+                      <DownloadIcon className="size-4" /> {t("Download")}
+                    </Button>
+                  </div>
               </div>
 
               <ResumePreview
@@ -450,10 +544,41 @@ export default function ResumeBuilder() {
                 accentColor={resumeData.accent_color || "#3B82F6"}
                 classes="shadow-lg"
               />
-            </div>
           </div>
         </div>
       </div>
+
+      <Modal
+        open={showConfirmModal}
+        onCancel={handleCancelExit}
+        onOk={handleConfirmExit}
+        title={
+          <span className="flex items-center gap-2">
+            <AlertCircle style={{ color: '#dc2626' }} />
+            {t("Confirm Popup")}
+          </span>
+        }
+        okText={t("OK")}
+        cancelText={t("Cancel")}
+        okButtonProps={{
+          style: {
+            backgroundColor: '#dc2626',
+          }
+        }}
+      >
+        <p>
+          {t("If you exit now, all unsaved changes will be lost.")}
+        </p>
+        <p>
+          {t("Are you sure you want to exit?")}
+        </p>
+      </Modal>
+
+      <ShareDialog
+        open={showShareDialog}
+        onOpenChange={setShowShareDialog}
+        resumeId={resumeId || ""}
+      />
     </div>
   );
 }

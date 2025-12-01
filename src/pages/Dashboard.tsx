@@ -3,12 +3,13 @@ import { dummyResumeData } from "@/lib/utils";
 import { Input, Modal } from "antd";
 import { FilePenLineIcon, PencilIcon, PlusIcon, TrashIcon, UploadCloud, UploadCloudIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 export default function Dashboard() {
     const { t } = useTranslation()
     const navigate = useNavigate()
+    const [searchParams] = useSearchParams()
 
     const colors = ["#9333ea", "#d97706", "#dc2626", "#0284c7", "#16a34a"]
     const [allResumes, setAllResumes] = useState<Resume[]>([])
@@ -46,8 +47,13 @@ export default function Dashboard() {
     }
 
     useEffect(() => {
+        const state = searchParams.get('state')
+        if (state === 'login' || state === 'register') {
+            navigate(`/login?state=${state}`)
+            return
+        }
         loadAllResumes()
-    }, [])
+    }, [searchParams, navigate])
 
     return (
         <div>

@@ -43,36 +43,34 @@ export const SkillsForm = ({
         </p>
       </div>
 
-      <Form.Item name="skills" noStyle>
-        <div className="space-y-4">
-          <div className="flex gap-2">
-            <Form.Item name="newSkill" noStyle>
-              <Input
-                placeholder={t(
-                  "Enter a skill (e.g., JavaScript, Project Management"
-                )}
-                className="flex-1"
-                size="large"
-                value={newSkill}
-                onChange={(e) => setNewSkill(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleAddSkill();
-                  }
-                }}
-              />
-            </Form.Item>
-            <Button
-              disabled={!newSkill.trim()}
-              onClick={handleAddSkill}
-              className="!bg-purple-100 !text-purple-700"
-              size="large"
-            >
-              <Plus className="size-4" />
-            </Button>
-          </div>
+      <div className="space-y-4">
+        <div className="flex gap-2">
+          <Input
+            placeholder={t(
+              "Enter a skill (e.g., JavaScript, Project Management"
+            )}
+            className="flex-1"
+            size="large"
+            value={newSkill}
+            onChange={(e) => setNewSkill(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleAddSkill();
+              }
+            }}
+          />
+          <Button
+            disabled={!newSkill.trim()}
+            onClick={handleAddSkill}
+            className="!bg-purple-100 !text-purple-700"
+            size="large"
+          >
+            <Plus className="size-4" />
+          </Button>
+        </div>
 
+        <Form.Item name="skills" noStyle>
           {skills.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {skills.map((skill, index) => (
@@ -98,8 +96,8 @@ export const SkillsForm = ({
               <p>{t("Add your technical and soft skills above")}</p>
             </div>
           )}
-        </div>
-      </Form.Item>
+        </Form.Item>
+      </div>
 
       <div className="bg-purple-50 p-3 rounded-lg">
         <p className="text-sm text-purple-800">

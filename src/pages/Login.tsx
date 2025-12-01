@@ -1,13 +1,17 @@
 import { Lock, Mail, User2Icon } from "lucide-react";
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { authApi } from "@/lib/api";
+import { message } from "antd";
 
 export default function Login() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const query = new URLSearchParams(window.location.search);
   const urlState = query.get("state");
   const [state, setState] = React.useState(urlState || "login");
+  const [loading, setLoading] = React.useState(false);
 
   const [formData, setFormData] = React.useState({
     name: "",
@@ -17,6 +21,44 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
+
+    try {
+      let response;
+      if (state === "login") {
+        response = await authApi.login({
+          email: formData.email,
+          password: formData.password,
+        });
+      } else {
+        response = await authApi.register({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+        });
+      }
+
+      // Save token and user info
+      localStorage.setItem("token", response.token);
+      localStorage.setItem("user", JSON.stringify(response.user));
+
+      message.success(
+        state === "login" ? t("loginSuccess") || "Đăng nhập thành công!" : t("registerSuccess") || "Đăng ký thành công!"
+      );
+
+      // Redirect to dashboard
+      navigate("/app");
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        (state === "login"
+          ? t("loginFailed") || "Đăng nhập thất bại!"
+          : t("registerFailed") || "Đăng ký thất bại!");
+      message.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -168,9 +210,14 @@ export default function Login() {
 
           <button
             type="submit"
-            className="mt-2 w-full h-11 rounded-full text-white bg-purple-500 hover:opacity-90 transition-opacity"
+            disabled={loading}
+            className="mt-2 w-full h-11 rounded-full text-white bg-purple-500 hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {state === "login" ? t("login") : t("signUp")}
+            {loading
+              ? t("loading") || "Đang xử lý..."
+              : state === "login"
+              ? t("login")
+              : t("signUp")}
           </button>
 
           <p
