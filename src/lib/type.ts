@@ -10,6 +10,7 @@ export interface Resume {
   template?: string;
   accent_color?: string;
   public?: boolean;
+  font_family?: string;
 }
 
 export interface PersonalInfo {

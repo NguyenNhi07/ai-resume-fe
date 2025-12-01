@@ -9,9 +9,9 @@ export default function Language() {
     const [language, setLanguage] = React.useState<string>(LANGUAGE_OPTIONS[0].value as string);
 
     return (
-        <div className="flex flex-col items-start p-0 sm:p-6 lg:p-8 gap-0 sm:gap-2 w-full max-w-full h-full md:h-auto bg-white">
+        <div className="flex flex-col items-start p-0 lg:p-8 gap-6 w-full max-w-full h-full bg-white">
             {/* Header Section */}
-            <div className="flex flex-col items-start gap-1 sm:gap-0 w-full p-4 sm:p-0">
+            <div className="flex flex-col items-start w-full p-4 sm:p-0">
                 <span className="text-4xl font-medium text-black/85 mb-2">
                     {t('Language')}
                 </span>

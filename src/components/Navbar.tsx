@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils"
 import {
     DownOutlined
 } from '@ant-design/icons'
-import { Popover } from "antd"
+import { Avatar, Popover } from "antd"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate } from "react-router-dom"
@@ -49,6 +49,12 @@ export const Navbar = () => {
                             <div>
                                 <div
                                     className="text-black/85 text-sm leading-[22px] font-normal font-roboto py-1 px-3 text-center cursor-pointer hover:!bg-gray-50"
+                                    onClick={() => navigate('/app')}
+                                >
+                                    {t('Dashboard')}
+                                </div>
+                                <div
+                                    className="text-black/85 text-sm leading-[22px] font-normal font-roboto py-1 px-3 text-center cursor-pointer hover:!bg-gray-50"
                                     onClick={() => navigate('/setting')}
                                 >
                                     {t('Profile Management')}
@@ -58,6 +64,12 @@ export const Navbar = () => {
                                     onClick={() => navigate('/setting/changePassword')}
                                 >
                                     {t('Change Password')}
+                                </div>
+                                <div
+                                    className="text-black/85 text-sm leading-[22px] font-normal font-roboto py-1 px-3 text-center cursor-pointer hover:!bg-gray-50"
+                                    onClick={() => navigate('/setting/language')}
+                                >
+                                    {t('Language')}
                                 </div>
                                 <div
                                     className="text-black/85 text-sm leading-[22px] font-normal font-roboto py-1 px-3 text-center cursor-pointer hover:!bg-gray-50"
@@ -74,20 +86,15 @@ export const Navbar = () => {
                         <div
                             className={cn('px-4 py-3 flex items-center gap-2 h-full rounded-lg')}
                         >
-                            {user?.avatarUrl ? (
-                                <img
-                                    src={user.avatarUrl}
-                                    alt="User Avatar"
-                                    className="rounded-full w-6 h-6 object-cover"
-                                />
-                            ) : (
-                                <div className="rounded-full w-6 h-6 bg-purple-500 text-white flex items-center justify-center text-xs font-medium">
-                                    {(user?.name || user?.email || 'U').charAt(0).toUpperCase()}
-                                </div>
-                            )}
-                            {/* <div className="font-poppins text-sm font-normal text-black/85 leading-[22px]">
-                                {user?.name || 'User'}
-                            </div> */}
+                            <div className="relative w-6 h-6 rounded-full overflow-hidden">
+                                <Avatar
+                                    src={user?.avatarUrl || undefined}
+                                    alt="profilePhotoUrl"
+                                    size={24}
+                                >
+                                    {user?.name?.charAt(0) || ""}
+                                </Avatar>
+                            </div>
                             <DownOutlined style={{ fontSize: 12, color: '#00000080' }} />
                         </div>
                     </Popover>

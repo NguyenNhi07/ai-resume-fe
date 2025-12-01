@@ -1,18 +1,15 @@
-import { LANGUAGE_OPTIONS } from "@/constants/languageOptions";
-import { Button, Popover, Select } from "antd";
-import { Globe } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+    DownOutlined
+} from '@ant-design/icons';
+import { Avatar, Button, Popover } from "antd";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
-import {
-    DownOutlined
-} from '@ant-design/icons'
-import { cn } from "@/lib/utils";
 
 export const Hero = () => {
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
     const [menuOpen, setMenuOpen] = React.useState(false);
-    const [language, setLanguage] = React.useState<string>(LANGUAGE_OPTIONS[0].value as string);
     const [isLoggedIn, setIsLoggedIn] = React.useState<boolean>(() => !!localStorage.getItem("token"));
     const navigate = useNavigate();
     const [open, setOpen] = useState(false)
@@ -84,27 +81,21 @@ export const Hero = () => {
                                     navigate('/app?state=login')
                                 }
                             }}
-                            className="!bg-purple-500 !rounded-lg !text-white"
+                            className="!bg-purple-500 !rounded-lg !text-white hover:!border-purple-500"
                         >
                             {isLoggedIn ? t('dashboard') : t('getStarted')}
                         </Button>
-                        <div className="flex items-center justify-center">
-                            <Select
-                                style={{ width: "150px" }}
-                                value={language}
-                                onChange={(value) => {
-                                    setLanguage(value);
-                                    i18n.changeLanguage(value);
-                                }}
-                                options={LANGUAGE_OPTIONS}
-                                suffixIcon={<Globe size={18} color="rgba(0,0,0,0.6)" />}
-                            />
-                        </div>
                         <Popover
                             open={open}
                             onOpenChange={setOpen}
                             content={
                                 <div>
+                                    <div
+                                        className="text-black/85 text-sm leading-[22px] font-normal font-roboto py-1 px-3 text-center cursor-pointer hover:!bg-gray-50"
+                                        onClick={() => navigate('/app')}
+                                    >
+                                        {t('Dashboard')}
+                                    </div>
                                     <div
                                         className="text-black/85 text-sm leading-[22px] font-normal font-roboto py-1 px-3 text-center cursor-pointer hover:!bg-gray-50"
                                         onClick={() => navigate('/setting')}
@@ -116,6 +107,12 @@ export const Hero = () => {
                                         onClick={() => navigate('/setting/changePassword')}
                                     >
                                         {t('Change Password')}
+                                    </div>
+                                    <div
+                                        className="text-black/85 text-sm leading-[22px] font-normal font-roboto py-1 px-3 text-center cursor-pointer hover:!bg-gray-50"
+                                        onClick={() => navigate('/setting/language')}
+                                    >
+                                        {t('Language')}
                                     </div>
                                     <div
                                         className="text-black/85 text-sm leading-[22px] font-normal font-roboto py-1 px-3 text-center cursor-pointer hover:!bg-gray-50"
@@ -132,17 +129,15 @@ export const Hero = () => {
                             <div
                                 className={cn('px-4 py-3 flex items-center gap-2 h-full rounded-lg')}
                             >
-                                {user?.avatarUrl ? (
-                                    <img
-                                        src={user.avatarUrl}
-                                        alt="User Avatar"
-                                        className="rounded-full w-6 h-6 object-cover"
-                                    />
-                                ) : (
-                                    <div className="rounded-full w-6 h-6 bg-purple-500 text-white flex items-center justify-center text-xs font-medium">
-                                        {(user?.name || user?.email || 'U').charAt(0).toUpperCase()}
-                                    </div>
-                                )}
+                                <div className="relative w-6 h-6 rounded-full overflow-hidden">
+                                    <Avatar
+                                        src={user?.avatarUrl || undefined}
+                                        alt="profilePhotoUrl"
+                                        size={24}
+                                    >
+                                        {user?.name?.charAt(0) || ""}
+                                    </Avatar>
+                                </div>
                                 <div className="font-poppins text-sm font-normal text-black/85 leading-[22px]">
                                     {user?.name || 'User'}
                                 </div>

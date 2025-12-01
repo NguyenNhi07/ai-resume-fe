@@ -1,11 +1,10 @@
 import { Menu, Modal, type MenuProps } from 'antd'
 import { useMemo } from 'react'
-import './settingStyle.css'
-import { useUnsavedChanges } from './context/UnsavedChangesContext'
 import { useTranslation } from 'react-i18next'
-import { AccountIcon } from '../icons/AccountIcon'
-import { FileTextIcon } from '../icons/FileTextIcon'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { AccountIcon } from '../icons/AccountIcon'
+import { useUnsavedChanges } from './context/UnsavedChangesContext'
+import './settingStyle.css'
 
 type MenuItem = Required<MenuProps>['items'][number]
 

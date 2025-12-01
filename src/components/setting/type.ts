@@ -1,9 +1,15 @@
 import { Dayjs } from 'dayjs'
 
 export interface ProfileForm {
-	firstName?: string
-	lastName?: string
+	name?: string
 	dateOfBirth?: Dayjs | null
 	phoneNumber?: string
 	gender?: string
+	email?: string
+	profession?: string
+}
+
+export interface ChangePasswordForm {
+	oldPassword?: string
+	newPassword?: string
 }

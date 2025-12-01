@@ -1,31 +1,71 @@
-import type { Resume } from "@/lib/type"
-import { ModernTemplate } from "./ModernTemplate"
-import { MinimalTemplate } from "./MinimalTemplate"
-import { MinimalImageTemplate } from "./MinimalImageTemplate"
-import { ClassicTemplate } from "./ClassicTemplate"
+import type { Resume } from "@/lib/type";
+import { ModernTemplate } from "./ModernTemplate";
+import { MinimalTemplate } from "./MinimalTemplate";
+import { MinimalImageTemplate } from "./MinimalImageTemplate";
+import { ClassicTemplate } from "./ClassicTemplate";
 
-export const ResumePreview = ({data, template, accentColor, classes} : {data: Resume, template: any, accentColor: string, classes: string}) => {
-    const rederTemplate = () => {
-        switch (template) {
-            case "modern":
-                return <ModernTemplate data={data} accentColor={accentColor} />
-            case "minimal":
-                return <MinimalTemplate data={data} accentColor={accentColor} />
-            case "minimal-image":
-                return <MinimalImageTemplate data={data} accentColor={accentColor} />
-            default:
-                return <ClassicTemplate data={data} accentColor={accentColor} />
-        }
+export const ResumePreview = ({
+  data,
+  template,
+  accentColor,
+  classes,
+}: {
+  data: Resume;
+  template: string;
+  accentColor: string;
+  classes: string;
+}) => {
+  const fontMap: Record<string, string> = {
+    times: "Times New Roman, serif",
+    inter: "Inter, system-ui, sans-serif",
+    georgia: "Georgia, serif",
+    arial: "Arial, Helvetica, sans-serif",
+    roboto: "Roboto, sans-serif",
+    poppins: "Poppins, sans-serif",
+    mulish: "Mulish, sans-serif",
+    helvetica: "Helvetica Neue, Helvetica, Arial, sans-serif",
+    calibri: "Calibri, Candara, Segoe, Segoe UI, Optima, Arial, sans-serif",
+    garamond:
+      "Garamond, Baskerville, Baskerville Old Face, Hoefler Text, Times New Roman, serif",
+    cambria: "Cambria, Georgia, serif",
+    nunito: "Nunito, sans-serif",
+    montserrat: "Montserrat, sans-serif",
+  };
+
+  const fontFamily =
+    (data.font_family && fontMap[data.font_family]) ||
+    "Inter, system-ui, sans-serif";
+
+  const rederTemplate = () => {
+    switch (template) {
+      case "modern":
+        return <ModernTemplate data={data} accentColor={accentColor} />;
+      case "minimal":
+        return <MinimalTemplate data={data} accentColor={accentColor} />;
+      case "minimal-image":
+        return <MinimalImageTemplate data={data} accentColor={accentColor} />;
+      default:
+        return <ClassicTemplate data={data} accentColor={accentColor} />;
     }
+  };
 
-    return (
-        <div className="w-full bg-gray-100">
-            <div id="resume-preview" className={'border border-gray-200 print:shadow-none print:border-none' + classes}>
-                {rederTemplate()}
-            </div>
+  return (
+    <div className="w-full bg-gray-100">
+      <div
+        id="resume-preview"
+        className={
+          "border border-gray-200 print:shadow-none print:border-none " +
+          classes
+        }
+      >
+        {rederTemplate()}
+      </div>
 
-            <style>
-                {`
+      <style>
+        {`
+                #resume-preview, #resume-preview * {
+                    font-family: ${fontFamily} !important;
+                }
                 @page {
                     size: letter;
                     margin: 0;
@@ -55,8 +95,7 @@ export const ResumePreview = ({data, template, accentColor, classes} : {data: Re
                     }
                 }
                 `}
-            </style>
-
-        </div>
-    )
-}
+      </style>
+    </div>
+  );
+};

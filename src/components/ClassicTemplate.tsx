@@ -19,6 +19,26 @@ export const ClassicTemplate = ({
   data: Resume;
   accentColor: string;
 }) => {
+  const fontMap: Record<string, string> = {
+    times: "Times New Roman, serif",
+    inter: "Inter, system-ui, sans-serif",
+    georgia: "Georgia, serif",
+    arial: "Arial, Helvetica, sans-serif",
+    roboto: "Roboto, sans-serif",
+    poppins: "Poppins, sans-serif",
+    mulish: "Mulish, sans-serif",
+    helvetica: "Helvetica Neue, Helvetica, Arial, sans-serif",
+    calibri: "Calibri, Candara, Segoe, Segoe UI, Optima, Arial, sans-serif",
+    garamond:
+      "Garamond, Baskerville, Baskerville Old Face, Hoefler Text, Times New Roman, serif",
+    cambria: "Cambria, Georgia, serif",
+    nunito: "Nunito, sans-serif",
+    montserrat: "Montserrat, sans-serif",
+  };
+
+  const fontFamily =
+    (data.font_family && fontMap[data.font_family]) || "Times New Roman, serif";
+
   const formatDate = (date: string) => {
     if (!date) return "";
     // Try parsing with MM/YYYY format first, then fallback to default
@@ -29,10 +49,7 @@ export const ClassicTemplate = ({
   };
 
   return (
-    <div
-      className="bg-white p-8 max-w-4xl mx-auto"
-      style={{ fontFamily: "Times New Roman, serif" }}
-    >
+    <div className="bg-white p-8 max-w-4xl mx-auto" style={{ fontFamily }}>
       {/* Header */}
       <div
         className="text-center mb-8 border-b-2 pb-6"
