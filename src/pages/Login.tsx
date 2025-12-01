@@ -3,7 +3,7 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { authApi } from "@/lib/api";
-import { message } from "antd";
+import { Button, message } from "antd";
 
 export default function Login() {
   const { t } = useTranslation();
@@ -208,17 +208,18 @@ export default function Login() {
             </button>
           </div>
 
-          <button
-            type="submit"
+          <Button
+            htmlType="submit"
             disabled={loading}
-            className="mt-2 w-full h-11 rounded-full text-white bg-purple-500 hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+            size="large"
+            className="!text-white !bg-purple-500 w-full !my-3"
           >
             {loading
-              ? t("loading") || "Đang xử lý..."
+              ? t("Loading")
               : state === "login"
               ? t("login")
               : t("signUp")}
-          </button>
+          </Button>
 
           <p
             onClick={() =>

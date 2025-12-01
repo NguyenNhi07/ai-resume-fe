@@ -15,13 +15,15 @@ import {
   EyeIcon,
   EyeOffIcon,
   DownloadIcon,
+  PrinterIcon,
+  FileDown,
 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { PersonalInfoForm } from "@/components/PersonalInfoForm";
 import { ResumePreview } from "@/components/ResumePreview";
-import { Button, Form, Modal } from "antd";
+import { Button, Form, Modal, Popover } from "antd";
 import { profileDefault } from "@/lib/constant";
 import dayjs, { Dayjs } from "dayjs";
 import { TemplateSelector } from "@/components/TemplateSelector";
@@ -187,6 +189,10 @@ export default function ResumeBuilder() {
     }
   };
 
+  const handleSave = () => {
+    navigate("/app")
+  }
+
   const handleBackToDashboard = () => {
     if (isDirty) {
       setPendingAction(() => () => navigate("/app"));
@@ -210,26 +216,74 @@ export default function ResumeBuilder() {
   };
 
   const changeResumeVisibility = async () => {
-    setResumeData({...resumeData, public: !resumeData.public})
+    setResumeData({ ...resumeData, public: !resumeData.public })
   }
 
   const handleShare = () => {
     setShowShareDialog(true);
   }
 
-  const downloadResume = () => {
+  const onPrint = () => {
+    window.print();
+  }
+
+  const onDownloadPdf = () => {
     window.print();
   }
 
   return (
     <div>
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-4 py-6 flex items-center justify-between">
         <Button
           onClick={handleBackToDashboard}
-          className="!border-0 !bg-[#f9fafb]"
+          className="!border-0 !bg-[#f9fafb] hover:!text-purple-600 !shadow-none !px-0"
         >
           <ArrowLeftIcon className="size-4" /> {t("backToDashboard")}
         </Button>
+
+        <div className="flex items-center gap-2">
+          {resumeData.public && (
+            <Button onClick={handleShare} className="!bg-gradient-to-br !from-blue-100 !to-blue-200 !text-blue-600 hover:!border-blue-400">
+              <Share2Icon className="size-4" /> {t("Share")}
+            </Button>
+          )}
+          <Button onClick={changeResumeVisibility} className="!bg-gradient-to-br !from-purple-100 !to-purple-200 !text-purple-600 hover:!border-purple-400">
+            {resumeData.public ? <EyeIcon className="size-4" /> : <EyeOffIcon className="size-4" />}
+            {resumeData.public ? t("Public") : t("Private")}
+          </Button>
+
+          <Popover
+            content={(
+              <div className="flex flex-col gap-2">
+                <Button
+                  type="text"
+                  icon={<PrinterIcon className="size-4" />}
+                  onClick={onPrint}
+                  className="flex !justify-start"
+                >
+                  {t("Print")}
+                </Button>
+
+                <Button
+                  type="text"
+                  icon={<FileDown className="size-4" />}
+                  onClick={onDownloadPdf}
+                  className="flex !justify-start"
+                >
+                  {t("Download PDF")}
+                </Button>
+              </div>
+            )}
+            trigger="click"
+            placement="bottom"
+          >
+            <Button
+              className="!bg-gradient-to-br !from-green-100 !to-green-200 
+                   !text-green-600 hover:!border-green-400">
+              <DownloadIcon className="size-4" /> {t("Download")}
+            </Button>
+          </Popover>
+        </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 pb-8">
@@ -510,7 +564,7 @@ export default function ResumeBuilder() {
                   <Button onClick={handleCancel}>
                     {t("Cancel")}
                   </Button>
-                  <Button disabled={!isDirty} color="default" variant="solid" className="flex mt-4 !bg-purple-600 max-w-fit disabled:!text-white/75">
+                  <Button onClick={handleSave} disabled={!isDirty} color="default" variant="solid" className="flex mt-4 !bg-purple-600 max-w-fit disabled:!text-white/75">
                     {t("Save changes")}
                   </Button>
                 </div>
@@ -520,30 +574,12 @@ export default function ResumeBuilder() {
 
           {/* right preview */}
           <div className="lg:col-span-7 max-lg:mt-6">
-              <div className="relavite w-full">
-                  <div className="absolute top-24 left-0 right-4.5 flex items-center justify-end gap-2">
-                    {resumeData.public && (
-                      <Button onClick={handleShare} className="!bg-gradient-to-br !from-blue-100 !to-blue-200 !text-blue-600 hover:!border-blue-400">
-                        <Share2Icon className="size-4" /> {t("Share")}
-                      </Button>
-                    )}
-                    <Button onClick={changeResumeVisibility} className="!bg-gradient-to-br !from-purple-100 !to-purple-200 !text-purple-600 hover:!border-purple-400">
-                      {resumeData.public ? <EyeIcon className="size-4" /> : <EyeOffIcon className="size-4" />}
-                      {resumeData.public ? t("Public") : t("Private")}
-                    </Button>
-
-                    <Button onClick={downloadResume} className="!bg-gradient-to-br !from-green-100 !to-green-200 !text-green-600 hover:!border-green-400">
-                      <DownloadIcon className="size-4" /> {t("Download")}
-                    </Button>
-                  </div>
-              </div>
-
-              <ResumePreview
-                data={resumeData}
-                template={resumeData.template}
-                accentColor={resumeData.accent_color || "#3B82F6"}
-                classes="shadow-lg"
-              />
+            <ResumePreview
+              data={resumeData}
+              template={resumeData.template}
+              accentColor={resumeData.accent_color || "#3B82F6"}
+              classes="shadow-lg"
+            />
           </div>
         </div>
       </div>

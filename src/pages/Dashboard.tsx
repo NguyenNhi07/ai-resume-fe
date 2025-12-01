@@ -1,7 +1,7 @@
 import type { Resume } from "@/lib/type";
 import { dummyResumeData } from "@/lib/utils";
 import { Input, Modal } from "antd";
-import { FilePenLineIcon, PencilIcon, PlusIcon, TrashIcon, UploadCloud, UploadCloudIcon } from "lucide-react";
+import { AlertCircle, FilePenLineIcon, PencilIcon, PlusIcon, TrashIcon, UploadCloud, UploadCloudIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -91,7 +91,7 @@ export default function Dashboard() {
                                     {t('updatedOn')} {new Date(resume.updatedAt).toLocaleDateString()}
                                 </p>
                                 <div onClick={(e) => e.stopPropagation()} className="absolute top-1 right-1 hidden group-hover:flex items-center ">
-                                    <TrashIcon onClick={() => {setDeleteResume(true); setDeleteResumeId(resume.id)}} className="size-7 p-1.5 hover:bg-white/50 rounded text-slate-700 transition-colors" />
+                                    <TrashIcon onClick={() => { setDeleteResume(true); setDeleteResumeId(resume.id) }} className="size-7 p-1.5 hover:bg-white/50 rounded text-slate-700 transition-colors" />
                                     <PencilIcon onClick={() => {
                                         setEditResumeId(resume.id);
                                         setTitle(resume.title)
@@ -154,11 +154,11 @@ export default function Dashboard() {
                                 )}
                             </div>
                         </label>
-                        <input 
-                            onChange={(e:React.ChangeEvent<HTMLInputElement>) => setResume(e.target.files?.[0] ?? null)} type="file" 
-                            id="resume-input" 
-                            accept=".pdf" 
-                            hidden 
+                        <input
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setResume(e.target.files?.[0] ?? null)} type="file"
+                            id="resume-input"
+                            accept=".pdf"
+                            hidden
                         />
                     </div>
                 </Modal>
@@ -184,13 +184,18 @@ export default function Dashboard() {
                 </Modal>
 
                 <Modal
-                    title={t('deleteResume')}
+                    title={
+                        <span className="flex items-center gap-2">
+                            <AlertCircle style={{ color: '#dc2626' }} />
+                            {t('deleteResume')}
+                        </span>
+                    }
                     open={deleteResume}
                     onCancel={() => { setDeleteResume(false); setTitle('') }}
                     width={'500px'}
                     onOk={() => handleDeleteResume(deleteResumeId as number)}
                     okButtonProps={{
-                        style: { backgroundColor: '#9810fa' },
+                        style: { backgroundColor: '#dc2626' },
                     }}
                     okText={t('delete')}
                 >
