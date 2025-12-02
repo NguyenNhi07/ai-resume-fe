@@ -11,6 +11,7 @@ import {
   Venus,
   VenusAndMars,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export const ClassicTemplate = ({
   data,
@@ -19,6 +20,7 @@ export const ClassicTemplate = ({
   data: Resume;
   accentColor: string;
 }) => {
+  const { t } = useTranslation();
   const fontMap: Record<string, string> = {
     times: "Times New Roman, serif",
     inter: "Inter, system-ui, sans-serif",
@@ -131,7 +133,7 @@ export const ClassicTemplate = ({
       {data.professional_summary && (
         <div className="mb-6">
           <h2 className="text-xl font-bold mb-3" style={{ color: accentColor }}>
-            Professional Summary
+            {t("Professional Summary")}
           </h2>
           <p className="text-gray-700 leading-relaxed">
             {data.professional_summary}
@@ -143,7 +145,7 @@ export const ClassicTemplate = ({
       {data.experience && data.experience.length > 0 && (
         <div className="mb-6">
           <h2 className="text-xl font-bold mb-4" style={{ color: accentColor }}>
-            Professional Experience
+            {t("Professional Experience")}
           </h2>
           <div className="space-y-4">
             {data.experience.map((exp, index) => (
@@ -179,7 +181,7 @@ export const ClassicTemplate = ({
       {data.education && data.education.length > 0 && (
         <div className="mb-6">
           <h2 className="text-xl font-bold mb-4" style={{ color: accentColor }}>
-            Education
+            {t("Education")}
           </h2>
           <div className="space-y-3">
             {data.education.map((edu, index) => (
@@ -215,7 +217,7 @@ export const ClassicTemplate = ({
       {data.project && data.project.length > 0 && (
         <div className="mb-6">
           <h2 className="text-xl font-bold mb-4" style={{ color: accentColor }}>
-            Projects
+            {t("Projects")}
           </h2>
           <div className="space-y-4">
             {data.project.map((project, index) => (
@@ -258,7 +260,7 @@ export const ClassicTemplate = ({
       {Array.isArray(data.skills) && data.skills.length > 0 && (
         <div className="mb-6">
           <h2 className="text-xl font-bold mb-4" style={{ color: accentColor }}>
-            Skills
+            {t("Skills")}
           </h2>
           <div className="flex flex-wrap gap-2">
             {data.skills.map((skill, index) => (

@@ -72,7 +72,7 @@ export const EducationForm = ({
             >
               <div className="flex justify-between items-center">
                 <h4 className="text-base font-medium text-gray-900">
-                  Education #{index + 1}
+                  {t("Education")} #{index + 1}
                 </h4>
                 <Button
                   onClick={() => removeEducation(index)}

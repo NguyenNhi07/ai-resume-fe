@@ -9,8 +9,9 @@ import {
   Mars,
   Phone,
   Venus,
-  VenusAndMars
+  VenusAndMars,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export const MinimalImageTemplate = ({
   data,
@@ -19,6 +20,7 @@ export const MinimalImageTemplate = ({
   data: Resume;
   accentColor: string;
 }) => {
+  const { t } = useTranslation();
   const fontMap: Record<string, string> = {
     times: "Times New Roman, serif",
     inter: "Inter, system-ui, sans-serif",
@@ -128,7 +130,7 @@ export const MinimalImageTemplate = ({
                   href={data.personal_info.language}
                   className="hover:text-gray-900 transition-colors"
                 >
-                  language
+                  {data.personal_info.language}
                 </a>
               </div>
             )}
@@ -148,7 +150,7 @@ export const MinimalImageTemplate = ({
               className="text-lg font-medium text-gray-900 uppercase tracking-wide"
               style={{ color: accentColor }}
             >
-              About
+              {t("About")}
             </h2>
           </div>
           <p className="text-gray-700 leading-relaxed text-lg font-light">
@@ -172,7 +174,7 @@ export const MinimalImageTemplate = ({
                   className="text-lg font-medium text-gray-900 uppercase tracking-wide"
                   style={{ color: accentColor }}
                 >
-                  Experience
+                  {t("Experience")}
                 </h2>
               </div>
               <div className="space-y-6">
@@ -223,7 +225,7 @@ export const MinimalImageTemplate = ({
                   className="text-lg font-medium text-gray-900 uppercase tracking-wide"
                   style={{ color: accentColor }}
                 >
-                  Education
+                  {t("Education")}
                 </h2>
               </div>
               <div className="space-y-4">
@@ -272,7 +274,7 @@ export const MinimalImageTemplate = ({
                   className="text-lg font-medium text-gray-900 uppercase tracking-wide"
                   style={{ color: accentColor }}
                 >
-                  Skills
+                  {t("Skills")}
                 </h2>
               </div>
               <div className="space-y-3">
@@ -303,7 +305,7 @@ export const MinimalImageTemplate = ({
                   className="text-lg font-medium text-gray-900 uppercase tracking-wide"
                   style={{ color: accentColor }}
                 >
-                  Projects
+                  {t("Projects")}
                 </h2>
               </div>
               <div className="space-y-4">

@@ -11,6 +11,7 @@ import {
   Venus,
   VenusAndMars,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export const MinimalTemplate = ({
   data,
@@ -19,6 +20,7 @@ export const MinimalTemplate = ({
   data: Resume;
   accentColor: string;
 }) => {
+  const { t } = useTranslation();
   const fontMap: Record<string, string> = {
     times: "Times New Roman, serif",
     inter: "Inter, system-ui, sans-serif",
@@ -122,12 +124,7 @@ export const MinimalTemplate = ({
           {data.personal_info?.language && (
             <div className="flex items-center gap-1">
               <Library className="w-3 h-3" />
-              <a
-                href={data.personal_info.language}
-                className="hover:text-gray-900 transition-colors"
-              >
-                language
-              </a>
+              <span>{data.personal_info.language}</span>
             </div>
           )}
         </div>
@@ -156,7 +153,7 @@ export const MinimalTemplate = ({
                 className="text-lg font-medium text-gray-900 mb-6 uppercase tracking-wide"
                 style={{ color: accentColor }}
               >
-                Experience
+                {t("Experience")}
               </h2>
               <div className="space-y-6">
                 {data.experience.map((exp, index) => (
@@ -191,7 +188,7 @@ export const MinimalTemplate = ({
                 className="text-lg font-medium text-gray-900 mb-6 uppercase tracking-wide"
                 style={{ color: accentColor }}
               >
-                Education
+                {t("Education")}
               </h2>
               <div className="space-y-4">
                 {data.education.map((edu, index) => (
@@ -230,7 +227,7 @@ export const MinimalTemplate = ({
                 className="text-lg font-medium text-gray-900 mb-6 uppercase tracking-wide"
                 style={{ color: accentColor }}
               >
-                Skills
+                {t("Skills")}
               </h2>
               <div className="space-y-2">
                 {data.skills.map((skill, index) => (
@@ -249,7 +246,7 @@ export const MinimalTemplate = ({
                 className="text-lg font-medium text-gray-900 mb-6 uppercase tracking-wide"
                 style={{ color: accentColor }}
               >
-                Projects
+                {t("Projects")}
               </h2>
               <div className="space-y-4">
                 {data.project.map((project, index) => (

@@ -1,42 +1,41 @@
-import type { Resume, Experience } from "@/lib/type";
-import { dummyResumeData } from "@/lib/utils";
-import {
-  ArrowLeftIcon,
-  FileText,
-  User,
-  Briefcase,
-  GraduationCap,
-  FolderIcon,
-  Sparkles,
-  ChevronLeft,
-  ChevronRight,
-  AlertCircle,
-  Share2Icon,
-  EyeIcon,
-  EyeOffIcon,
-  DownloadIcon,
-  PrinterIcon,
-  FileDown,
-  UserCheck,
-} from "lucide-react";
-import { useEffect, useState, useRef } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { PersonalInfoForm } from "@/components/PersonalInfoForm";
-import { ResumePreview } from "@/components/ResumePreview";
-import { Button, Form, Modal, Popover, Select } from "antd";
-import { profileDefault } from "@/lib/constant";
-import dayjs, { Dayjs } from "dayjs";
-import { TemplateSelector } from "@/components/TemplateSelector";
 import { ColorPicker } from "@/components/ColorPicker";
-import { ProfessionalSummaryForm } from "@/components/ProfessionalSummaryForm";
-import { ExperienceForm } from "@/components/ExperienceForm";
 import { EducationForm } from "@/components/EducationForm";
+import { ExperienceForm } from "@/components/ExperienceForm";
+import { PersonalInfoForm } from "@/components/PersonalInfoForm";
+import { ProfessionalSummaryForm } from "@/components/ProfessionalSummaryForm";
 import { ProjectForm } from "@/components/ProjectForm";
-import { SkillsForm } from "@/components/SkillsForm";
+import { ResumePreview } from "@/components/ResumePreview";
 import ShareDialog from "@/components/ShareDialog";
+import { SkillsForm } from "@/components/SkillsForm";
+import { TemplateSelector } from "@/components/TemplateSelector";
+import { profileDefault } from "@/lib/constant";
+import type { Experience, Resume } from "@/lib/type";
+import { dummyResumeData } from "@/lib/utils";
+import { Button, Form, Modal, Popover, Select } from "antd";
+import dayjs, { Dayjs } from "dayjs";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
+import {
+  AlertCircle,
+  ArrowLeftIcon,
+  Briefcase,
+  ChevronLeft,
+  ChevronRight,
+  DownloadIcon,
+  EyeIcon,
+  FileDown,
+  FileText,
+  FolderIcon,
+  GraduationCap,
+  PrinterIcon,
+  Share2Icon,
+  Sparkles,
+  User,
+  UserCheck,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useNavigate, useParams } from "react-router-dom";
 
 // Interface cho form data với dayjs object
 interface FormResume
@@ -140,12 +139,12 @@ export default function ResumeBuilder() {
   const [removeBackground, setRemoveBackground] = useState(false);
 
   const sections = [
-    { id: "personal", name: "Personal Info", icon: User },
-    { id: "summary", name: "Summary", icon: FileText },
-    { id: "experience", name: "Experience", icon: Briefcase },
-    { id: "education", name: "Education", icon: GraduationCap },
-    { id: "projects", name: "Projetcs", icon: FolderIcon },
-    { id: "skills", name: "Skills", icon: Sparkles },
+    { id: "personal", name: t("Personal Info"), icon: User },
+    { id: "summary", name: t("Summary"), icon: FileText },
+    { id: "experience", name: t("Experience"), icon: Briefcase },
+    { id: "education", name: t("Education"), icon: GraduationCap },
+    { id: "projects", name: t("Projects"), icon: FolderIcon },
+    { id: "skills", name: t("Skills"), icon: Sparkles },
   ];
 
   const activeSection = sections[activeSectionIndex];
@@ -177,22 +176,22 @@ export default function ResumeBuilder() {
         },
         experience: resumeData.experience
           ? resumeData.experience.map((exp) => ({
-            ...exp,
-            start_date: exp.start_date
-              ? dayjs(exp.start_date, "MM/YYYY")
-              : undefined,
-            end_date: exp.end_date
-              ? dayjs(exp.end_date, "MM/YYYY")
-              : undefined,
-          }))
+              ...exp,
+              start_date: exp.start_date
+                ? dayjs(exp.start_date, "MM/YYYY")
+                : undefined,
+              end_date: exp.end_date
+                ? dayjs(exp.end_date, "MM/YYYY")
+                : undefined,
+            }))
           : [],
         education: resumeData.education
           ? resumeData.education.map((edu) => ({
-            ...edu,
-            graduation_date: edu.graduation_date
-              ? dayjs(edu.graduation_date, "MM/YYYY")
-              : undefined,
-          }))
+              ...edu,
+              graduation_date: edu.graduation_date
+                ? dayjs(edu.graduation_date, "MM/YYYY")
+                : undefined,
+            }))
           : [],
       };
       form.setFieldsValue(formData);
@@ -373,7 +372,9 @@ export default function ResumeBuilder() {
 
         <div className="flex items-center gap-2">
           <Button
-            onClick={() => {navigate(`/app/preview/${resumeId}`)}}
+            onClick={() => {
+              navigate(`/app/preview/${resumeId}`);
+            }}
             className="!bg-gradient-to-br !from-yellow-50 !to-yellow-100 !text-yellow-500
              hover:!border-yellow-400"
           >
@@ -440,8 +441,9 @@ export default function ResumeBuilder() {
               <hr
                 className="absolute top-0 left-0 h-1 bg-gradient-to-r from-purple-500 to-purple-600 border-none transition-all duration-2000"
                 style={{
-                  width: `${(activeSectionIndex * 100) / (sections.length - 1)
-                    }%`,
+                  width: `${
+                    (activeSectionIndex * 100) / (sections.length - 1)
+                  }%`,
                 }}
               />
 
@@ -464,7 +466,6 @@ export default function ResumeBuilder() {
                         }))
                       }
                     />
-                    
                   </div>
                   <div className="flex items-center">
                     {activeSectionIndex !== 0 && (
@@ -511,9 +512,10 @@ export default function ResumeBuilder() {
                           );
                         }
                       }}
-                      className={`flex items-center gap-1 p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all ${activeSectionIndex === sections.length - 1 &&
+                      className={`flex items-center gap-1 p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all ${
+                        activeSectionIndex === sections.length - 1 &&
                         "opacity-50"
-                        }`}
+                      }`}
                       disabled={activeSectionIndex === sections.length - 1}
                     >
                       {t("next")} <ChevronRight className="size-4" />
@@ -594,8 +596,8 @@ export default function ResumeBuilder() {
                         ? typeof allValues.personal_info.birthDate === "string"
                           ? allValues.personal_info.birthDate
                           : allValues.personal_info.birthDate.format(
-                            "DD/MM/YYYY"
-                          )
+                              "DD/MM/YYYY"
+                            )
                         : resumeData.personal_info?.birthDate,
                     },
                     professional_summary:
@@ -604,55 +606,55 @@ export default function ResumeBuilder() {
                         : resumeData.professional_summary,
                     experience: allValues.experience
                       ? allValues.experience.map((exp) => {
-                        const startDate = exp.start_date
-                          ? typeof exp.start_date === "string"
-                            ? exp.start_date
-                            : (exp.start_date as Dayjs).format("MM/YYYY")
-                          : "";
-                        // Clear end_date if is_current is true
-                        const endDate = exp.is_current
-                          ? ""
-                          : exp.end_date
+                          const startDate = exp.start_date
+                            ? typeof exp.start_date === "string"
+                              ? exp.start_date
+                              : (exp.start_date as Dayjs).format("MM/YYYY")
+                            : "";
+                          // Clear end_date if is_current is true
+                          const endDate = exp.is_current
+                            ? ""
+                            : exp.end_date
                             ? typeof exp.end_date === "string"
                               ? exp.end_date
                               : (exp.end_date as Dayjs).format("MM/YYYY")
                             : "";
-                        return {
-                          company: exp.company,
-                          position: exp.position,
-                          description: exp.description,
-                          is_current: exp.is_current || false,
-                          start_date: startDate,
-                          end_date: endDate,
-                        };
-                      })
+                          return {
+                            company: exp.company,
+                            position: exp.position,
+                            description: exp.description,
+                            is_current: exp.is_current || false,
+                            start_date: startDate,
+                            end_date: endDate,
+                          };
+                        })
                       : resumeData.experience || [],
                     education: allValues.education
                       ? allValues.education.map((edu) => {
-                        const graduationDate = edu.graduation_date
-                          ? typeof edu.graduation_date === "string"
-                            ? edu.graduation_date
-                            : (edu.graduation_date as Dayjs).format("MM/YYYY")
-                          : "";
-                        return {
-                          institution: edu.institution,
-                          degree: edu.degree,
-                          field: edu.field,
-                          graduation_date: graduationDate,
-                          gpa: edu.gpa,
-                        };
-                      })
+                          const graduationDate = edu.graduation_date
+                            ? typeof edu.graduation_date === "string"
+                              ? edu.graduation_date
+                              : (edu.graduation_date as Dayjs).format("MM/YYYY")
+                            : "";
+                          return {
+                            institution: edu.institution,
+                            degree: edu.degree,
+                            field: edu.field,
+                            graduation_date: graduationDate,
+                            gpa: edu.gpa,
+                          };
+                        })
                       : resumeData.education || [],
                     project: allValues.project
                       ? allValues.project.map((proj) => ({
-                        name: proj.name,
-                        description: proj.description,
-                        technologies: proj.technologies || [],
-                      }))
+                          name: proj.name,
+                          description: proj.description,
+                          technologies: proj.technologies || [],
+                        }))
                       : resumeData.project || [],
                     skills:
                       allValues.skills !== undefined &&
-                        Array.isArray(allValues.skills)
+                      Array.isArray(allValues.skills)
                         ? allValues.skills
                         : resumeData.skills || [],
                   };

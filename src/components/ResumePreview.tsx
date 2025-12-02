@@ -1,9 +1,10 @@
 import type { Resume } from "@/lib/type";
-import { ModernTemplate } from "./template/ModernTemplate";
-import { MinimalTemplate } from "./template/MinimalTemplate";
-import { MinimalImageTemplate } from "./template/MinimalImageTemplate";
-import { ClassicTemplate } from "./template/ClassicTemplate";
 import { BoldTemplate } from "./template/BoldTemplate";
+import { MinimalImageTemplate } from "./template/MinimalImageTemplate";
+import { MinimalTemplate } from "./template/MinimalTemplate";
+import { ModernTemplate } from "./template/ModernTemplate";
+import { ProfessionalTemplate } from "./template/ProfessionalTemplate";
+import { ClassicTemplate } from "./template/ClassicTemplate";
 
 export const ResumePreview = ({
   data,
@@ -37,7 +38,7 @@ export const ResumePreview = ({
     (data.font_family && fontMap[data.font_family]) ||
     "Inter, system-ui, sans-serif";
 
-  const rederTemplate = () => {
+  const renderTemplate = () => {
     switch (template) {
       case "modern":
         return <ModernTemplate data={data} accentColor={accentColor} />;
@@ -45,8 +46,12 @@ export const ResumePreview = ({
         return <MinimalTemplate data={data} accentColor={accentColor} />;
       case "minimal-image":
         return <MinimalImageTemplate data={data} accentColor={accentColor} />;
-      default:
+      case "bold":
         return <BoldTemplate data={data} accentColor={accentColor} />;
+      case "professional":
+        return <ProfessionalTemplate data={data} accentColor={accentColor} />;
+      default:
+        return <ClassicTemplate data={data} accentColor={accentColor} />;
     }
   };
 
@@ -59,7 +64,7 @@ export const ResumePreview = ({
           classes
         }
       >
-        {rederTemplate()}
+        {renderTemplate()}
       </div>
 
       <style>

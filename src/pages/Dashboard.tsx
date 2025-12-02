@@ -217,7 +217,7 @@ export default function Dashboard() {
         </Modal>
 
         <Modal
-          title={t("uploadResume")}
+          title={t("Upload Resume")}
           open={showUploadResume}
           onCancel={() => {
             setShowUploadResume(false);
@@ -228,10 +228,10 @@ export default function Dashboard() {
           okButtonProps={{
             style: { backgroundColor: "#9810fa" },
           }}
-          okText={t("uploadResume")}
+          okText={t("Upload Resume")}
         >
           <Input
-            placeholder={t("enterResumeTitle")}
+            placeholder={t("Enter resume title")}
             size="large"
             maxLength={100}
             value={title}
@@ -249,7 +249,7 @@ export default function Dashboard() {
                 ) : (
                   <>
                     <UploadCloud className="size-14 stroke-1" />
-                    <p>{t("uploadResume")}</p>
+                    <p>{t("Upload resume")}</p>
                   </>
                 )}
               </div>

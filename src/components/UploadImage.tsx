@@ -1,11 +1,12 @@
-import { User } from "lucide-react"
-import React from "react"
+import { User } from "lucide-react";
+import React from "react";
+import { useTranslation } from "react-i18next";
 
 interface UploadImageProps {
-  imageFile: File | string | null
-  onChange: (file: File | string | null) => void
-  removeBackground: boolean
-  setRemoveBackground: React.Dispatch<React.SetStateAction<boolean>>
+  imageFile: File | string | null;
+  onChange: (file: File | string | null) => void;
+  removeBackground: boolean;
+  setRemoveBackground: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const UploadImage: React.FC<UploadImageProps> = ({
@@ -14,12 +15,13 @@ export const UploadImage: React.FC<UploadImageProps> = ({
   removeBackground,
   setRemoveBackground,
 }) => {
+  const { t } = useTranslation();
   const previewUrl =
     imageFile && typeof imageFile !== "string"
       ? URL.createObjectURL(imageFile)
       : typeof imageFile === "string"
       ? imageFile
-      : null
+      : null;
 
   return (
     <div className="flex items-center gap-4">
@@ -33,7 +35,7 @@ export const UploadImage: React.FC<UploadImageProps> = ({
         ) : (
           <div className="inline-flex items-center gap-2 text-slate-600 hover:text-slate-700">
             <User className="size-10 p-2.5 border rounded-full" />
-            Upload Image
+            {t("Upload Image")}
           </div>
         )}
 
@@ -47,7 +49,7 @@ export const UploadImage: React.FC<UploadImageProps> = ({
 
       {imageFile && (
         <div className="flex flex-col gap-1 text-sm">
-          <p className="!mb-0">Remove background</p>
+          <p className="!mb-0">{t("Remove background")}</p>
           <label className="relative inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
@@ -61,5 +63,5 @@ export const UploadImage: React.FC<UploadImageProps> = ({
         </div>
       )}
     </div>
-  )
-}
+  );
+};

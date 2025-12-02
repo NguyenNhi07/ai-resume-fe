@@ -11,6 +11,7 @@ import {
   Venus,
   VenusAndMars,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export const ModernTemplate = ({
   data,
@@ -19,6 +20,7 @@ export const ModernTemplate = ({
   data: Resume;
   accentColor: string;
 }) => {
+  const { t } = useTranslation();
   const fontMap: Record<string, string> = {
     times: "Times New Roman, serif",
     inter: "Inter, system-ui, sans-serif",
@@ -128,12 +130,7 @@ export const ModernTemplate = ({
             {data.personal_info?.language && (
               <div className="flex items-center gap-2">
                 <Library className="w-4 h-4" />
-                <a
-                  href={data.personal_info.language}
-                  className="hover:underline"
-                >
-                  language
-                </a>
+                <span>{data.personal_info.language}</span>
               </div>
             )}
           </div>
@@ -152,7 +149,7 @@ export const ModernTemplate = ({
                     className="w-1 h-8 mr-3 rounded"
                     style={{ backgroundColor: accentColor }}
                   ></div>
-                  About Me
+                  {t("About Me")}
                 </h2>
                 <p className="text-gray-700 leading-relaxed text-lg">
                   {data.professional_summary}
@@ -168,7 +165,7 @@ export const ModernTemplate = ({
                     className="w-1 h-8 mr-3 rounded"
                     style={{ backgroundColor: accentColor }}
                   ></div>
-                  Experience
+                  {t("Experience")}
                 </h2>
                 <div className="space-y-6">
                   {data.experience.map((exp, index) => (
@@ -217,7 +214,7 @@ export const ModernTemplate = ({
                     className="w-1 h-8 mr-3 rounded"
                     style={{ backgroundColor: accentColor }}
                   ></div>
-                  Projects
+                  {t("Projects")}
                 </h2>
                 <div className="grid gap-6">
                   {data.project.map((project, index) => (
@@ -268,7 +265,7 @@ export const ModernTemplate = ({
                     className="w-1 h-8 mr-3 rounded"
                     style={{ backgroundColor: accentColor }}
                   ></div>
-                  Education
+                  {t("Education")}
                 </h2>
                 <div className="space-y-4">
                   {data.education.map((edu, index) => (
@@ -312,7 +309,7 @@ export const ModernTemplate = ({
                     className="w-1 h-8 mr-3 rounded"
                     style={{ backgroundColor: accentColor }}
                   ></div>
-                  Skills
+                  {t("Skills")}
                 </h2>
                 <div className="flex flex-wrap gap-3">
                   {data.skills.map((skill, index) => (

@@ -278,22 +278,9 @@ export const PersonalInfoForm = ({
           </div>
         }
         name={["personal_info", "language"]}
-        rules={[
-          {
-            validator: async (_, url) => {
-              if (!url)
-                return Promise.reject(new Error(t("this_field_is_required")));
-              if (url && !urlRegex.test(url))
-                return Promise.reject(
-                  new Error(t("invalid_link_please_try_again"))
-                );
-              return Promise.resolve();
-            },
-          },
-        ]}
         required={false}
       >
-        <Input size="large" placeholder={t("input_linkedin")} />
+        <Input size="large" placeholder={t("Input language")} />
       </Form.Item>
 
       <Form.Item

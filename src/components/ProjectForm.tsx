@@ -60,7 +60,7 @@ export const ProjectForm = ({
             >
               <div className="flex justify-between items-center">
                 <h4 className="text-base font-medium text-gray-900">
-                  Project #{index + 1}
+                  {t("Project")} #{index + 1}
                 </h4>
                 <Button
                   onClick={() => removeProject(index)}
@@ -102,7 +102,7 @@ export const ProjectForm = ({
                       className="flex items-center gap-1 px-2 py-1 text-xs bg-purple-100 !text-purple-700 rounded hover:bg-purple-200 transition-colors disabled:opacity-50"
                     >
                       <Sparkles className="w-3 h-3" />
-                      Enhance with AI
+                      {t("Enhance with AI")}
                     </button>
                   </div>
                 }
