@@ -2,14 +2,16 @@ import { Loader } from "@/components/Loader"
 import { ResumePreview } from "@/components/ResumePreview"
 import type { Resume } from "@/lib/type"
 import { dummyResumeData } from "@/lib/utils"
+import { Button } from "antd"
 import { ArrowLeftIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 
-export default function Preview() {
+export default function PreviewResume() {
     const { t } = useTranslation();
     const { resumeId } = useParams()
+    const navigate = useNavigate()
 
     const [isLoading, setIsLoading] = useState(true)
 
@@ -26,7 +28,13 @@ export default function Preview() {
     }, [])
 
     return resumeData ? (
-        <div className="bg-slate-100">
+        <div className="bg-slate-100 p-6 flex">
+            <Button
+                onClick={() => navigate(-1)}
+                className="!border-0 !bg-[#F1F5F9] hover:!text-purple-600 !text-lg !shadow-none !px-0"
+            >
+                <ArrowLeftIcon className="size-4" /> {t("Back")}
+            </Button>
             <div className="max-w-3xl mx-auto py-10">
                 <ResumePreview data={resumeData} template={resumeData.template || ''} accentColor={resumeData.accent_color || ''} classes="bg-white" />
             </div>

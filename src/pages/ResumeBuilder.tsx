@@ -177,22 +177,22 @@ export default function ResumeBuilder() {
         },
         experience: resumeData.experience
           ? resumeData.experience.map((exp) => ({
-              ...exp,
-              start_date: exp.start_date
-                ? dayjs(exp.start_date, "MM/YYYY")
-                : undefined,
-              end_date: exp.end_date
-                ? dayjs(exp.end_date, "MM/YYYY")
-                : undefined,
-            }))
+            ...exp,
+            start_date: exp.start_date
+              ? dayjs(exp.start_date, "MM/YYYY")
+              : undefined,
+            end_date: exp.end_date
+              ? dayjs(exp.end_date, "MM/YYYY")
+              : undefined,
+          }))
           : [],
         education: resumeData.education
           ? resumeData.education.map((edu) => ({
-              ...edu,
-              graduation_date: edu.graduation_date
-                ? dayjs(edu.graduation_date, "MM/YYYY")
-                : undefined,
-            }))
+            ...edu,
+            graduation_date: edu.graduation_date
+              ? dayjs(edu.graduation_date, "MM/YYYY")
+              : undefined,
+          }))
           : [],
       };
       form.setFieldsValue(formData);
@@ -372,6 +372,14 @@ export default function ResumeBuilder() {
         </Button>
 
         <div className="flex items-center gap-2">
+          <Button
+            onClick={() => {navigate(`/app/preview/${resumeId}`)}}
+            className="!bg-gradient-to-br !from-yellow-50 !to-yellow-100 !text-yellow-500
+             hover:!border-yellow-400"
+          >
+            <EyeIcon className="size-4" />
+            {t("Preview")}
+          </Button>
           {resumeData.public && (
             <Button
               onClick={handleShare}
@@ -384,11 +392,6 @@ export default function ResumeBuilder() {
             onClick={changeResumeVisibility}
             className="!bg-gradient-to-br !from-purple-100 !to-purple-200 !text-purple-600 hover:!border-purple-400"
           >
-            {resumeData.public ? (
-              <EyeIcon className="size-4" />
-            ) : (
-              <EyeOffIcon className="size-4" />
-            )}
             {resumeData.public ? t("Public") : t("Private")}
           </Button>
 
@@ -437,9 +440,8 @@ export default function ResumeBuilder() {
               <hr
                 className="absolute top-0 left-0 h-1 bg-gradient-to-r from-purple-500 to-purple-600 border-none transition-all duration-2000"
                 style={{
-                  width: `${
-                    (activeSectionIndex * 100) / (sections.length - 1)
-                  }%`,
+                  width: `${(activeSectionIndex * 100) / (sections.length - 1)
+                    }%`,
                 }}
               />
 
@@ -462,16 +464,7 @@ export default function ResumeBuilder() {
                         }))
                       }
                     />
-                    <button
-                      onClick={() => setShowAutoFillModal(true)}
-                      disabled={isAutoFilling}
-                      className="flex items-center gap-1 text-sm !text-purple-600 bg-gradient-to-br from-purple-50 to-purple-100 ring-purple-300 hover:ring transition-all px-3 py-2 rounded-lg disabled:opacity-70"
-                    >
-                      <UserCheck size={16} />
-                      <span className="max-sm:hidden">
-                        {t("Use my profile")}
-                      </span>
-                    </button>
+                    
                   </div>
                   <div className="flex items-center">
                     {activeSectionIndex !== 0 && (
@@ -518,10 +511,9 @@ export default function ResumeBuilder() {
                           );
                         }
                       }}
-                      className={`flex items-center gap-1 p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all ${
-                        activeSectionIndex === sections.length - 1 &&
+                      className={`flex items-center gap-1 p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all ${activeSectionIndex === sections.length - 1 &&
                         "opacity-50"
-                      }`}
+                        }`}
                       disabled={activeSectionIndex === sections.length - 1}
                     >
                       {t("next")} <ChevronRight className="size-4" />
@@ -529,7 +521,19 @@ export default function ResumeBuilder() {
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <span className="text-sm text-gray-500">{t("Font")}</span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">{t("Font")}</span>
+                    <button
+                      onClick={() => setShowAutoFillModal(true)}
+                      disabled={isAutoFilling}
+                      className="flex items-center gap-1 text-sm !text-purple-600 bg-gradient-to-br from-purple-50 to-purple-100 ring-purple-300 hover:ring transition-all px-3 py-2 rounded-lg disabled:opacity-70"
+                    >
+                      <UserCheck size={16} />
+                      <span className="max-sm:hidden">
+                        {t("Use my profile")}
+                      </span>
+                    </button>
+                  </div>
                   <Select
                     size="large"
                     options={fontOptions}
@@ -590,8 +594,8 @@ export default function ResumeBuilder() {
                         ? typeof allValues.personal_info.birthDate === "string"
                           ? allValues.personal_info.birthDate
                           : allValues.personal_info.birthDate.format(
-                              "DD/MM/YYYY"
-                            )
+                            "DD/MM/YYYY"
+                          )
                         : resumeData.personal_info?.birthDate,
                     },
                     professional_summary:
@@ -600,55 +604,55 @@ export default function ResumeBuilder() {
                         : resumeData.professional_summary,
                     experience: allValues.experience
                       ? allValues.experience.map((exp) => {
-                          const startDate = exp.start_date
-                            ? typeof exp.start_date === "string"
-                              ? exp.start_date
-                              : (exp.start_date as Dayjs).format("MM/YYYY")
-                            : "";
-                          // Clear end_date if is_current is true
-                          const endDate = exp.is_current
-                            ? ""
-                            : exp.end_date
+                        const startDate = exp.start_date
+                          ? typeof exp.start_date === "string"
+                            ? exp.start_date
+                            : (exp.start_date as Dayjs).format("MM/YYYY")
+                          : "";
+                        // Clear end_date if is_current is true
+                        const endDate = exp.is_current
+                          ? ""
+                          : exp.end_date
                             ? typeof exp.end_date === "string"
                               ? exp.end_date
                               : (exp.end_date as Dayjs).format("MM/YYYY")
                             : "";
-                          return {
-                            company: exp.company,
-                            position: exp.position,
-                            description: exp.description,
-                            is_current: exp.is_current || false,
-                            start_date: startDate,
-                            end_date: endDate,
-                          };
-                        })
+                        return {
+                          company: exp.company,
+                          position: exp.position,
+                          description: exp.description,
+                          is_current: exp.is_current || false,
+                          start_date: startDate,
+                          end_date: endDate,
+                        };
+                      })
                       : resumeData.experience || [],
                     education: allValues.education
                       ? allValues.education.map((edu) => {
-                          const graduationDate = edu.graduation_date
-                            ? typeof edu.graduation_date === "string"
-                              ? edu.graduation_date
-                              : (edu.graduation_date as Dayjs).format("MM/YYYY")
-                            : "";
-                          return {
-                            institution: edu.institution,
-                            degree: edu.degree,
-                            field: edu.field,
-                            graduation_date: graduationDate,
-                            gpa: edu.gpa,
-                          };
-                        })
+                        const graduationDate = edu.graduation_date
+                          ? typeof edu.graduation_date === "string"
+                            ? edu.graduation_date
+                            : (edu.graduation_date as Dayjs).format("MM/YYYY")
+                          : "";
+                        return {
+                          institution: edu.institution,
+                          degree: edu.degree,
+                          field: edu.field,
+                          graduation_date: graduationDate,
+                          gpa: edu.gpa,
+                        };
+                      })
                       : resumeData.education || [],
                     project: allValues.project
                       ? allValues.project.map((proj) => ({
-                          name: proj.name,
-                          description: proj.description,
-                          technologies: proj.technologies || [],
-                        }))
+                        name: proj.name,
+                        description: proj.description,
+                        technologies: proj.technologies || [],
+                      }))
                       : resumeData.project || [],
                     skills:
                       allValues.skills !== undefined &&
-                      Array.isArray(allValues.skills)
+                        Array.isArray(allValues.skills)
                         ? allValues.skills
                         : resumeData.skills || [],
                   };

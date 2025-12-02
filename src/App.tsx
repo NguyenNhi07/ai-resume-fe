@@ -10,6 +10,7 @@ import SettingLayout from './pages/SettingLayout'
 import ProfileManagement from './pages/ProfileManagement'
 import ChangePassword from './pages/ChangePassword'
 import Language from './pages/Language'
+import PreviewResume from './pages/PreviewResume'
 
 function App() {
 
@@ -21,6 +22,7 @@ function App() {
         <Route path='app' element={<Layout/>}>
           <Route index element={<Dashboard/>}/>
           <Route path='builder/:resumeId' element={<ResumeBuilder/>}/>
+          <Route path='preview/:resumeId' element={<PreviewResume/>}/>
         </Route>
 
         <Route path='setting' element={<SettingLayout/>}>
