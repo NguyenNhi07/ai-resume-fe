@@ -3,13 +3,13 @@ import dayjs from "dayjs";
 import {
   CalendarDays,
   Globe,
-  Linkedin,
+  Library,
   Mail,
   MapPin,
   Mars,
   Phone,
   Venus,
-  VenusAndMars,
+  VenusAndMars
 } from "lucide-react";
 
 export const MinimalImageTemplate = ({
@@ -121,14 +121,14 @@ export const MinimalImageTemplate = ({
                 </a>
               </div>
             )}
-            {data.personal_info?.linkedin && (
+            {data.personal_info?.language && (
               <div className="flex items-center gap-2">
-                <Linkedin className="w-4 h-4" />
+                <Library className="w-4 h-4" />
                 <a
-                  href={data.personal_info.linkedin}
+                  href={data.personal_info.language}
                   className="hover:text-gray-900 transition-colors"
                 >
-                  LinkedIn
+                  language
                 </a>
               </div>
             )}

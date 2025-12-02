@@ -17,7 +17,7 @@ export const dummyResumeData = [
       phone: "+84 912 345 678",
       location: "123 Le Duan, Hanoi, Vietnam",
       website: "https://nguyenvana.dev",
-      linkedin: "https://linkedin.com/in/nguyenvana",
+      language: "English",
       image: 'https://avatars.githubusercontent.com/u/9919?v=4',
       profession: "Frontend Developer"
     },
@@ -66,7 +66,7 @@ export const dummyResumeData = [
       phone: "+84 988 765 432",
       location: "456 Nguyen Trai, Hanoi, Vietnam",
       website: "https://tranthib.dev",
-      linkedin: "https://linkedin.com/in/tranthib",
+      language: "English",
       image: 'https://avatars.githubusercontent.com/u/9919?v=4',
       profession: "Backend Developer"
     },
@@ -115,7 +115,7 @@ export const dummyResumeData = [
       phone: "+84 933 456 789",
       location: "789 Tran Hung Dao, Ho Chi Minh City, Vietnam",
       website: "https://lethic.design",
-      linkedin: "https://linkedin.com/in/lethic",
+      language: "English",
       image: 'https://avatars.githubusercontent.com/u/9919?v=4',
       profession: "Creative UI/UX Designer"
     },

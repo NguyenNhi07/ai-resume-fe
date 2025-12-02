@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import {
   CalendarDays,
   Globe,
-  Linkedin,
+  Library,
   Mail,
   MapPin,
   Mars,
@@ -119,14 +119,14 @@ export const MinimalTemplate = ({
               </a>
             </div>
           )}
-          {data.personal_info?.linkedin && (
+          {data.personal_info?.language && (
             <div className="flex items-center gap-1">
-              <Linkedin className="w-3 h-3" />
+              <Library className="w-3 h-3" />
               <a
-                href={data.personal_info.linkedin}
+                href={data.personal_info.language}
                 className="hover:text-gray-900 transition-colors"
               >
-                LinkedIn
+                language
               </a>
             </div>
           )}

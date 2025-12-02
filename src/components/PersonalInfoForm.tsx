@@ -5,7 +5,7 @@ import {
   BriefcaseBusiness,
   CalendarDays,
   Globe,
-  Linkedin,
+  Library,
   Mail,
   MapPin,
   Phone,
@@ -272,12 +272,12 @@ export const PersonalInfoForm = ({
       <Form.Item
         label={
           <div className="flex gap-2 items-center">
-            <Linkedin className="size-5" />
-            {t("linkedin")}
+            <Library className="size-5" />
+            {t("Language")}
             <span className="text-red-500">*</span>
           </div>
         }
-        name={["personal_info", "linkedin"]}
+        name={["personal_info", "language"]}
         rules={[
           {
             validator: async (_, url) => {

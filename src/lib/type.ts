@@ -21,7 +21,7 @@ export interface PersonalInfo {
   phone?: string;
   location?: string;
   website?: string;
-  linkedin?: string;
+  language?: string;
   image?: string;
   profession?: string;
 }

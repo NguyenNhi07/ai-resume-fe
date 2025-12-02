@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import {
   CalendarDays,
   Globe,
-  Linkedin,
+  Library,
   Mail,
   MapPin,
   Mars,
@@ -89,7 +89,7 @@ export const ClassicTemplate = ({
               ) : (
                 <VenusAndMars className="w-4 h-4" />
               )}
-              <span className="font-medium">{data.personal_info.gender}</span>
+              <span>{data.personal_info.gender}</span>
             </div>
           )}
           {data.personal_info?.email && (
@@ -118,12 +118,10 @@ export const ClassicTemplate = ({
               </a>
             </div>
           )}
-          {data.personal_info?.linkedin && (
+          {data.personal_info?.language && (
             <div className="flex items-center gap-1">
-              <Linkedin className="w-4 h-4" />
-              <a href={data.personal_info.linkedin} className="hover:underline">
-                LinkedIn
-              </a>
+              <Library className="w-4 h-4" />
+              <span>{data.personal_info.language}</span>
             </div>
           )}
         </div>

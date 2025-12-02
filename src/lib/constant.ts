@@ -8,7 +8,7 @@ export const profileDefault: Resume = {
     phone: "",
     location: "",
     website: "",
-    linkedin: "",
+    language: "",
     image: "",
   },
   professional_summary: "",

@@ -493,7 +493,7 @@ export default function ResumeBuilder() {
                               ["personal_info", "phone"],
                               ["personal_info", "location"],
                               ["personal_info", "profession"],
-                              ["personal_info", "linkedin"],
+                              ["personal_info", "language"],
                               ["personal_info", "website"],
                             ]);
                             // If validation passes, move to next section

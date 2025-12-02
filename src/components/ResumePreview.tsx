@@ -1,8 +1,9 @@
 import type { Resume } from "@/lib/type";
-import { ModernTemplate } from "./ModernTemplate";
-import { MinimalTemplate } from "./MinimalTemplate";
-import { MinimalImageTemplate } from "./MinimalImageTemplate";
-import { ClassicTemplate } from "./ClassicTemplate";
+import { ModernTemplate } from "./template/ModernTemplate";
+import { MinimalTemplate } from "./template/MinimalTemplate";
+import { MinimalImageTemplate } from "./template/MinimalImageTemplate";
+import { ClassicTemplate } from "./template/ClassicTemplate";
+import { BoldTemplate } from "./template/BoldTemplate";
 
 export const ResumePreview = ({
   data,
@@ -45,7 +46,7 @@ export const ResumePreview = ({
       case "minimal-image":
         return <MinimalImageTemplate data={data} accentColor={accentColor} />;
       default:
-        return <ClassicTemplate data={data} accentColor={accentColor} />;
+        return <BoldTemplate data={data} accentColor={accentColor} />;
     }
   };
 
