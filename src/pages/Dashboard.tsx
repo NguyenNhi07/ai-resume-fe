@@ -62,7 +62,7 @@ export default function Dashboard() {
   useEffect(() => {
     const state = searchParams.get("state");
     if (state === "login" || state === "register") {
-      navigate(`/login?state=${state}`);
+      navigate(`/auth/login?state=${state}`);
       return;
     }
     loadAllResumes();

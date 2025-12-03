@@ -31,7 +31,7 @@ export const Hero = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         setIsLoggedIn(false);
-        navigate("/login");
+        navigate("/auth/login");
     };
 
     const logos = [
