@@ -4,11 +4,11 @@ import { Button, Input, Segmented, Tag } from "antd";
 import { ArrowLeftIcon, DownloadIcon, PrinterIcon, Sparkles, FileText } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
-  dummyResumeData,
   extractSkillsFromJD,
   generateCoverLetter,
 } from "@/lib/utils";
 import type { Resume } from "@/lib/type";
+import { resumeApi } from "@/lib/api";
 
 const { TextArea } = Input;
 
@@ -27,13 +27,14 @@ export default function CoverLetter() {
 
   useEffect(() => {
     if (!resumeId) return;
-    const found = dummyResumeData.find((r) => r.id === resumeId);
-    if (found) {
-      setResume(found);
-      // init letter stub
-      const skills = extractSkillsFromJD("", found.skills || []);
-      setLetter(generateCoverLetter(found, "", tone, skills));
-    }
+    resumeApi
+      .detail(resumeId)
+      .then((res) => {
+        setResume(res);
+        const skills = extractSkillsFromJD("", res.skills || []);
+        setLetter(generateCoverLetter(res, "", tone, skills));
+      })
+      .catch(() => setResume(null));
   }, [resumeId, tone]);
 
   const jdSkills = useMemo(

@@ -19,6 +19,7 @@ import { useState } from "react";
 import { isValidPhoneNumber } from "@/lib/phone-utils";
 import { PhoneInput } from "./PhoneInput";
 import { UploadImage } from "./UploadImage";
+import { fileApi } from "@/lib/api";
 
 const genderOptions = [
   { label: "Male", value: "Male" },
@@ -42,17 +43,27 @@ export const PersonalInfoForm = ({
 
   const [errorPhone, setErrorPhone] = useState(false);
 
-  const handleChange = (field: string, value: string | File) => {
-    // Convert File to base64 if it's an image field and value is a File
-    if (field === "image" && value instanceof File) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        onChange({ ...data, [field]: reader.result as string });
-      };
-      reader.readAsDataURL(value);
-    } else {
-      onChange({ ...data, [field]: value });
+  const handleChange = (field: string, value: string | File | null) => {
+    if (field === "image") {
+      if (!value) {
+        onChange({ ...data, image: "" });
+        return;
+      }
+      if (value instanceof File) {
+        // Upload image to backend and save URL
+        fileApi
+          .uploadImage(value)
+          .then((url) => {
+            onChange({ ...data, image: url });
+          })
+          .catch(() => {
+            // fallback: do nothing or keep old image
+          });
+        return;
+      }
     }
+
+    onChange({ ...data, [field]: value as string });
   };
 
   const validateAge = (_: unknown, value: Dayjs) => {
@@ -76,7 +87,7 @@ export const PersonalInfoForm = ({
         <UploadImage
           imageFile={data.image || null}
           onChange={(file: File | string | null) => {
-            handleChange("image", file as string);
+            handleChange("image", file);
           }}
           removeBackground={removeBackground}
           setRemoveBackground={setRemoveBackground}

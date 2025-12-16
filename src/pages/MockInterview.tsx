@@ -4,12 +4,12 @@ import { Button, Input, Tag } from "antd";
 import { Sparkles, ArrowLeftIcon, FileText } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
-  dummyResumeData,
   extractSkillsFromJD,
   generateInterviewQuestions,
   scoreInterviewAnswers,
 } from "@/lib/utils";
 import type { Resume } from "@/lib/type";
+import { resumeApi } from "@/lib/api";
 
 const { TextArea } = Input;
 
@@ -30,8 +30,10 @@ export default function MockInterview() {
 
   useEffect(() => {
     if (!resumeId) return;
-    const found = dummyResumeData.find((r) => r.id === resumeId);
-    if (found) setResume(found);
+    resumeApi
+      .detail(resumeId)
+      .then((res) => setResume(res))
+      .catch(() => setResume(null));
   }, [resumeId]);
 
   const jdSkills = useMemo(() => extractSkillsFromJD(jdText, resume?.skills || []), [jdText, resume]);

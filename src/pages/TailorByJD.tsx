@@ -9,13 +9,13 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
-  dummyResumeData,
   extractSkillsFromJD,
   scoreResumeAgainstJD,
   tailorResumeByJD,
 } from "@/lib/utils";
 import type { Resume } from "@/lib/type";
 import { ResumePreview } from "@/components/ResumePreview";
+import { resumeApi } from "@/lib/api";
 
 const { TextArea } = Input;
 
@@ -46,10 +46,10 @@ export default function TailorByJD() {
 
   useEffect(() => {
     if (!resumeId) return;
-    const found = dummyResumeData.find((r) => r.id === resumeId);
-    if (found) {
-      setBaseResume(found);
-    }
+    resumeApi
+      .detail(resumeId)
+      .then((res) => setBaseResume(res))
+      .catch(() => setBaseResume(null));
   }, [resumeId]);
 
   const handleBack = () => {
@@ -105,15 +105,6 @@ export default function TailorByJD() {
 
   const handleSaveOverwrite = () => {
     if (!tailoredResume || !baseResume || !baseResume.id) return;
-
-    const index = dummyResumeData.findIndex((r) => r.id === baseResume.id);
-    if (index !== -1) {
-      dummyResumeData[index] = {
-        ...tailoredResume,
-        id: baseResume.id,
-      };
-    }
-
     navigate(`/app/builder/${baseResume.id}`);
   };
 
@@ -128,18 +119,8 @@ export default function TailorByJD() {
     if (!tailoredResume) return;
 
     const title = saveAsNewTitle.trim() || tailoredResume.title || t("UntitledResume");
-    const newId = String(Date.now());
-
-    const newResume: Resume = {
-      ...tailoredResume,
-      id: newId,
-      title,
-    };
-
-    dummyResumeData.push(newResume);
-
     setIsSaveModalOpen(false);
-    navigate(`/app/builder/${newId}`);
+    navigate(`/app/builder/new?title=${encodeURIComponent(title)}`);
   };
 
   return (

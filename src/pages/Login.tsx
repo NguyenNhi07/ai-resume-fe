@@ -41,8 +41,28 @@ export default function Login() {
       }
 
       // Save token and user info
-      localStorage.setItem("token", response.token);
-      localStorage.setItem("user", JSON.stringify(response.user));
+      const token = response.accessToken || (response as any).token;
+      if (token) localStorage.setItem("token", token);
+      if (response.refreshToken) {
+        localStorage.setItem("refreshToken", response.refreshToken);
+      }
+
+      // Fetch user profile after login
+      try {
+        const profile = await authApi.me();
+        const userPayload = {
+          id: profile.id,
+          name: profile.fullName || formData.name || profile.firstName,
+          email: profile.email,
+          avatarUrl: profile.imageLink,
+        };
+        localStorage.setItem("user", JSON.stringify(userPayload));
+      } catch (err) {
+        // fallback to basic info if profile fails
+        if (response.user) {
+          localStorage.setItem("user", JSON.stringify(response.user));
+        }
+      }
 
       toast.success(
         state === "login" ? t("Login Success!") : t("Register Success!")

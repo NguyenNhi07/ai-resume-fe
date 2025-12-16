@@ -1,7 +1,7 @@
 import { Loader } from "@/components/Loader"
 import { ResumePreview } from "@/components/ResumePreview"
 import type { Resume } from "@/lib/type"
-import { dummyResumeData } from "@/lib/utils"
+import { resumeApi } from "@/lib/api"
 import { ArrowLeftIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -16,9 +16,15 @@ export default function Preview() {
     const [resumeData, setResumeData] = useState<Resume | null>(null)
 
     const loadResume = async () => {
-        const found = dummyResumeData.find(resume => resume.id === resumeId)
-        setResumeData(found ?? null)
-        setIsLoading(false)
+        try {
+            if (!resumeId) return;
+            const found = await resumeApi.detail(resumeId)
+            setResumeData(found ?? null)
+        } catch (e) {
+            setResumeData(null)
+        } finally {
+            setIsLoading(false)
+        }
     }
 
     useEffect(() => {

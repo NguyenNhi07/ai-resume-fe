@@ -1,10 +1,15 @@
 import { Button } from "antd";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { authApi } from "@/lib/api";
+import { useToast } from "@/hooks/useToast";
 
 export default function VeirifyEmail() {
     const { t } = useTranslation();
+    const [searchParams] = useSearchParams();
+    const email = searchParams.get("email") || "";
+    const toast = useToast();
     const [loading, setLoading] = React.useState(false);
     const [otp, setOtp] = useState(['', '', '', '', '', ''])
     const [isInvalid, setIsInvalid] = useState(false)
@@ -31,9 +36,15 @@ export default function VeirifyEmail() {
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleResendOTP = () => {
+    const handleResendOTP = async () => {
         setCountdown(120)
-        // TODO: Call API to resend OTP here
+        try {
+            await authApi.forgotPassword(email);
+            toast.success(t("We have sent a reset link/OTP to your email"));
+        } catch (error: any) {
+            const msg = error?.response?.data?.message || error.message || t("Something went wrong");
+            toast.error(msg);
+        }
     }
 
     const handleInputChange = (index: number, value: string) => {
@@ -57,15 +68,26 @@ export default function VeirifyEmail() {
 
     const handleSubmit = async () => {
         const otpCode = otp.join('')
-        console.log('OTP submitted:', otpCode)
-
-        // fake code OTP
-        const isCorrectOTP = otpCode === '123456'
-        if (!isCorrectOTP) {
-            setIsInvalid(true)
-            return
+        if (!email) {
+            toast.error(t("Email is missing"));
+            return;
         }
-        navigate('/auth/login')
+        if (!otpCode || otpCode.length < 6) {
+            setIsInvalid(true);
+            return;
+        }
+        setLoading(true);
+        try {
+            await authApi.verifyOtp(email, otpCode);
+            toast.success(t("Code verified. Please set a new password."));
+            navigate(`/auth/reset-password?email=${encodeURIComponent(email)}&otp=${otpCode}`);
+        } catch (error: any) {
+            const msg = error?.response?.data?.message || error.message || t("Invalid code");
+            toast.error(msg);
+            setIsInvalid(true);
+        } finally {
+            setLoading(false);
+        }
     }
 
     return (

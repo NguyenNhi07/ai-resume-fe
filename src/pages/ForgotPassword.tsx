@@ -3,10 +3,13 @@ import { Lock, Mail } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { authApi } from "@/lib/api";
+import { useToast } from "@/hooks/useToast";
 
 export default function ForgotPassword() {
     const { t } = useTranslation();
     const navigate = useNavigate()
+    const toast = useToast()
     const [loading, setLoading] = React.useState(false);
 
     const [formData, setFormData] = React.useState({
@@ -15,7 +18,18 @@ export default function ForgotPassword() {
     });
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-
+        e.preventDefault();
+        setLoading(true);
+        try {
+            await authApi.forgotPassword(formData.email);
+            toast.success(t("We have sent a reset link/OTP to your email"));
+            navigate(`/auth/verify-email?email=${encodeURIComponent(formData.email)}`);
+        } catch (error: any) {
+            const msg = error?.response?.data?.message || error.message || t("Something went wrong");
+            toast.error(msg);
+        } finally {
+            setLoading(false);
+        }
     }
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,12 +74,12 @@ export default function ForgotPassword() {
                 </div>
 
                 <Button
-                    onClick={() => navigate('/auth/verify-email')}
+                    htmlType="submit"
                     disabled={loading}
                     size="large"
                     className="!text-white !bg-purple-500 w-full !my-3 disabled:!text-white-65"
                 >
-                    {t("Continue")}
+                    {loading ? t("Loading") : t("Continue")}
                 </Button>
             </form>
         </div>

@@ -14,6 +14,7 @@ import PreviewResume from './pages/PreviewResume'
 import ForgotPassword from './pages/ForgotPassword'
 import AuthLayout from './pages/AuthLayout'
 import VeirifyEmail from './pages/VerifyEmail'
+import ResetPassword from './pages/ResetPassword'
 import MockInterview from './pages/MockInterview'
 import CoverLetter from './pages/CoverLetter'
 import TailorByJD from './pages/TailorByJD'
@@ -46,6 +47,7 @@ function App() {
           <Route path='login' element={<Login/>}/>
           <Route path='forgot-password' element={<ForgotPassword/>}/>
           <Route path='verify-email' element={<VeirifyEmail/>}/>
+          <Route path='reset-password' element={<ResetPassword/>}/>
         </Route>
       </Routes>
     </>

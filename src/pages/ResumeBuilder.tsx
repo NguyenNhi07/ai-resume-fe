@@ -11,6 +11,7 @@ import { TemplateSelector } from "@/components/TemplateSelector";
 import { profileDefault } from "@/lib/constant";
 import type { Experience, Resume } from "@/lib/type";
 import { dummyResumeData, extractSkillsFromJD, scoreResumeAgainstJD } from "@/lib/utils";
+import { resumeApi } from "@/lib/api";
 import { Button, Form, Modal, Popover, Select, Input, Tag } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 import html2canvas from "html2canvas";
@@ -118,15 +119,16 @@ export default function ResumeBuilder() {
   } | null>(null);
 
   const loadExitstingResume = async () => {
-    const resume = dummyResumeData.find((resume) => resume.id === resumeId);
-    if (resume) {
+    if (!resumeId) return;
+    try {
+      const resume = await resumeApi.detail(resumeId);
       setResumeData(resume);
       initialFormData.current = { ...resume };
       document.title = resume.title;
       currentResumeId.current = resumeId;
       setIsDirty(false);
-    } else {
-      // New resume
+    } catch (e) {
+      // Fallback to default for new resume
       const newResume: Resume = {
         id: "",
         title: "",
@@ -140,6 +142,7 @@ export default function ResumeBuilder() {
         accent_color: "#3B82F6",
         public: false,
       };
+      setResumeData(newResume);
       initialFormData.current = { ...newResume };
       setIsDirty(false);
     }
@@ -224,6 +227,77 @@ export default function ResumeBuilder() {
     }
   }, [resumeId, resumeData, form]);
 
+  const buildResumeFromForm = (allValues: FormResume, current: Resume): Resume => {
+    return {
+      ...current,
+      ...allValues,
+      personal_info: {
+        ...current.personal_info,
+        ...allValues.personal_info,
+        birthDate: allValues.personal_info?.birthDate
+          ? typeof allValues.personal_info.birthDate === "string"
+            ? allValues.personal_info.birthDate
+            : allValues.personal_info.birthDate.format("DD/MM/YYYY")
+          : current.personal_info?.birthDate,
+      },
+      professional_summary:
+        allValues.professional_summary !== undefined
+          ? allValues.professional_summary
+          : current.professional_summary,
+      experience: allValues.experience
+        ? allValues.experience.map((exp) => {
+            const startDate = exp.start_date
+              ? typeof exp.start_date === "string"
+                ? exp.start_date
+                : (exp.start_date as Dayjs).format("MM/YYYY")
+              : "";
+            const endDate = exp.is_current
+              ? ""
+              : exp.end_date
+              ? typeof exp.end_date === "string"
+                ? exp.end_date
+                : (exp.end_date as Dayjs).format("MM/YYYY")
+              : "";
+            return {
+              company: exp.company,
+              position: exp.position,
+              description: exp.description,
+              is_current: exp.is_current || false,
+              start_date: startDate,
+              end_date: endDate,
+            };
+          })
+        : current.experience || [],
+      education: allValues.education
+        ? allValues.education.map((edu) => {
+            const graduationDate = edu.graduation_date
+              ? typeof edu.graduation_date === "string"
+                ? edu.graduation_date
+                : (edu.graduation_date as Dayjs).format("MM/YYYY")
+              : "";
+            return {
+              institution: edu.institution,
+              degree: edu.degree,
+              field: edu.field,
+              graduation_date: graduationDate,
+              gpa: edu.gpa,
+            };
+          })
+        : current.education || [],
+      project: allValues.project
+        ? allValues.project.map((proj) => ({
+            name: proj.name,
+            description: proj.description,
+            technologies: proj.technologies || [],
+          }))
+        : current.project || [],
+      skills:
+        allValues.skills !== undefined && Array.isArray(allValues.skills)
+          ? allValues.skills
+          : current.skills || [],
+    };
+  };
+
   const handleCancel = () => {
     if (isDirty) {
       setPendingAction(() => () => navigate("/app"));
@@ -233,8 +307,25 @@ export default function ResumeBuilder() {
     }
   };
 
-  const handleSave = () => {
-    navigate("/app");
+  const handleSave = async () => {
+    try {
+      const allValues = await form.validateFields();
+      const payload = buildResumeFromForm(allValues, resumeData);
+
+      let updated: Resume;
+      if (payload.id) {
+        updated = await resumeApi.update(payload.id, payload);
+      } else {
+        updated = await resumeApi.create(payload);
+        navigate(`/app/builder/${updated.id}`);
+      }
+      setResumeData(updated);
+      initialFormData.current = { ...updated };
+      setIsDirty(false);
+      navigate("/app");
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const handleBackToDashboard = () => {
@@ -615,79 +706,7 @@ export default function ResumeBuilder() {
                     );
                   }
 
-                  // Merge với resumeData hiện có để giữ lại tất cả dữ liệu
-                  const formData: Resume = {
-                    ...resumeData,
-                    ...allValues,
-                    personal_info: {
-                      ...resumeData.personal_info,
-                      ...allValues.personal_info,
-                      birthDate: allValues.personal_info?.birthDate
-                        ? typeof allValues.personal_info.birthDate === "string"
-                          ? allValues.personal_info.birthDate
-                          : allValues.personal_info.birthDate.format(
-                              "DD/MM/YYYY"
-                            )
-                        : resumeData.personal_info?.birthDate,
-                    },
-                    professional_summary:
-                      allValues.professional_summary !== undefined
-                        ? allValues.professional_summary
-                        : resumeData.professional_summary,
-                    experience: allValues.experience
-                      ? allValues.experience.map((exp) => {
-                          const startDate = exp.start_date
-                            ? typeof exp.start_date === "string"
-                              ? exp.start_date
-                              : (exp.start_date as Dayjs).format("MM/YYYY")
-                            : "";
-                          // Clear end_date if is_current is true
-                          const endDate = exp.is_current
-                            ? ""
-                            : exp.end_date
-                            ? typeof exp.end_date === "string"
-                              ? exp.end_date
-                              : (exp.end_date as Dayjs).format("MM/YYYY")
-                            : "";
-                          return {
-                            company: exp.company,
-                            position: exp.position,
-                            description: exp.description,
-                            is_current: exp.is_current || false,
-                            start_date: startDate,
-                            end_date: endDate,
-                          };
-                        })
-                      : resumeData.experience || [],
-                    education: allValues.education
-                      ? allValues.education.map((edu) => {
-                          const graduationDate = edu.graduation_date
-                            ? typeof edu.graduation_date === "string"
-                              ? edu.graduation_date
-                              : (edu.graduation_date as Dayjs).format("MM/YYYY")
-                            : "";
-                          return {
-                            institution: edu.institution,
-                            degree: edu.degree,
-                            field: edu.field,
-                            graduation_date: graduationDate,
-                            gpa: edu.gpa,
-                          };
-                        })
-                      : resumeData.education || [],
-                    project: allValues.project
-                      ? allValues.project.map((proj) => ({
-                          name: proj.name,
-                          description: proj.description,
-                          technologies: proj.technologies || [],
-                        }))
-                      : resumeData.project || [],
-                    skills:
-                      allValues.skills !== undefined &&
-                      Array.isArray(allValues.skills)
-                        ? allValues.skills
-                        : resumeData.skills || [],
-                  };
+                  const formData: Resume = buildResumeFromForm(allValues, resumeData);
                   console.log("Setting resumeData:", formData);
                   setResumeData(formData);
                 }}

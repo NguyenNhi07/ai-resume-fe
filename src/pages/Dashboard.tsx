@@ -1,6 +1,7 @@
 import type { Resume } from "@/lib/type";
-import { dummyResumeData } from "@/lib/utils";
-import { Input, Modal, Popover } from "antd";
+import { resumeApi } from "@/lib/api";
+import { Input, Modal, Popover, Spin } from "antd";
+import { useToast } from "@/hooks/useToast";
 import {
   AlertCircle,
   Copy,
@@ -21,6 +22,7 @@ export default function Dashboard() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const toast = useToast();
 
   const colors = ["#9333ea", "#d97706", "#dc2626", "#0284c7", "#16a34a"];
   const [allResumes, setAllResumes] = useState<Resume[]>([]);
@@ -33,15 +35,30 @@ export default function Dashboard() {
   const [deleteResume, setDeleteResume] = useState(false);
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
   const [duplicateResumeId, setDuplicateResumeId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const loadAllResumes = async () => {
-    setAllResumes(dummyResumeData);
+    setLoading(true);
+    try {
+      const data = await resumeApi.list({ page: 1, pageSize: 99 });
+      setAllResumes(data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const createResume = async (event: React.FormEvent) => {
     event.preventDefault();
     setShowCreateResume(false);
-    navigate(`/app/builder/resume123`);
+    try {
+      const created = await resumeApi.createWithTitle(title || "New Resume");
+      setAllResumes((prev) => [created, ...prev]);
+      navigate(`/app/builder/${created.id}`);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const uploadResume = async (event: React.FormEvent) => {
@@ -52,13 +69,36 @@ export default function Dashboard() {
 
   const editTitle = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (!editResumeId || !title.trim()) return;
+    try {
+      const target = allResumes.find((r) => String(r.id) === String(editResumeId));
+      if (!target) return;
+      const updatedResume: Resume = { ...target, title: title.trim() };
+      const saved = await resumeApi.update(String(updatedResume.id), updatedResume);
+      setAllResumes((prev) =>
+        prev.map((r) => (String(r.id) === String(saved.id) ? saved : r)),
+      );
+      toast.success(t("updateSuccess") || "Updated resume title successfully");
+    } catch (e) {
+      console.error(e);
+      toast.error(t("updateFailed") || "Update resume title failed");
+    } finally {
+      setEditResumeId("");
+      setTitle("");
+    }
   };
 
   const handleDeleteResume = async (resumeId: number) => {
-    setAllResumes((prev) =>
-      prev.filter((resume) => Number(resume.id) !== resumeId)
-    );
-    setDeleteResume(false);
+    try {
+      await resumeApi.remove(String(resumeId));
+      setAllResumes((prev) =>
+        prev.filter((resume) => Number(resume.id) !== resumeId)
+      );
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setDeleteResume(false);
+    }
   };
 
   useEffect(() => {
@@ -102,6 +142,11 @@ export default function Dashboard() {
         <hr className="border-slate-300 my-6 sm:w-[305px]" />
 
         <div className="grid grid-cols-2 sm:flex flex-wrap gap-4">
+          {loading && (
+            <div className="w-full flex justify-center py-6">
+              <Spin />
+            </div>
+          )}
           {allResumes.map(
             (resume: Resume & { updatedAt?: string | Date }, index: number) => {
               const baseColor = colors[index % colors.length];
@@ -356,20 +401,31 @@ export default function Dashboard() {
             setTitle("");
           }}
           width={"500px"}
-          onOk={() => {
+          onOk={async () => {
             if (!duplicateResumeId || !title.trim()) return;
-            const base = dummyResumeData.find((r) => String(r.id) === String(duplicateResumeId));
-            const newId = String(Date.now());
-            if (base) {
-              dummyResumeData.push({
+            try {
+              const base = allResumes.find(
+                (r) => String(r.id) === String(duplicateResumeId),
+              );
+              if (!base) return;
+
+              // Tạo bản copy, chỉ đổi title, bỏ id
+              const payload: Resume = {
                 ...base,
-                id: newId,
+                id: "",
                 title: title.trim(),
-              });
-              navigate(`/app/builder/${newId}`);
+              };
+              const created = await resumeApi.create(payload);
+              setAllResumes((prev) => [created, ...prev]);
+              toast.success(t("createResumeSuccess") || "Duplicated resume successfully");
+              navigate(`/app/builder/${created.id}`);
+            } catch (e) {
+              console.error(e);
+              toast.error(t("createResumeFailed") || "Duplicate resume failed");
+            } finally {
+              setDuplicateResumeId(null);
+              setTitle("");
             }
-            setDuplicateResumeId(null);
-            setTitle("");
           }}
           okButtonProps={{
             style: { backgroundColor: "#9810fa" },

@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils"
+import { authApi } from "@/lib/api"
 import {
     DownOutlined
 } from '@ant-design/icons'
@@ -24,10 +25,12 @@ export const Navbar = () => {
         }
     }, [])
 
-    const logoutUser = () => {
-        localStorage.removeItem('token')
-        localStorage.removeItem('user')
-        navigate('/auth/login')
+    const logoutUser = async () => {
+        try {
+            await authApi.logout()
+        } finally {
+            navigate('/auth/login')
+        }
     }
 
     return (
