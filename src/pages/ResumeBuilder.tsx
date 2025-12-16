@@ -364,113 +364,19 @@ export default function ResumeBuilder() {
 
   const onDownloadPdf = async () => {
     try {
-      const element = document.getElementById("resume-preview");
-      if (!element) {
-        console.error("Resume preview element not found");
-        return;
-      }
-
-      // Capture the element as canvas
-      const canvas = await html2canvas(element, {
-        scale: 2, // Higher quality
-        useCORS: true,
-        logging: false,
-        backgroundColor: "#ffffff",
-        foreignObjectRendering: false, // Avoid SVG rendering issues
-        onclone: (clonedDoc) => {
-          // Fix oklch color issues by overriding CSS variables
-          const style = clonedDoc.createElement("style");
-          style.textContent = `
-            :root, * {
-              --background: #ffffff !important;
-              --foreground: #000000 !important;
-              --card: #ffffff !important;
-              --card-foreground: #000000 !important;
-              --popover: #ffffff !important;
-              --popover-foreground: #000000 !important;
-              --primary: #965bea !important;
-              --primary-foreground: #ffffff !important;
-              --secondary: #f3f4f6 !important;
-              --secondary-foreground: #000000 !important;
-              --muted: #f3f4f6 !important;
-              --muted-foreground: #6b7280 !important;
-              --accent: #f3f4f6 !important;
-              --accent-foreground: #000000 !important;
-              --destructive: #dc2626 !important;
-              --border: #e5e7eb !important;
-              --input: #e5e7eb !important;
-              --ring: #d1d5db !important;
-            }
-            * {
-              color: rgb(0, 0, 0) !important;
-              background-color: rgb(255, 255, 255) !important;
-              border-color: rgb(229, 231, 235) !important;
-            }
-            #resume-preview {
-              background-color: rgb(255, 255, 255) !important;
-            }
-          `;
-          clonedDoc.head.appendChild(style);
-
-          // Remove inline styles with oklch
-          const allElements = clonedDoc.querySelectorAll("*");
-          allElements.forEach((el) => {
-            const htmlEl = el as HTMLElement;
-            if (htmlEl && htmlEl.style) {
-              const styleText = htmlEl.getAttribute("style") || "";
-              if (styleText.includes("oklch")) {
-                htmlEl.removeAttribute("style");
-              }
-            }
-          });
-        },
-      });
-
-      // Calculate PDF dimensions (A4 size in mm)
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 297; // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      // Create PDF
-      const pdf = new jsPDF("p", "mm", "a4");
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      // Add first page
-      pdf.addImage(
-        canvas.toDataURL("image/png"),
-        "PNG",
-        0,
-        position,
-        imgWidth,
-        imgHeight
-      );
-      heightLeft -= pageHeight;
-
-      // Add additional pages if content is longer than one page
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(
-          canvas.toDataURL("image/png"),
-          "PNG",
-          0,
-          position,
-          imgWidth,
-          imgHeight
-        );
-        heightLeft -= pageHeight;
-      }
-
-      // Generate filename
+      if (!resumeId) return;
+      const blob = await resumeApi.downloadPdf(resumeId);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
       const fileName = resumeData.title
         ? `${resumeData.title.replace(/[^a-z0-9]/gi, "_")}.pdf`
         : `resume_${Date.now()}.pdf`;
-
-      // Download PDF
-      pdf.save(fileName);
+      a.href = url;
+      a.download = fileName;
+      a.click();
+      window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("Error generating PDF:", error);
+      console.error("Error downloading PDF:", error);
     }
   };
 

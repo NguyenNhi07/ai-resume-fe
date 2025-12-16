@@ -375,6 +375,10 @@ export const resumeApi = {
   remove: async (id: string): Promise<void> => {
     await api.delete(`/resume/${id}`);
   },
+  downloadPdf: async (id: string | number): Promise<Blob> => {
+    const res = await api.get(`/resume/${id}/pdf`, { responseType: 'blob' });
+    return res.data as Blob;
+  },
 };
 
 export const fileApi = {
