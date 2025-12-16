@@ -10,8 +10,8 @@ import { SkillsForm } from "@/components/SkillsForm";
 import { TemplateSelector } from "@/components/TemplateSelector";
 import { profileDefault } from "@/lib/constant";
 import type { Experience, Resume } from "@/lib/type";
-import { dummyResumeData } from "@/lib/utils";
-import { Button, Form, Modal, Popover, Select } from "antd";
+import { dummyResumeData, extractSkillsFromJD, scoreResumeAgainstJD } from "@/lib/utils";
+import { Button, Form, Modal, Popover, Select, Input, Tag } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
@@ -106,6 +106,16 @@ export default function ResumeBuilder() {
   const initialFormData = useRef<Resume | null>(null);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [isAutoFilling, setIsAutoFilling] = useState(false);
+  const [jdText, setJdText] = useState("");
+  const [isScoring, setIsScoring] = useState(false);
+  const [showScoreModal, setShowScoreModal] = useState(false);
+  const [scoreResult, setScoreResult] = useState<{
+    score: number;
+    missingSkills: string[];
+    weakSections: string[];
+    suggestions: string[];
+    matchedRole?: string;
+  } | null>(null);
 
   const loadExitstingResume = async () => {
     const resume = dummyResumeData.find((resume) => resume.id === resumeId);
@@ -148,6 +158,19 @@ export default function ResumeBuilder() {
   ];
 
   const activeSection = sections[activeSectionIndex];
+
+  const handleScoreByJD = async () => {
+    if (!jdText.trim()) return;
+    setIsScoring(true);
+    try {
+      const skills = extractSkillsFromJD(jdText, resumeData.skills || []);
+      const scored = await scoreResumeAgainstJD(resumeData, jdText, skills);
+      setScoreResult(scored);
+      setShowScoreModal(true);
+    } finally {
+      setIsScoring(false);
+    }
+  };
 
   useEffect(() => {
     loadExitstingResume();
@@ -371,6 +394,13 @@ export default function ResumeBuilder() {
         </Button>
 
         <div className="flex items-center gap-2">
+          <Button
+            onClick={() => setShowScoreModal(true)}
+            className="!bg-gradient-to-br !from-purple-50 !to-purple-200 !text-purple-700 hover:!border-purple-400"
+          >
+            <Sparkles className="size-4" />
+            {t("AnalyzeScoreWithAI")}
+          </Button>
           <Button
             onClick={() => {
               navigate(`/app/preview/${resumeId}`);
@@ -861,6 +891,115 @@ export default function ResumeBuilder() {
             "Do you want to automatically fill your resume with your profile information (name, date of birth, email, phone, gender, profession)?"
           )}
         </p>
+      </Modal>
+
+      <Modal
+        open={showScoreModal}
+        onCancel={() => setShowScoreModal(false)}
+        footer={null}
+        title={
+          <span className="flex items-center gap-2">
+            <Sparkles className="size-4 text-purple-600" />
+            {t("ScoreAgainstJD")}
+          </span>
+        }
+      >
+        <div className="space-y-3">
+          <Input.TextArea
+            value={jdText}
+            onChange={(e) => setJdText(e.target.value)}
+            rows={5}
+            placeholder={t("PasteJDPlaceholder")}
+            autoSize={{ minRows: 5, maxRows: 10 }}
+            showCount
+          />
+          <div className="flex items-center justify-between">
+            <div className="text-xs text-gray-500">{t("JDScoreHelper")}</div>
+            <Button
+              size="small"
+              type="primary"
+              className="!bg-purple-600 disabled:!bg-purple-300"
+              loading={isScoring}
+              disabled={isScoring || !jdText.trim()}
+              onClick={handleScoreByJD}
+            >
+              <Sparkles className="size-4 mr-1" />
+              {t("AnalyzeJDButton")}
+            </Button>
+          </div>
+
+          {scoreResult && (
+            <div className="border border-slate-200 rounded-lg p-3 bg-white">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="size-4 text-purple-600" />
+                  <p className="text-sm font-semibold text-slate-800">
+                    {t("CVScoreTitle", {
+                      score: scoreResult.score,
+                      role: scoreResult.matchedRole || "",
+                    })}
+                  </p>
+                </div>
+                <Tag
+                  color={
+                    scoreResult.score >= 75
+                      ? "green"
+                      : scoreResult.score >= 60
+                      ? "blue"
+                      : "orange"
+                  }
+                >
+                  {scoreResult.score}/100
+                </Tag>
+              </div>
+
+              <div className="space-y-2 text-sm text-slate-700">
+                {scoreResult.missingSkills.length > 0 && (
+                  <div>
+                    <p className="font-medium text-slate-800">
+                      {t("MissingSkills")}
+                    </p>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {scoreResult.missingSkills.map((s) => (
+                        <Tag key={s} color="red">
+                          {s}
+                        </Tag>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {scoreResult.weakSections.length > 0 && (
+                  <div>
+                    <p className="font-medium text-slate-800">
+                      {t("WeakSections")}
+                    </p>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {scoreResult.weakSections.map((s) => (
+                        <Tag key={s} color="gold">
+                          {t(s) || s}
+                        </Tag>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {scoreResult.suggestions.length > 0 && (
+                  <div>
+                    <p className="font-medium text-slate-800">
+                      {t("Suggestions")}
+                    </p>
+                    <ul className="list-disc list-inside text-slate-700 space-y-1">
+                      {scoreResult.suggestions.map((s, idx) => (
+                        <li key={idx}>{s}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
       </Modal>
 
       <ShareDialog

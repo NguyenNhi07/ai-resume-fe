@@ -14,6 +14,9 @@ import PreviewResume from './pages/PreviewResume'
 import ForgotPassword from './pages/ForgotPassword'
 import AuthLayout from './pages/AuthLayout'
 import VeirifyEmail from './pages/VerifyEmail'
+import MockInterview from './pages/MockInterview'
+import CoverLetter from './pages/CoverLetter'
+import TailorByJD from './pages/TailorByJD'
 
 function App() {
 
@@ -26,6 +29,9 @@ function App() {
           <Route index element={<Dashboard/>}/>
           <Route path='builder/:resumeId' element={<ResumeBuilder/>}/>
           <Route path='preview/:resumeId' element={<PreviewResume/>}/>
+          <Route path='tailor/:resumeId' element={<TailorByJD/>}/>
+          <Route path='mock-interview/:resumeId' element={<MockInterview/>}/>
+          <Route path='cover-letter/:resumeId' element={<CoverLetter/>}/>
         </Route>
 
         <Route path='setting' element={<SettingLayout/>}>

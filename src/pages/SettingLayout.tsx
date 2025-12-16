@@ -39,7 +39,7 @@ export default function SettingLayout() {
               <Avatar
                 src={user?.avatarUrl || undefined}
                 alt="profilePhotoUrl"
-                size={40}
+                size={40} 
               >
                 {user?.name?.charAt(0) || ""}
               </Avatar>

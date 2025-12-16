@@ -8,6 +8,7 @@ import {
   MoreVertical,
   PencilIcon,
   PlusIcon,
+  Sparkles,
   TrashIcon,
   UploadCloud,
   UploadCloudIcon,
@@ -31,6 +32,7 @@ export default function Dashboard() {
   const [deleteResumeId, setDeleteResumeId] = useState<number | undefined>();
   const [deleteResume, setDeleteResume] = useState(false);
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
+  const [duplicateResumeId, setDuplicateResumeId] = useState<string | null>(null);
 
   const loadAllResumes = async () => {
     setAllResumes(dummyResumeData);
@@ -171,12 +173,47 @@ export default function Dashboard() {
                           <button
                             onClick={() => {
                               // TODO: implement duplicate logic
+                              setDuplicateResumeId(resume.id ?? "");
+                              setTitle(`${resume.title || t("enterResumeTitle")} (copy)`);
                               setOpenPopoverId(null);
                             }}
                             className="flex items-center gap-2 px-3 py-1.5 rounded-md text-purple-600 hover:bg-purple-50 transition-colors"
                           >
                             <Copy className="size-4 text-purple-600 transition-colors" />
                             {t("Duplicate")}
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              navigate(`/app/tailor/${resume.id}`);
+                              setOpenPopoverId(null);
+                            }}
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-md text-violet-600 hover:bg-violet-50 transition-colors"
+                          >
+                            <Sparkles className="size-4 text-violet-600 transition-colors" />
+                            {t("TailorCVByJDMenu")}
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              navigate(`/app/mock-interview/${resume.id}`);
+                              setOpenPopoverId(null);
+                            }}
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-md text-indigo-600 hover:bg-indigo-50 transition-colors"
+                          >
+                            <Sparkles className="size-4 text-indigo-600 transition-colors" />
+                            {t("MockInterviewMenu")}
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              navigate(`/app/cover-letter/${resume.id}`);
+                              setOpenPopoverId(null);
+                            }}
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-md text-emerald-600 hover:bg-emerald-50 transition-colors"
+                          >
+                            <Sparkles className="size-4 text-emerald-600 transition-colors" />
+                            {t("CoverLetterMenu")}
                           </button>
                         </div>
                       }
@@ -309,6 +346,43 @@ export default function Dashboard() {
           okText={t("delete")}
         >
           <p>{t("areYouSureYouWantToDeleteThisResume")}</p>
+        </Modal>
+
+        <Modal
+          title={t("Duplicate")}
+          open={!!duplicateResumeId}
+          onCancel={() => {
+            setDuplicateResumeId(null);
+            setTitle("");
+          }}
+          width={"500px"}
+          onOk={() => {
+            if (!duplicateResumeId || !title.trim()) return;
+            const base = dummyResumeData.find((r) => String(r.id) === String(duplicateResumeId));
+            const newId = String(Date.now());
+            if (base) {
+              dummyResumeData.push({
+                ...base,
+                id: newId,
+                title: title.trim(),
+              });
+              navigate(`/app/builder/${newId}`);
+            }
+            setDuplicateResumeId(null);
+            setTitle("");
+          }}
+          okButtonProps={{
+            style: { backgroundColor: "#9810fa" },
+          }}
+          okText={t("createResume")}
+        >
+          <Input
+            placeholder={t("enterResumeTitle")}
+            size="large"
+            maxLength={100}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
         </Modal>
       </div>
     </div>
