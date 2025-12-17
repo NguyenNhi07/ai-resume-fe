@@ -47,7 +47,7 @@ export const UploadImage: React.FC<UploadImageProps> = ({
         />
       </label>
 
-      {imageFile && (
+      {/* {imageFile && (
         <div className="flex flex-col gap-1 text-sm">
           <p className="!mb-0">{t("Remove background")}</p>
           <label className="relative inline-flex items-center cursor-pointer">
@@ -61,7 +61,7 @@ export const UploadImage: React.FC<UploadImageProps> = ({
             <span className="dot absolute left-1 top-1 w-3 h-3 bg-white rounded-full transition-transform duration-200 ease-in-out peer-checked:translate-x-4" />
           </label>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

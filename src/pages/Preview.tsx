@@ -18,7 +18,7 @@ export default function Preview() {
     const loadResume = async () => {
         try {
             if (!resumeId) return;
-            const found = await resumeApi.detail(resumeId)
+            const found = await resumeApi.publicDetail(resumeId)
             setResumeData(found ?? null)
         } catch (e) {
             setResumeData(null)

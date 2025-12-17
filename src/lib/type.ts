@@ -11,6 +11,8 @@ export interface Resume {
   accent_color?: string;
   public?: boolean;
   font_family?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface PersonalInfo {

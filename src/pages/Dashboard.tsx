@@ -1,22 +1,25 @@
 import type { Resume } from "@/lib/type";
 import { resumeApi } from "@/lib/api";
-import { Input, Modal, Popover, Spin } from "antd";
+import { Button, Input, Modal, Popover, Spin, Table, Tooltip } from "antd";
 import { useToast } from "@/hooks/useToast";
 import {
   AlertCircle,
   Copy,
-  FilePenLineIcon,
+  LayoutGrid,
   MoreVertical,
   PencilIcon,
   PlusIcon,
+  SearchIcon,
   Sparkles,
   TrashIcon,
   UploadCloud,
-  UploadCloudIcon,
+  List,
+  FileTextIcon
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
 
 export default function Dashboard() {
   const { t } = useTranslation();
@@ -24,7 +27,6 @@ export default function Dashboard() {
   const [searchParams] = useSearchParams();
   const toast = useToast();
 
-  const colors = ["#9333ea", "#d97706", "#dc2626", "#0284c7", "#16a34a"];
   const [allResumes, setAllResumes] = useState<Resume[]>([]);
   const [showCreateResume, setShowCreateResume] = useState(false);
   const [showUploadResume, setShowUploadResume] = useState(false);
@@ -35,19 +37,68 @@ export default function Dashboard() {
   const [deleteResume, setDeleteResume] = useState(false);
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
   const [duplicateResumeId, setDuplicateResumeId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [recentResumes, setRecentResumes] = useState<Resume[]>([]);
+  const [search, setSearch] = useState("");
+  const [loadingTable, setLoadingTable] = useState(false);
+  const [loadingRecent, setLoadingRecent] = useState(false);
+  const [view, setView] = useState<'list' | 'grid'>('list');
+  const [tableSort, setTableSort] = useState<{
+    field?: 'title' | 'createdAt' | 'updatedAt';
+    order?: 'ascend' | 'descend';
+  }>({ field: 'updatedAt', order: 'descend' });
 
-  const loadAllResumes = async () => {
-    setLoading(true);
+  const loadAllResumes = async (options?: {
+    sortField?: 'title' | 'createdAt' | 'updatedAt';
+    sortOrder?: 'ascend' | 'descend';
+  }) => {
+    setLoadingTable(true);
     try {
-      const data = await resumeApi.list({ page: 1, pageSize: 99 });
+      let sortBy: 'title' | 'createdAt' | 'updatedAt' | undefined;
+      let sortOrder: 'asc' | 'desc' | undefined;
+
+      if (options?.sortField) {
+        sortBy = options.sortField;
+        sortOrder = options.sortOrder === 'ascend' ? 'asc' : 'desc';
+      }
+
+      const data = await resumeApi.list({
+        page: 1,
+        pageSize: 99,
+        ...(sortBy && sortOrder ? { sortBy, sortOrder } : {}),
+      });
       setAllResumes(data);
     } catch (e) {
       console.error(e);
     } finally {
-      setLoading(false);
+      setLoadingTable(false);
     }
   };
+
+  const loadRecentResumes = async () => {
+    setLoadingRecent(true);
+    try {
+      const data = await resumeApi.list({
+        page: 1,
+        pageSize: 5,
+        sortBy: 'updatedAt',
+        sortOrder: 'desc',
+      });
+      setRecentResumes(data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingRecent(false);
+    }
+  };
+
+  const filteredResumes = allResumes.filter((r) => {
+    if (!search.trim()) return true;
+    const q = search.toLowerCase();
+    return (
+      r.title?.toLowerCase().includes(q) ||
+      r.personal_info?.full_name?.toLowerCase().includes(q)
+    );
+  });
 
   const createResume = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -55,6 +106,7 @@ export default function Dashboard() {
     try {
       const created = await resumeApi.createWithTitle(title || "New Resume");
       setAllResumes((prev) => [created, ...prev]);
+      setRecentResumes((prev) => [created, ...prev].slice(0, 5));
       navigate(`/app/builder/${created.id}`);
     } catch (e) {
       console.error(e);
@@ -94,6 +146,9 @@ export default function Dashboard() {
       setAllResumes((prev) =>
         prev.filter((resume) => Number(resume.id) !== resumeId)
       );
+      setRecentResumes((prev) =>
+        prev.filter((resume) => Number(resume.id) !== resumeId)
+      );
     } catch (e) {
       console.error(e);
     } finally {
@@ -107,171 +162,371 @@ export default function Dashboard() {
       navigate(`/auth/login?state=${state}`);
       return;
     }
-    loadAllResumes();
+    // default: table sort by updatedAt desc, recents by updatedAt desc (pageSize 5)
+    loadAllResumes({ sortField: 'updatedAt', sortOrder: 'descend' });
+    loadRecentResumes();
   }, [searchParams, navigate]);
 
   return (
-    <div>
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <p className="text-2xl font-medium mb-6 bg-grandient-to-r from-slate-500 to-slate-700 bg-clip-text text-transparent sm:hidden">
-          {t("welcome")}, Joe Doe
-        </p>
-
-        <div className="flex gap-4">
-          <button
-            onClick={() => setShowCreateResume(true)}
-            className="w-full bg-white sm:max-w-36 h-48 flex flex-col items-center justify-center rounded-lg gap-2 text-slate-600 border border-dashed border-slate-300 group hover:border-indigo-500 hover:shadow-lg transition-all duration-300 cursor-pointer"
+    <div className="h-full">
+      <div className="h-[200px] flex items-center justify-betweenq flex-col gap-6 pt-6" style={{ background: "linear-gradient(to bottom, rgba(255,255,255,0) 0%, #f9fafb), linear-gradient(to right,rgb(212, 249, 255),rgb(236, 211, 255))" }}>
+        <span className="text-[50px] font-medium text-black/70">{t("All Resumes")}</span>
+        <div
+          className="p-[1px] rounded-full bg-gradient-to-r from-cyan-300 to-purple-400 w-[600px]"
+        >
+          <div
+            className="flex items-center gap-3 bg-white rounded-full px-5 py-4"
           >
-            <PlusIcon className="size-11 transition-all duration-300 p-2.5 bg-gradient-to-br from-indigo-300 to-indigo-500 text-white rounded-full" />
-            <p className="text-sm group hover:text-indigo-600 transition-all duration-300">
-              {t("createResume")}
-            </p>
-          </button>
+            <SearchIcon className="size-4 text-gray-500" />
+            <input
+              className="flex-1 outline-none text-sm"
+              placeholder="Search resume"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+        </div>
+      </div>
 
-          <button
-            onClick={() => setShowUploadResume(true)}
-            className="w-full bg-white sm:max-w-36 h-48 flex flex-col items-center justify-center rounded-lg gap-2 text-slate-600 border border-dashed border-slate-300 group hober:border-purple-500 hover:shadow-lg transition-all duration-300 cursor-pointer"
-          >
-            <UploadCloudIcon className="size-11 transition-all duration-300 p-2.5 bg-gradient-to-br from-indigo-300 to-purple-500 text-white rounded-full" />
-            <p className="text-sm group hover:text-purple-600 transition-all duration-300">
-              {t("uploadExisting")}
-            </p>
-          </button>
+      <div className="p-6 flex flex-col gap-3">
+        <div className="flex justify-end gap-2">
+          <Tooltip title={view === 'grid' ? t("List View") : t("Grid View")}><Button variant="text" onClick={() => { setView(view === 'list' ? 'grid' : 'list') }}>{view === 'grid' ? <List /> : <LayoutGrid />}</Button></Tooltip>
+          <Tooltip title={t("Add new resume")}><Button variant="text" onClick={() => { setShowCreateResume(true) }}><PlusIcon /></Button></Tooltip>
         </div>
 
-        <hr className="border-slate-300 my-6 sm:w-[305px]" />
-
-        <div className="grid grid-cols-2 sm:flex flex-wrap gap-4">
-          {loading && (
-            <div className="w-full flex justify-center py-6">
-              <Spin />
-            </div>
-          )}
-          {allResumes.map(
-            (resume: Resume & { updatedAt?: string | Date }, index: number) => {
-              const baseColor = colors[index % colors.length];
-
-              return (
-                <button
-                  onClick={() => navigate(`/app/builder/${resume.id}`)}
-                  key={index}
-                  className="relative w-full sm:max-w-36 h-48 flex flex-col items-center justify-center rounded-lg gap-2 border group group-hover:shadow-lg transition-all duration-300 cursor-pointer"
-                  style={{
-                    background: `linear-gradient(135deg, ${baseColor}10, ${baseColor}40)`,
-                    borderColor: baseColor + "40",
-                  }}
-                >
-                  <FilePenLineIcon
-                    className="size-7 group-hover:scale-105 transition-all:"
-                    style={{ color: baseColor }}
-                  />
-                  <p
-                    className="text-sm group-hover:scale-105 transition-all px-2 text-center"
-                    style={{ color: baseColor }}
-                  >
-                    {resume.title}
-                  </p>
-                  <p
-                    className="absolute bottom-1 text-[11px] text-slate-400 group-hover:text-slate-500 transition-all duration-300 px-2 text-center"
-                    style={{ color: baseColor + "90" }}
-                  >
-                    {t("updatedOn")}{" "}
-                    {resume.updatedAt
-                      ? new Date(resume.updatedAt).toLocaleDateString()
-                      : ""}
-                  </p>
-                  <div
-                    onClick={(e) => e.stopPropagation()}
-                    className="absolute top-1 right-1 hidden group-hover:flex items-center "
-                  >
-                    <Popover
-                      open={openPopoverId === String(resume.id)}
-                      onOpenChange={(visible) =>
-                        setOpenPopoverId(visible ? String(resume.id) : null)
-                      }
-                      content={
-                        <div className="flex flex-col gap-1 py-1">
-                          <button
-                            onClick={() => {
-                              setDeleteResume(true);
-                              setDeleteResumeId(Number(resume.id));
-                              setOpenPopoverId(null);
-                            }}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-md text-red-700 hover:bg-red-50 transition-colors"
-                          >
-                            <TrashIcon className="size-4 text-red-700 transition-colors" />
-                            {t("Delete")}
-                          </button>
-
-                          <button
-                            onClick={() => {
-                              setEditResumeId(resume.id ?? "");
-                              setTitle(resume.title ?? "");
-                              setOpenPopoverId(null);
-                            }}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-md text-blue-600 hover:bg-blue-50 transition-colors"
-                          >
-                            <PencilIcon className="size-4 text-blue-600 transition-colors" />
-                            {t("Edit")}
-                          </button>
-
-                          <button
-                            onClick={() => {
-                              // TODO: implement duplicate logic
-                              setDuplicateResumeId(resume.id ?? "");
-                              setTitle(`${resume.title || t("enterResumeTitle")} (copy)`);
-                              setOpenPopoverId(null);
-                            }}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-md text-purple-600 hover:bg-purple-50 transition-colors"
-                          >
-                            <Copy className="size-4 text-purple-600 transition-colors" />
-                            {t("Duplicate")}
-                          </button>
-
-                          <button
-                            onClick={() => {
-                              navigate(`/app/tailor/${resume.id}`);
-                              setOpenPopoverId(null);
-                            }}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-md text-violet-600 hover:bg-violet-50 transition-colors"
-                          >
-                            <Sparkles className="size-4 text-violet-600 transition-colors" />
-                            {t("TailorCVByJDMenu")}
-                          </button>
-
-                          <button
-                            onClick={() => {
-                              navigate(`/app/mock-interview/${resume.id}`);
-                              setOpenPopoverId(null);
-                            }}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-md text-indigo-600 hover:bg-indigo-50 transition-colors"
-                          >
-                            <Sparkles className="size-4 text-indigo-600 transition-colors" />
-                            {t("MockInterviewMenu")}
-                          </button>
-
-                          <button
-                            onClick={() => {
-                              navigate(`/app/cover-letter/${resume.id}`);
-                              setOpenPopoverId(null);
-                            }}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-md text-emerald-600 hover:bg-emerald-50 transition-colors"
-                          >
-                            <Sparkles className="size-4 text-emerald-600 transition-colors" />
-                            {t("CoverLetterMenu")}
-                          </button>
-                        </div>
-                      }
-                      trigger="click"
-                      className="cursor-pointer"
-                      arrow={false}
+        <div className="flex flex-col gap-2">
+          <span className="text-[32px] font-medium text-black/70">{t('Recents')}</span>
+          <div className="flex gap-2 items-center">
+            {loadingRecent && (
+              <div className="w-full flex justify-center py-6">
+                <Spin />
+              </div>
+            )}
+            {recentResumes.map(
+              (resume: Resume & { updatedAt?: string | Date }, index: number) => {
+                return (
+                  <div onClick={() => navigate(`/app/builder/${resume.id}`)} key={index} className="flex flex-col cursor-pointer relative group group-hover:shadow-lg transition-all duration-300">
+                    <div className="mb-2 bg-gray-100 rounded-xl p-2 w-[150px] h-[150px] flex items-center justify-center">
+                      <FileTextIcon className="size-6 text-gray-500" />
+                    </div>
+                    <span className="text-base text-black/70">{resume.title}</span>
+                    <span className="text-sm text-gray-500">{t('Updated on ')}{resume.updatedAt ? new Date(resume.updatedAt).toLocaleDateString() : ''}</span>
+                    <div
+                      onClick={(e) => e.stopPropagation()}
+                      className="absolute top-1 right-1 hidden group-hover:flex items-center "
                     >
-                      <MoreVertical className="size-5 text-black/65" />
-                    </Popover>
+                      <Popover
+                        open={openPopoverId === String(resume.id)}
+                        onOpenChange={(visible) =>
+                          setOpenPopoverId(visible ? String(resume.id) : null)
+                        }
+                        content={
+                          <div className="flex flex-col gap-1 py-1">
+                            <button
+                              onClick={() => {
+                                setDeleteResume(true);
+                                setDeleteResumeId(Number(resume.id));
+                                setOpenPopoverId(null);
+                              }}
+                              className="flex items-center gap-2 px-3 py-1.5 rounded-md text-red-700 hover:bg-red-50 transition-colors"
+                            >
+                              <TrashIcon className="size-4 text-red-700 transition-colors" />
+                              {t("Delete")}
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                setEditResumeId(resume.id ?? "");
+                                setTitle(resume.title ?? "");
+                                setOpenPopoverId(null);
+                              }}
+                              className="flex items-center gap-2 px-3 py-1.5 rounded-md text-blue-600 hover:bg-blue-50 transition-colors"
+                            >
+                              <PencilIcon className="size-4 text-blue-600 transition-colors" />
+                              {t("Edit")}
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                // TODO: implement duplicate logic
+                                setDuplicateResumeId(resume.id ?? "");
+                                setTitle(`${resume.title || t("enterResumeTitle")} (copy)`);
+                                setOpenPopoverId(null);
+                              }}
+                              className="flex items-center gap-2 px-3 py-1.5 rounded-md text-purple-600 hover:bg-purple-50 transition-colors"
+                            >
+                              <Copy className="size-4 text-purple-600 transition-colors" />
+                              {t("Duplicate")}
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                navigate(`/app/tailor/${resume.id}`);
+                                setOpenPopoverId(null);
+                              }}
+                              className="flex items-center gap-2 px-3 py-1.5 rounded-md text-violet-600 hover:bg-violet-50 transition-colors"
+                            >
+                              <Sparkles className="size-4 text-violet-600 transition-colors" />
+                              {t("TailorCVByJDMenu")}
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                navigate(`/app/mock-interview/${resume.id}`);
+                                setOpenPopoverId(null);
+                              }}
+                              className="flex items-center gap-2 px-3 py-1.5 rounded-md text-indigo-600 hover:bg-indigo-50 transition-colors"
+                            >
+                              <Sparkles className="size-4 text-indigo-600 transition-colors" />
+                              {t("MockInterviewMenu")}
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                navigate(`/app/cover-letter/${resume.id}`);
+                                setOpenPopoverId(null);
+                              }}
+                              className="flex items-center gap-2 px-3 py-1.5 rounded-md text-emerald-600 hover:bg-emerald-50 transition-colors"
+                            >
+                              <Sparkles className="size-4 text-emerald-600 transition-colors" />
+                              {t("CoverLetterMenu")}
+                            </button>
+                          </div>
+                        }
+                        trigger="click"
+                        className="cursor-pointer"
+                        arrow={false}
+                      >
+                        <MoreVertical className="size-5 text-black/65" />
+                      </Popover>
+                    </div>
                   </div>
-                </button>
-              );
-            }
+                )
+              }
+            )}
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl mt-5 gap-2 flex flex-col">
+          <div className="text-[32px] font-medium text-black/70 p-4">{t('Resumes')}</div>
+          {view === 'list' ? (
+          <Table
+              onRow={(record) => ({
+                onClick: () => {
+                  navigate(`/app/builder/${record.id}`);
+                },
+              })}
+              dataSource={filteredResumes}
+              loading={loadingTable}
+              pagination={allResumes.length > 9 ? { pageSize: 9 } : false}
+              onChange={(_, __, sorter: any) => {
+                const field = sorter.field as 'title' | 'createdAt' | 'updatedAt' | undefined;
+                const order = sorter.order as 'ascend' | 'descend' | undefined;
+                if (field && order) {
+                  setTableSort({ field, order });
+                  const sortField: 'title' | 'createdAt' | 'updatedAt' =
+                    field === 'title' ? 'title' : field === 'createdAt' ? 'createdAt' : 'updatedAt';
+                  loadAllResumes({ sortField, sortOrder: order });
+                } else {
+                  setTableSort({});
+                  loadAllResumes();
+                }
+              }}
+            >
+              <Table.Column
+                width={200}
+                title={t("Title")}
+                dataIndex="title"
+                key="title"
+                sorter
+                sortOrder={tableSort.field === 'title' ? tableSort.order : null}
+              />
+              <Table.Column width={200} title={t("People")} dataIndex="isPublic" key="isPublic" render={(value) => !value ? t("Private") : t("Public")} />
+              <Table.Column
+                width={200}
+                title={t("Created on")}
+                dataIndex="createdAt"
+                key="createdAt"
+                sorter
+                sortOrder={tableSort.field === 'createdAt' ? tableSort.order : null}
+                render={(value) => value ? new Date(value).toLocaleDateString() : ''}
+              />
+              <Table.Column
+                width={200}
+                title={t("Updated on")}
+                dataIndex="updatedAt"
+                key="updatedAt"
+                sorter
+                sortOrder={tableSort.field === 'updatedAt' ? tableSort.order : null}
+                render={(value) => value ? new Date(value).toLocaleDateString() : ''}
+              />
+              <Table.Column width={100} title={t("Actions")} key="actions" render={(_, record) => (
+                <div className="flex gap-4">
+                  <Tooltip title={t("Edit")}><button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setEditResumeId(record.id ?? "");
+                      setTitle(record.title ?? "");
+                    }}
+                  >
+                    <PencilIcon className="size-4 text-blue-600 transition-colors cursor-pointer" />
+                  </button></Tooltip>
+                  <Tooltip title={t("Delete")}><button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setDeleteResume(true);
+                      setDeleteResumeId(Number(record.id));
+                    }}
+                  >
+                    <TrashIcon className="size-4 text-red-700 transition-colors cursor-pointer" />
+                  </button></Tooltip>
+                  <Tooltip title={t("Duplicate")}><button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      // TODO: implement duplicate logic
+                      setDuplicateResumeId(record.id ?? "");
+                      setTitle(`${record.title || t("enterResumeTitle")} (copy)`);
+                    }}
+                  >
+                    <Copy className="size-4 text-purple-600 transition-colors cursor-pointer" />
+                  </button></Tooltip>
+                  <Tooltip title={t("TailorCVByJDMenu")}><button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      navigate(`/app/tailor/${record.id}`);
+                    }}
+                  >
+                    <Sparkles className="size-4 text-violet-600 transition-colors cursor-pointer" />
+                  </button></Tooltip>
+                  <Tooltip title={t("MockInterviewMenu")}><button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      navigate(`/app/mock-interview/${record.id}`);
+                    }}
+                  >
+                    <Sparkles className="size-4 text-indigo-600 transition-colors cursor-pointer" />
+                  </button></Tooltip>
+                  <Tooltip title={t("CoverLetterMenu")}><button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      navigate(`/app/cover-letter/${record.id}`);
+                    }}
+                  >
+                    <Sparkles className="size-4 text-emerald-600 transition-colors cursor-pointer" />
+                  </button></Tooltip>
+                </div>
+              )} />
+            </Table>
+          ) : (
+            <div className={cn("flex gap-2 items-center", view === 'grid' ? 'px-4' : undefined)}>
+              {loadingTable && (
+                <div className="w-full flex justify-center py-6">
+                  <Spin />
+                </div>
+              )}
+              {filteredResumes.map(
+                (resume: Resume & { updatedAt?: string | Date }, index: number) => {
+                  return (
+                    <div onClick={() => navigate(`/app/builder/${resume.id}`)} key={index} className="flex flex-col cursor-pointer relative group group-hover:shadow-lg transition-all duration-300">
+                      <div className="mb-2 bg-gray-100 rounded-xl p-2 w-[150px] h-[150px] flex items-center justify-center">
+                        <FileTextIcon className="size-6 text-gray-500" />
+                      </div>
+                      <span className="text-base text-black/70">{resume.title}</span>
+                      <span className="text-sm text-gray-500">{t('Updated on ')}{resume.updatedAt ? new Date(resume.updatedAt).toLocaleDateString() : ''}</span>
+                      <div
+                        onClick={(e) => e.stopPropagation()}
+                        className="absolute top-1 right-1 hidden group-hover:flex items-center "
+                      >
+                        <Popover
+                          open={openPopoverId === String(resume.id)}
+                          onOpenChange={(visible) =>
+                            setOpenPopoverId(visible ? String(resume.id) : null)
+                          }
+                          content={
+                            <div className="flex flex-col gap-1 py-1">
+                              <button
+                                onClick={() => {
+                                  setDeleteResume(true);
+                                  setDeleteResumeId(Number(resume.id));
+                                  setOpenPopoverId(null);
+                                }}
+                                className="flex items-center gap-2 px-3 py-1.5 rounded-md text-red-700 hover:bg-red-50 transition-colors"
+                              >
+                                <TrashIcon className="size-4 text-red-700 transition-colors" />
+                                {t("Delete")}
+                              </button>
+
+                              <button
+                                onClick={() => {
+                                  setEditResumeId(resume.id ?? "");
+                                  setTitle(resume.title ?? "");
+                                  setOpenPopoverId(null);
+                                }}
+                                className="flex items-center gap-2 px-3 py-1.5 rounded-md text-blue-600 hover:bg-blue-50 transition-colors"
+                              >
+                                <PencilIcon className="size-4 text-blue-600 transition-colors" />
+                                {t("Edit")}
+                              </button>
+
+                              <button
+                                onClick={() => {
+                                  // TODO: implement duplicate logic
+                                  setDuplicateResumeId(resume.id ?? "");
+                                  setTitle(`${resume.title || t("enterResumeTitle")} (copy)`);
+                                  setOpenPopoverId(null);
+                                }}
+                                className="flex items-center gap-2 px-3 py-1.5 rounded-md text-purple-600 hover:bg-purple-50 transition-colors"
+                              >
+                                <Copy className="size-4 text-purple-600 transition-colors" />
+                                {t("Duplicate")}
+                              </button>
+
+                              <button
+                                onClick={() => {
+                                  navigate(`/app/tailor/${resume.id}`);
+                                  setOpenPopoverId(null);
+                                }}
+                                className="flex items-center gap-2 px-3 py-1.5 rounded-md text-violet-600 hover:bg-violet-50 transition-colors"
+                              >
+                                <Sparkles className="size-4 text-violet-600 transition-colors" />
+                                {t("TailorCVByJDMenu")}
+                              </button>
+
+                              <button
+                                onClick={() => {
+                                  navigate(`/app/mock-interview/${resume.id}`);
+                                  setOpenPopoverId(null);
+                                }}
+                                className="flex items-center gap-2 px-3 py-1.5 rounded-md text-indigo-600 hover:bg-indigo-50 transition-colors"
+                              >
+                                <Sparkles className="size-4 text-indigo-600 transition-colors" />
+                                {t("MockInterviewMenu")}
+                              </button>
+
+                              <button
+                                onClick={() => {
+                                  navigate(`/app/cover-letter/${resume.id}`);
+                                  setOpenPopoverId(null);
+                                }}
+                                className="flex items-center gap-2 px-3 py-1.5 rounded-md text-emerald-600 hover:bg-emerald-50 transition-colors"
+                              >
+                                <Sparkles className="size-4 text-emerald-600 transition-colors" />
+                                {t("CoverLetterMenu")}
+                              </button>
+                            </div>
+                          }
+                          trigger="click"
+                          className="cursor-pointer"
+                          arrow={false}
+                        >
+                          <MoreVertical className="size-5 text-black/65" />
+                        </Popover>
+                      </div>
+                    </div>
+                  )
+                }
+              )}
+            </div>
           )}
         </div>
 
@@ -417,6 +672,7 @@ export default function Dashboard() {
               };
               const created = await resumeApi.create(payload);
               setAllResumes((prev) => [created, ...prev]);
+              setRecentResumes((prev) => [created, ...prev].slice(0, 5));
               toast.success(t("createResumeSuccess") || "Duplicated resume successfully");
               navigate(`/app/builder/${created.id}`);
             } catch (e) {

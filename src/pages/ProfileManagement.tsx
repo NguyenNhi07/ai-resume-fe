@@ -1,5 +1,3 @@
-'use client'
-
 import { AllowedCharsInput } from '@/components/AllowedCharsInput'
 import { PhoneInput } from '@/components/PhoneInput'
 import EditIcon from '@/components/icons/EditIcon'
@@ -7,35 +5,59 @@ import { useUnsavedChanges } from '@/components/setting/context/UnsavedChangesCo
 import type { ProfileForm } from '@/components/setting/type'
 import { isValidPhoneNumber } from '@/lib/phone-utils'
 import { cn } from '@/lib/utils'
+import { userApi } from '@/lib/api'
+import { useToast } from '@/hooks/useToast'
 import { Button, DatePicker, Form, Radio } from 'antd'
 import dayjs from 'dayjs'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 export default function ProfileManagement() {
 	const { t } = useTranslation();
-	// const userQ = useMyInfo()
-	// const { mutate: updateUserProfile } = useUpdateUserProfile()
 	const [isEdit, setIsEdit] = useState(false)
+	const [profile, setProfile] = useState<{
+		name?: string
+		email?: string
+		dateOfBirth?: string | null
+		phoneNumber?: string
+		gender?: string
+		profession?: string
+	} | null>(null)
 	const [profileForm] = Form.useForm<ProfileForm>()
 	const [isDirty, setIsDirty] = useState(false)
 	const [errorPhone, setErrorPhone] = useState(false)
 	const { setHasUnsavedChanges } = useUnsavedChanges()
-	const formValues = Form.useWatch([], profileForm)
+	const formValues = (Form.useWatch([], profileForm) || {}) as ProfileForm
+	const toast = useToast()
 
-	// useEffect(() => {
-	// 	if (userQ.data) {
-	// 		profileForm.setFieldsValue({
-	// 			firstName: userQ.data.firstName,
-	// 			lastName: userQ.data.lastName,
-	// 			dateOfBirth: userQ.data.dateOfBirth
-	// 				? dayjs(userQ.data.dateOfBirth)
-	// 				: null,
-	// 			phoneNumber: userQ.data.phoneNumber,
-	// 			gender: userQ.data.gender,
-	// 		})
-	// 	}
-	// }, [userQ.data, profileForm])
+	useEffect(() => {
+		const loadProfile = async () => {
+			try {
+				const me = await userApi.me()
+				setProfile({
+					name: me.fullName,
+					email: me.email,
+					dateOfBirth: me.dob || null,
+					phoneNumber: me.phoneNumber,
+					gender: me.gender,
+					profession: me.profession,
+				})
+				profileForm.setFieldsValue({
+					name: me.fullName,
+					email: me.email,
+					dateOfBirth: me.dob ? dayjs(me.dob) : null,
+					phoneNumber: me.phoneNumber,
+					gender: me.gender,
+					profession: me.profession,
+				} as any)
+				setIsDirty(false)
+				setHasUnsavedChanges(false)
+			} catch (error) {
+				console.error('Failed to load profile', error)
+			}
+		}
+		loadProfile()
+	}, [profileForm, setHasUnsavedChanges])
 
 	const validateAge = (_: any, value: any) => {
 		if (!value) return Promise.reject(new Error(t('This field is required')))
@@ -95,13 +117,13 @@ export default function ProfileManagement() {
 							{t('Name')}
 						</span>
 						<span className="text-base text-black/85">
-							{/* {userQ.data?.firstName} */} Nguyễn Uyển Nhi
+							{profile?.name || '-'}
 						</span>
 					</div>
 					<div className="flex flex-col">
 						<span className="text-sm text-black/45">{t('Email')}</span>
 						<span className="text-base text-black/85">
-							{/* {userQ.data?.gender} */} 123@gmail.com
+							{profile?.email || '-'}
 						</span>
 					</div>
 					<div className="flex flex-col">
@@ -109,25 +131,27 @@ export default function ProfileManagement() {
 							{t('Date of birth')}
 						</span>
 						<span className="text-base text-black/85">
-							{/* {dayjs(userQ.data?.dateOfBirth).format('DD/MM/YYYY')} */} 07/11/2003
+							{profile?.dateOfBirth
+								? dayjs(profile.dateOfBirth).format('DD/MM/YYYY')
+								: '-'}
 						</span>
 					</div>
 					<div className="flex flex-col">
 						<span className="text-sm text-black/45">{t('Phone number')}</span>
 						<span className="text-base text-black/85">
-							{/* {userQ.data?.phoneNumber ? userQ.data?.phoneNumber : 'No Data'} */} 0813059790
+							{profile?.phoneNumber || '-'}
 						</span>
 					</div>
 					<div className="flex flex-col">
 						<span className="text-sm text-black/45">{t('Gender')}</span>
 						<span className="text-base text-black/85">
-							{/* {userQ.data?.gender} */} Male
+							{profile?.gender || '-'}
 						</span>
 					</div>
 					<div className="flex flex-col">
 						<span className="text-sm text-black/45">{t('Profession')}</span>
 						<span className="text-base text-black/85">
-							{/* {userQ.data?.gender} */} Frontend Developer
+							{profile?.profession || '-'}
 						</span>
 					</div>
 				</div>
@@ -261,17 +285,6 @@ export default function ProfileManagement() {
 					<div className="flex items-center gap-4 w-full justify-end max-sm:p-4 max-sm:justify-between max-sm:border-t-[1px] max-sm:border-[rgba(0,0,0,0.06)]">
 						<Button
 							onClick={() => {
-								// if (userQ.data) {
-								// 	profileForm.setFieldsValue({
-								// 		firstName: userQ.data.firstName,
-								// 		lastName: userQ.data.lastName,
-								// 		dateOfBirth: userQ.data.dateOfBirth
-								// 			? dayjs(userQ.data.dateOfBirth)
-								// 			: null,
-								// 		phoneNumber: userQ.data.phoneNumber,
-								// 		gender: userQ.data.gender,
-								// 	})
-								// }
 								setIsDirty(false)
 								setHasUnsavedChanges(false)
 								setIsEdit(false)
@@ -283,10 +296,34 @@ export default function ProfileManagement() {
 						<Button
 							onClick={async () => {
 								await profileForm.validateFields()
-								//TODO: call update profile
-								setHasUnsavedChanges(false)
-								setIsDirty(false)
-								setIsEdit(false)
+								const values = profileForm.getFieldsValue()
+								try {
+									const updated = await userApi.updateProfile({
+										name: values.name,
+										email: values.email,
+										dateOfBirth: values.dateOfBirth
+											? dayjs(values.dateOfBirth).format('DD/MM/YYYY')
+											: undefined,
+										phoneNumber: values.phoneNumber,
+										gender: values.gender,
+										profession: values.profession,
+									})
+									setProfile({
+										name: updated.fullName,
+										email: updated.email,
+										dateOfBirth: updated.dob || null,
+										phoneNumber: updated.phoneNumber,
+										gender: updated.gender,
+										profession: updated.profession,
+									})
+									setHasUnsavedChanges(false)
+									setIsDirty(false)
+									setIsEdit(false)
+									toast.success(t('Profile updated successfully'))
+								} catch (error) {
+									console.error('Failed to update profile', error)
+									toast.error(t('Failed to update profile'))
+								}
 							}}
 							className="h-8 w-[110px] max-sm:w-1/2 !bg-purple-600 !text-white disabled:!text-white/65"
 							type="primary"

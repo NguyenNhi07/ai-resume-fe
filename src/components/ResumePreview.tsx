@@ -1,6 +1,5 @@
 import type { Resume } from "@/lib/type";
 import { BoldTemplate } from "./template/BoldTemplate";
-import { MinimalImageTemplate } from "./template/MinimalImageTemplate";
 import { MinimalTemplate } from "./template/MinimalTemplate";
 import { ModernTemplate } from "./template/ModernTemplate";
 import { ProfessionalTemplate } from "./template/ProfessionalTemplate";
@@ -44,8 +43,6 @@ export const ResumePreview = ({
         return <ModernTemplate data={data} accentColor={accentColor} />;
       case "minimal":
         return <MinimalTemplate data={data} accentColor={accentColor} />;
-      case "minimal-image":
-        return <MinimalImageTemplate data={data} accentColor={accentColor} />;
       case "bold":
         return <BoldTemplate data={data} accentColor={accentColor} />;
       case "professional":

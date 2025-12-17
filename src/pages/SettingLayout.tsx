@@ -3,6 +3,8 @@ import { Navbar } from "@/components/Navbar";
 import { UnsavedChangesProvider } from "@/components/setting/context/UnsavedChangesContext";
 import { MenuSideBar } from "@/components/setting/MenuSideBar";
 import { Avatar, Button } from "antd";
+import { fileApi } from "@/lib/api";
+import { useToast } from "@/hooks/useToast";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet } from "react-router-dom";
@@ -15,6 +17,7 @@ export default function SettingLayout() {
     avatarUrl?: string;
   } | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const toast = useToast();
   useEffect(() => {
     const userStr = localStorage.getItem("user");
     if (userStr) {
@@ -28,6 +31,21 @@ export default function SettingLayout() {
 
   const handleClick = () => {
     fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    try {
+      const imageUrl = await fileApi.uploadImage(file);
+      const updatedUser = { ...user, avatarUrl: imageUrl };
+      setUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      toast.success(t("Avatar updated successfully"));
+    } catch (error) {
+      console.error("Failed to upload avatar", error);
+      toast.error(t("Failed to upload avatar"));
+    }
   };
   return (
     <UnsavedChangesProvider>
@@ -56,13 +74,13 @@ export default function SettingLayout() {
                 <EditIcon /> {t("Change Avatar")}
               </Button>
 
-              {/* <input
-								ref={fileInputRef}
-								type="file"
-								accept="image/*"
-								className="hidden"
-								onChange={handleFileChange}
-							/> */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileChange}
+              />
             </div>
           </div>
           <MenuSideBar />

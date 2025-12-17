@@ -145,6 +145,25 @@ export interface MeResponse {
   lastName?: string;
   fullName?: string;
   imageLink?: string;
+  phoneNumber?: string;
+  dob?: string;
+  gender?: string;
+  profession?: string;
+}
+
+export interface UpdateProfileRequest {
+  name?: string;
+  email?: string;
+  dateOfBirth?: string; // DD/MM/YYYY
+  phoneNumber?: string;
+  gender?: string;
+  profession?: string;
+  imageLink?: string;
+}
+
+export interface ChangePasswordRequest {
+  oldPassword: string;
+  newPassword: string;
 }
 
 export interface UploadImageResponse {
@@ -183,6 +202,9 @@ const toBackendResume = (r: Resume) => ({
   experiences: r.experience,
   educations: r.education,
   projects: r.project,
+  template: r.template || 'classic',
+  accentColor: r.accent_color || '#3B82F6',
+  fontFamily: r.font_family || 'inter',
   isPublic: r.public,
 });
 
@@ -219,12 +241,12 @@ const toFrontendResume = (data: any): Resume => ({
       }))
     : [],
   skills: Array.isArray(data.skills) ? data.skills : [],
-  template: 'classic',
-  accent_color: '#3B82F6',
+  template: data.template ?? 'classic',
+  accent_color: data.accentColor ?? '#3B82F6',
   public: data.isPublic ?? false,
-  font_family: 'inter',
+  font_family: data.fontFamily ?? 'inter',
   // extra field from BE to use in dashboard card (type widening)
-  // @ts-expect-error extended field
+  createdAt: data.createdAt,
   updatedAt: data.updatedAt,
 });
 
@@ -343,12 +365,42 @@ export const authApi = {
   },
 };
 
+export const userApi = {
+  me: async (): Promise<MeResponse> => {
+    const res = await api.get('/user/me');
+    return res.data;
+  },
+  updateProfile: async (payload: UpdateProfileRequest): Promise<MeResponse> => {
+    const body: any = { ...payload };
+    if (payload.dateOfBirth) {
+      body.dateOfBirth = dayjs(payload.dateOfBirth, 'DD/MM/YYYY').toISOString();
+    }
+    const res = await api.put('/user/me', body);
+    return res.data;
+  },
+  changePassword: async (payload: ChangePasswordRequest): Promise<void> => {
+    await api.post('/user/change-password', payload);
+  },
+};
+
 export const resumeApi = {
-  list: async (params?: { page?: number; pageSize?: number; lastItemId?: number }): Promise<Resume[]> => {
-    const query = {
+  list: async (params?: {
+    page?: number;
+    pageSize?: number;
+    lastItemId?: number;
+    sortBy?: 'title' | 'createdAt' | 'updatedAt';
+    sortOrder?: 'asc' | 'desc';
+  }): Promise<Resume[]> => {
+    const orderBy: string[] = [];
+    if (params?.sortBy) {
+      orderBy.push(`${params.sortBy}:${params.sortOrder || 'desc'}`);
+    }
+
+    const query: any = {
       page: params?.page ?? 1,
       pageSize: Math.min(params?.pageSize ?? DEFAULT_PAGE_SIZE, 100),
       ...(params?.lastItemId ? { lastItemId: params.lastItemId } : {}),
+      ...(orderBy.length ? { orderBy } : {}),
     };
     const res = await api.get('/resume', { params: query });
     const items = res.data?.data || res.data || [];
@@ -356,6 +408,10 @@ export const resumeApi = {
   },
   detail: async (id: string | number): Promise<Resume> => {
     const res = await api.get(`/resume/${id}`);
+    return toFrontendResume(res.data);
+  },
+  publicDetail: async (id: string | number): Promise<Resume> => {
+    const res = await api.get(`/public/resume/${id}`);
     return toFrontendResume(res.data);
   },
   create: async (resume: Resume): Promise<Resume> => {
@@ -370,6 +426,10 @@ export const resumeApi = {
   update: async (id: string, resume: Resume): Promise<Resume> => {
     const payload = toBackendResume(resume);
     const res = await api.put(`/resume/${id}`, payload);
+    return toFrontendResume(res.data);
+  },
+  setVisibility: async (id: string | number, isPublic: boolean): Promise<Resume> => {
+    const res = await api.put(`/resume/${id}/visibility`, { isPublic });
     return toFrontendResume(res.data);
   },
   remove: async (id: string): Promise<void> => {

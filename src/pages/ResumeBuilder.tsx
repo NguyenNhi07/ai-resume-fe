@@ -11,7 +11,8 @@ import { TemplateSelector } from "@/components/TemplateSelector";
 import { profileDefault } from "@/lib/constant";
 import type { Experience, Resume } from "@/lib/type";
 import { dummyResumeData, extractSkillsFromJD, scoreResumeAgainstJD } from "@/lib/utils";
-import { resumeApi } from "@/lib/api";
+import { resumeApi, userApi } from "@/lib/api";
+import { useToast } from "@/hooks/useToast";
 import { Button, Form, Modal, Popover, Select, Input, Tag } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 import html2canvas from "html2canvas";
@@ -100,6 +101,7 @@ export default function ResumeBuilder() {
   const [form] = Form.useForm<FormResume>();
   const isFormInitialized = useRef(false);
   const currentResumeId = useRef(resumeId);
+  const toast = useToast();
   const [isDirty, setIsDirty] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showAutoFillModal, setShowAutoFillModal] = useState(false);
@@ -295,6 +297,9 @@ export default function ResumeBuilder() {
         allValues.skills !== undefined && Array.isArray(allValues.skills)
           ? allValues.skills
           : current.skills || [],
+      // Preserve template and accent_color from current state (set by TemplateSelector/ColorPicker)
+      template: current.template || 'classic',
+      accent_color: current.accent_color || '#3B82F6',
     };
   };
 
@@ -351,7 +356,20 @@ export default function ResumeBuilder() {
   };
 
   const changeResumeVisibility = async () => {
-    setResumeData({ ...resumeData, public: !resumeData.public });
+    if (!resumeId) return;
+    try {
+      const updated = await resumeApi.setVisibility(resumeId, !resumeData.public);
+      setResumeData((prev) => ({
+        ...prev,
+        public: updated.public,
+      }));
+      toast.success(
+        updated.public ? t("Resume is now public") : t("Resume is now private"),
+      );
+    } catch (error) {
+      console.error("Failed to change visibility", error);
+      toast.error(t("Failed to change visibility"));
+    }
   };
 
   const handleShare = () => {
@@ -696,7 +714,7 @@ export default function ResumeBuilder() {
                   <Button onClick={handleCancel}>{t("Cancel")}</Button>
                   <Button
                     onClick={handleSave}
-                    disabled={!isDirty}
+                    // disabled={!isDirty}
                     color="default"
                     variant="solid"
                     className="flex mt-4 !bg-purple-600 max-w-fit disabled:!text-white/75"
@@ -749,26 +767,20 @@ export default function ResumeBuilder() {
           try {
             setIsAutoFilling(true);
 
-            // TODO: Thay mockProfile bằng API thực tế (ví dụ: useMyInfo hoặc user profile từ backend)
-            const mockProfile = {
-              name: "Nguyễn Uyển Nhi",
-              dateOfBirth: "07/11/2003",
-              email: "123@gmail.com",
-              phoneNumber: "+84813059790",
-              gender: "Male",
-              profession: "Frontend Developer",
-              image: "",
-            };
+            // Lấy profile thật từ BE và map vào personal_info của CV
+            const me = await userApi.me();
+
+            const birthDateStr = me.dob ? dayjs(me.dob).format("DD/MM/YYYY") : undefined;
 
             const updatedPersonalInfo = {
               ...resumeData.personal_info,
-              full_name: mockProfile.name,
-              birthDate: mockProfile.dateOfBirth,
-              gender: mockProfile.gender,
-              email: mockProfile.email,
-              phone: mockProfile.phoneNumber,
-              profession: mockProfile.profession,
-              image: mockProfile.image || resumeData.personal_info?.image,
+              full_name: me.fullName || resumeData.personal_info?.full_name,
+              birthDate: birthDateStr || resumeData.personal_info?.birthDate,
+              gender: me.gender || resumeData.personal_info?.gender,
+              email: me.email || resumeData.personal_info?.email,
+              phone: me.phoneNumber || resumeData.personal_info?.phone,
+              profession: me.profession || resumeData.personal_info?.profession,
+              image: me.imageLink || resumeData.personal_info?.image,
             };
 
             const updatedResume: Resume = {
@@ -793,6 +805,8 @@ export default function ResumeBuilder() {
             });
 
             setIsDirty(true);
+            toast.success(t("Auto filled from profile"));
+            setShowAutoFillModal(false)
           } finally {
             setIsAutoFilling(false);
           }

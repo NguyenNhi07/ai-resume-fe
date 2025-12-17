@@ -1,5 +1,7 @@
 import { useUnsavedChanges } from "@/components/setting/context/UnsavedChangesContext";
 import type { ChangePasswordForm } from "@/components/setting/type";
+import { userApi } from "@/lib/api";
+import { useToast } from "@/hooks/useToast";
 import { Button, Form, Input } from "antd";
 import { useTranslation } from "react-i18next";
 
@@ -7,6 +9,7 @@ export default function ChangePassword() {
   const { t } = useTranslation();
   const [changePassForm] = Form.useForm<ChangePasswordForm>();
   const { setHasUnsavedChanges } = useUnsavedChanges();
+  const toast = useToast();
 
   return (
     <div className="flex flex-col items-start p-0 sm:p-6 lg:p-8 gap-0 sm:gap-2 w-full max-w-full h-full md:h-auto bg-white">
@@ -23,8 +26,23 @@ export default function ChangePassword() {
       {/* Form Section */}
       <Form
         name="changePassword"
-        onFinish={() => {
-          console.log(123);
+        onFinish={async (values) => {
+          try {
+            await userApi.changePassword({
+              oldPassword: values.oldPassword || "",
+              newPassword: values.newPassword || "",
+            });
+            toast.success(t("Password changed successfully"));
+            setHasUnsavedChanges(false);
+            changePassForm.resetFields();
+          } catch (error: any) {
+            console.error("Failed to change password", error);
+            // BE đang trả INVALID_CREDENTIALS nếu oldPassword sai
+            const message =
+              error?.response?.data?.message ||
+              t("Failed to change password");
+            toast.error(message);
+          }
         }}
         layout="vertical"
         form={changePassForm}
@@ -88,10 +106,8 @@ export default function ChangePassword() {
           {t("Cancel")}
         </Button>
         <Button
-          onClick={async () => {
-            await changePassForm.validateFields();
-            //TODO: change password api
-            setHasUnsavedChanges(false);
+          onClick={() => {
+            changePassForm.submit();
           }}
           className="h-8 w-[110px] max-sm:w-1/2 !bg-purple-600 !text-white disabled:!text-white/65"
           type="primary"

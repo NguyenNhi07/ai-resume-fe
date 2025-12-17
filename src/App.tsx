@@ -18,36 +18,38 @@ import ResetPassword from './pages/ResetPassword'
 import MockInterview from './pages/MockInterview'
 import CoverLetter from './pages/CoverLetter'
 import TailorByJD from './pages/TailorByJD'
+import { Toaster } from 'sonner';
 
 function App() {
 
   return (
     <>
+      <Toaster position="top-right" richColors />
       <Routes>
-        <Route path='/' element={<Home/>} />
+        <Route path='/' element={<Home />} />
 
-        <Route path='app' element={<Layout/>}>
-          <Route index element={<Dashboard/>}/>
-          <Route path='builder/:resumeId' element={<ResumeBuilder/>}/>
-          <Route path='preview/:resumeId' element={<PreviewResume/>}/>
-          <Route path='tailor/:resumeId' element={<TailorByJD/>}/>
-          <Route path='mock-interview/:resumeId' element={<MockInterview/>}/>
-          <Route path='cover-letter/:resumeId' element={<CoverLetter/>}/>
+        <Route path='app' element={<Layout />}>
+          <Route index element={<Dashboard />} />
+          <Route path='builder/:resumeId' element={<ResumeBuilder />} />
+          <Route path='preview/:resumeId' element={<PreviewResume />} />
+          <Route path='tailor/:resumeId' element={<TailorByJD />} />
+          <Route path='mock-interview/:resumeId' element={<MockInterview />} />
+          <Route path='cover-letter/:resumeId' element={<CoverLetter />} />
         </Route>
 
-        <Route path='setting' element={<SettingLayout/>}>
-          <Route index element={<ProfileManagement/>}/>
-          <Route path='changePassword' element={<ChangePassword/>}/>
-          <Route path='language' element={<Language/>}/>
+        <Route path='setting' element={<SettingLayout />}>
+          <Route index element={<ProfileManagement />} />
+          <Route path='changePassword' element={<ChangePassword />} />
+          <Route path='language' element={<Language />} />
         </Route>
 
-        <Route path='view/:resumeId' element={<Preview/>} />
+        <Route path='view/:resumeId' element={<Preview />} />
 
-        <Route path='auth' element={<AuthLayout/>}>
-          <Route path='login' element={<Login/>}/>
-          <Route path='forgot-password' element={<ForgotPassword/>}/>
-          <Route path='verify-email' element={<VeirifyEmail/>}/>
-          <Route path='reset-password' element={<ResetPassword/>}/>
+        <Route path='auth' element={<AuthLayout />}>
+          <Route path='login' element={<Login />} />
+          <Route path='forgot-password' element={<ForgotPassword />} />
+          <Route path='verify-email' element={<VeirifyEmail />} />
+          <Route path='reset-password' element={<ResetPassword />} />
         </Route>
       </Routes>
     </>

@@ -28,13 +28,6 @@ export const TemplateSelector = ({
       ),
     },
     {
-      id: "mininal-image",
-      name: t("Minimal Image"),
-      preview: t(
-        "Two-column layout featuring large circular avatar and elegant minimal design"
-      ),
-    },
-    {
       id: "minimal",
       name: t("Minimal"),
       preview: t(
