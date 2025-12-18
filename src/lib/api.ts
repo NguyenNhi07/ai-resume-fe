@@ -593,6 +593,23 @@ export const aiApi = {
     const res = await api.post('/ai/interview-questions', { resumeText, jdText });
     return res.data;
   },
+  scoreInterviewAnswers: async (
+    qaList: { question: string; answer: string }[],
+  ): Promise<{
+    language: string;
+    averageScore: number;
+    results: {
+      question: string;
+      answer: string;
+      score: number;
+      comment: string;
+      improvementSuggestions: string[];
+    }[];
+    overallFeedback: string;
+  }> => {
+    const res = await api.post('/ai/interview-score', { qaList });
+    return res.data;
+  },
 };
 
 export default api;

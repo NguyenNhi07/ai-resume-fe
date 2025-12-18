@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button, Input, Tag } from "antd";
 import { Sparkles, ArrowLeftIcon, FileText } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { extractSkillsFromJD, scoreInterviewAnswers } from "@/lib/utils";
+import { extractSkillsFromJD } from "@/lib/utils";
 import type { Resume } from "@/lib/type";
 import { resumeApi, aiApi } from "@/lib/api";
 
@@ -20,7 +20,15 @@ export default function MockInterview() {
     Array<{ id: string; type: "technical" | "behavioral" | "experience" | "situational" | "soft-skill"; question: string; hint?: string }>
   >([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [score, setScore] = useState<{ total: number; perQuestion: Array<{ id: string; score: number; feedback: string }> } | null>(null);
+  const [score, setScore] = useState<{
+    averageScore: number;
+    results: Array<{
+      score: number;
+      comment: string;
+      improvementSuggestions: string[];
+    }>;
+    overallFeedback: string;
+  } | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isScoring, setIsScoring] = useState(false);
 
@@ -106,14 +114,32 @@ export default function MockInterview() {
     }
   };
 
-  const handleScore = () => {
+  const handleScore = async () => {
     if (!questions.length) return;
     setIsScoring(true);
-    setTimeout(() => {
-      const scored = scoreInterviewAnswers(questions, answers, jdSkills);
-      setScore(scored);
+    try {
+      const qaList = questions.map((q) => ({
+        question: q.question,
+        answer: answers[q.id] || "",
+      }));
+
+      const res = await aiApi.scoreInterviewAnswers(qaList);
+      setScore({
+        averageScore: res.averageScore,
+        results: res.results.map((r) => ({
+          score: r.score,
+          comment: r.comment,
+          improvementSuggestions: r.improvementSuggestions || [],
+        })),
+        overallFeedback: res.overallFeedback,
+      });
+    } catch (e: any) {
+      console.error(e);
+      // eslint-disable-next-line no-alert
+      alert(e?.response?.data?.message || "Failed to score interview answers");
+    } finally {
       setIsScoring(false);
-    }, 300);
+    }
   };
 
   return (
@@ -151,7 +177,7 @@ export default function MockInterview() {
               </div>
             </div>
 
-            <div>
+            <div className="flex flex-col gap-3">
               <p className="text-xs font-medium text-slate-500 uppercase mb-1">{t("JobDescription")}</p>
               <TextArea
                 value={jdText}
@@ -161,7 +187,7 @@ export default function MockInterview() {
                 autoSize={{ minRows: 6, maxRows: 10 }}
                 showCount
               />
-              <div className="flex flex-wrap gap-1 mt-2">
+              <div className="flex flex-wrap gap-1">
                 {jdSkills.map((skill) => (
                   <Tag key={skill} color="purple">
                     {skill}
@@ -188,14 +214,24 @@ export default function MockInterview() {
                 <div className="flex items-center gap-2">
                   <Sparkles className="size-4 text-purple-600" />
                   <p className="text-sm font-semibold text-slate-800">
-                    {t("InterviewScoreTitle", { score: score.total })}
+                    {t("InterviewScoreTitle", { score: score.averageScore })}
                   </p>
                 </div>
-                <Tag color={score.total >= 75 ? "green" : score.total >= 60 ? "blue" : "orange"}>
-                  {score.total}/100
+                <Tag
+                  color={
+                    score.averageScore >= 75
+                      ? "green"
+                      : score.averageScore >= 60
+                      ? "blue"
+                      : "orange"
+                  }
+                >
+                  {score.averageScore}/100
                 </Tag>
               </div>
-              <p className="text-xs text-slate-500">{t("InterviewScoreNote")}</p>
+              {score.overallFeedback && (
+                <p className="text-xs text-slate-500">{score.overallFeedback}</p>
+              )}
             </div>
           )}
         </div>
@@ -225,7 +261,7 @@ export default function MockInterview() {
               <div className="text-sm text-slate-500">{t("NoInterviewQuestions")}</div>
             ) : (
               <div className="space-y-4">
-                {questions.map((q) => (
+                {questions.map((q, index) => (
                   <div key={q.id} className="border border-slate-200 rounded-lg p-3">
                     <div className="flex items-center gap-2 mb-3">
                       <Tag color={q.type === "technical" ? "blue" : "gold"}>{q.type.charAt(0).toUpperCase() + q.type.slice(1)}</Tag>
@@ -244,22 +280,29 @@ export default function MockInterview() {
                       placeholder={t("YourAnswerPlaceholder")}
                       autoSize={{ minRows: 4, maxRows: 8 }}
                     />
-                    {score?.perQuestion.find((p) => p.id === q.id) && (
+                    {score?.results[index] && (
                       <div className="mt-2 flex items-center justify-between">
                         <Tag
                           color={
-                            (score?.perQuestion.find((p) => p.id === q.id)?.score || 0) >= 75
+                            (score.results[index].score || 0) >= 75
                               ? "green"
-                              : (score?.perQuestion.find((p) => p.id === q.id)?.score || 0) >= 60
+                              : (score.results[index].score || 0) >= 60
                               ? "blue"
                               : "orange"
                           }
                         >
-                          {score?.perQuestion.find((p) => p.id === q.id)?.score}/100
+                          {score.results[index].score}/100
                         </Tag>
-                        <p className="text-xs text-slate-600">
-                          {score?.perQuestion.find((p) => p.id === q.id)?.feedback}
-                        </p>
+                        <div className="ml-3 text-xs text-slate-600 flex-1">
+                          <div>{score.results[index].comment}</div>
+                          {score.results[index].improvementSuggestions?.length > 0 && (
+                            <ul className="mt-1 list-disc list-inside space-y-0.5">
+                              {score.results[index].improvementSuggestions.map((sug, i) => (
+                                <li key={i}>{sug}</li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
