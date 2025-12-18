@@ -3,12 +3,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button, Input, Segmented, Tag } from "antd";
 import { ArrowLeftIcon, DownloadIcon, PrinterIcon, Sparkles, FileText } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import {
-  extractSkillsFromJD,
-  generateCoverLetter,
-} from "@/lib/utils";
+import { extractSkillsFromJD } from "@/lib/utils";
 import type { Resume } from "@/lib/type";
-import { resumeApi } from "@/lib/api";
+import { resumeApi, aiApi } from "@/lib/api";
 
 const { TextArea } = Input;
 
@@ -31,25 +28,76 @@ export default function CoverLetter() {
       .detail(resumeId)
       .then((res) => {
         setResume(res);
-        const skills = extractSkillsFromJD("", res.skills || []);
-        setLetter(generateCoverLetter(res, "", tone, skills));
+        // giữ nội dung trống ban đầu, user bấm Generate để gọi AI
+        setLetter("");
       })
       .catch(() => setResume(null));
-  }, [resumeId, tone]);
+  }, [resumeId]);
 
   const jdSkills = useMemo(
     () => extractSkillsFromJD(jdText, resume?.skills || []),
     [jdText, resume]
   );
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!resume) return;
     setIsGenerating(true);
-    setTimeout(() => {
-      const content = generateCoverLetter(resume, jdText, tone, jdSkills);
-      setLetter(content);
+    try {
+      const parts: string[] = [];
+      if (resume.personal_info?.full_name) {
+        parts.push(`Name: ${resume.personal_info.full_name}`);
+      }
+      if (resume.personal_info?.profession) {
+        parts.push(`Profession: ${resume.personal_info.profession}`);
+      }
+      if (resume.professional_summary) {
+        parts.push(`Summary: ${resume.professional_summary}`);
+      }
+      if (resume.experience?.length) {
+        parts.push(
+          "Experience:",
+          ...resume.experience.map((e) =>
+            `- ${e.position || ""} at ${e.company || ""} (${e.start_date || ""} - ${
+              e.is_current ? "Present" : e.end_date || ""
+            }) ${e.description || ""}`,
+          ),
+        );
+      }
+      if (resume.education?.length) {
+        parts.push(
+          "Education:",
+          ...resume.education.map((ed) =>
+            `- ${ed.degree || ""} in ${ed.field || ""} at ${ed.institution || ""} (${
+              ed.graduation_date || ""
+            }) GPA: ${ed.gpa || ""}`,
+          ),
+        );
+      }
+      if (resume.project?.length) {
+        parts.push(
+          "Projects:",
+          ...resume.project.map((p) =>
+            `- ${p.name || ""}: ${p.description || ""} (Tech: ${(p.technologies || []).join(
+              ", ",
+            )})`,
+          ),
+        );
+      }
+      if (resume.skills?.length) {
+        parts.push(`Skills: ${resume.skills.join(", ")}`);
+      }
+      const resumeText = parts.join("\n");
+
+      const type = tone === "formal" ? "normal" : "friendly";
+      const res = await aiApi.generateCoverLetter(resumeText, jdText, type);
+      setLetter(res.coverLetter);
+    } catch (error: any) {
+      console.error(error);
+      // eslint-disable-next-line no-alert
+      alert(error?.response?.data?.message || "Failed to generate cover letter");
+    } finally {
       setIsGenerating(false);
-    }, 300);
+    }
   };
 
   const handleDownload = () => {

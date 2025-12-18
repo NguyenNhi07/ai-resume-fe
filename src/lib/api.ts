@@ -570,6 +570,18 @@ export const aiApi = {
     const res = await api.post('/ai/score-resume-jd', { resumeText, jdText });
     return res.data;
   },
+  generateCoverLetter: async (
+    resumeText: string,
+    jdText: string,
+    type: 'normal' | 'friendly',
+  ): Promise<{
+    type: string;
+    language: string;
+    coverLetter: string;
+  }> => {
+    const res = await api.post('/ai/cover-letter', { resumeText, jdText, type });
+    return res.data;
+  },
 };
 
 export default api;
