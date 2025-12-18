@@ -610,6 +610,25 @@ export const aiApi = {
     const res = await api.post('/ai/interview-score', { qaList });
     return res.data;
   },
+  tailorResumeByJD: async (
+    resumeText: string,
+    jdText: string,
+  ): Promise<{
+    language: string;
+    matchedPosition?: string;
+    summary: { original: string; optimized: string };
+    sections: {
+      section: string;
+      title: string;
+      original: string;
+      optimized: string;
+      changes: string[];
+    }[];
+    overallSuggestions: string[];
+  }> => {
+    const res = await api.post('/ai/tailor-resume-jd', { resumeText, jdText });
+    return res.data;
+  },
 };
 
 export default api;

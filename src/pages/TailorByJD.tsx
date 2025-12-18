@@ -8,14 +8,10 @@ import {
   Wand2,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import {
-  extractSkillsFromJD,
-  scoreResumeAgainstJD,
-  tailorResumeByJD,
-} from "@/lib/utils";
+import { extractSkillsFromJD } from "@/lib/utils";
 import type { Resume } from "@/lib/type";
 import { ResumePreview } from "@/components/ResumePreview";
-import { resumeApi } from "@/lib/api";
+import { resumeApi, aiApi } from "@/lib/api";
 
 const { TextArea } = Input;
 
@@ -89,10 +85,80 @@ export default function TailorByJD() {
       const skills = extractSkillsFromJD(jdText, resumeSource.skills || []);
       setJdSkills(skills);
 
-      const tailored = await tailorResumeByJD(resumeSource, jdText, skills);
-      setTailoredResume(tailored);
+      // Build plain-text CV để gửi cho AI (giống CoverLetter/MockInterview)
+      const parts: string[] = [];
+      if (resumeSource.personal_info?.full_name) {
+        parts.push(`Name: ${resumeSource.personal_info.full_name}`);
+      }
+      if (resumeSource.personal_info?.profession) {
+        parts.push(`Profession: ${resumeSource.personal_info.profession}`);
+      }
+      if (resumeSource.professional_summary) {
+        parts.push(`Summary: ${resumeSource.professional_summary}`);
+      }
+      if (resumeSource.experience?.length) {
+        parts.push(
+          "Experience:",
+          ...resumeSource.experience.map((e) =>
+            `- ${e.position || ""} at ${e.company || ""} (${e.start_date || ""} - ${
+              e.is_current ? "Present" : e.end_date || ""
+            }) ${e.description || ""}`,
+          ),
+        );
+      }
+      if (resumeSource.education?.length) {
+        parts.push(
+          "Education:",
+          ...resumeSource.education.map((ed) =>
+            `- ${ed.degree || ""} in ${ed.field || ""} at ${ed.institution || ""} (${
+              ed.graduation_date || ""
+            }) GPA: ${ed.gpa || ""}`,
+          ),
+        );
+      }
+      if (resumeSource.project?.length) {
+        parts.push(
+          "Projects:",
+          ...resumeSource.project.map((p) =>
+            `- ${p.name || ""}: ${p.description || ""} (Tech: ${(p.technologies || []).join(
+              ", ",
+            )})`,
+          ),
+        );
+      }
+      if (resumeSource.skills?.length) {
+        parts.push(`Skills: ${resumeSource.skills.join(", ")}`);
+      }
+      const resumeText = parts.join("\n");
 
-      const scored = await scoreResumeAgainstJD(tailored, jdText, skills);
+      const tailoredInfo = await aiApi.tailorResumeByJD(resumeText, jdText);
+
+      // Apply AI result vào Resume (MVP: summary + skills từ sections nếu có)
+      const newResume: Resume = {
+        ...resumeSource,
+        title: tailoredInfo.matchedPosition
+          ? `${resumeSource.title || ""}`.trim() || tailoredInfo.matchedPosition
+          : resumeSource.title,
+        professional_summary: tailoredInfo.summary?.optimized || resumeSource.professional_summary,
+      };
+
+      const skillsSection = tailoredInfo.sections.find(
+        (s) => s.section === "skills" || s.title.toLowerCase().includes("skill"),
+      );
+      if (skillsSection?.optimized) {
+        const optimizedSkills = skillsSection.optimized
+          .split(/[,;\n]/)
+          .map((s) => s.trim())
+          .filter(Boolean);
+        if (optimizedSkills.length) {
+          newResume.skills = optimizedSkills;
+        }
+      }
+
+      setTailoredResume(newResume);
+
+      // Dùng AI thật để chấm điểm CV đã tailor
+      const scored = await aiApi.scoreResumeByJD(resumeText, jdText);
       setScoreResult(scored);
     } finally {
       setIsProcessing(false);
