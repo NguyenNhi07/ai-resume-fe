@@ -76,10 +76,10 @@ export default function CoverLetter() {
     <div className="max-w-6xl mx-auto px-4 py-6">
       <div className="flex items-center justify-between mb-6">
         <Button
-          onClick={() => navigate("/app")}
+          onClick={() => navigate(-1)}
           className="!border-0 !bg-[#f9fafb] hover:!text-purple-600 !text-lg !shadow-none !px-0"
         >
-          <ArrowLeftIcon className="size-4" /> {t("backToDashboard")}
+          <ArrowLeftIcon className="size-4" /> {t("Back")}
         </Button>
         <div className="flex items-center gap-2">
           <Button

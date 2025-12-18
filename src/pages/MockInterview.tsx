@@ -64,10 +64,10 @@ export default function MockInterview() {
     <div className="max-w-6xl mx-auto px-4 py-6">
       <div className="flex items-center justify-between mb-6">
         <Button
-          onClick={() => navigate("/app")}
+          onClick={() => navigate(-1)}
           className="!border-0 !bg-[#f9fafb] hover:!text-purple-600 !text-lg !shadow-none !px-0"
         >
-          <ArrowLeftIcon className="size-4" /> {t("backToDashboard")}
+          <ArrowLeftIcon className="size-4" /> {t("Back")}
         </Button>
         <div className="inline-flex items-center gap-2 rounded-full bg-purple-50 px-3 py-1 text-xs text-purple-700">
           <Sparkles className="size-3" />

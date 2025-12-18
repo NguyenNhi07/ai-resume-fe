@@ -5,35 +5,26 @@ import { PersonalInfoForm } from "@/components/PersonalInfoForm";
 import { ProfessionalSummaryForm } from "@/components/ProfessionalSummaryForm";
 import { ProjectForm } from "@/components/ProjectForm";
 import { ResumePreview } from "@/components/ResumePreview";
-import ShareDialog from "@/components/ShareDialog";
 import { SkillsForm } from "@/components/SkillsForm";
 import { TemplateSelector } from "@/components/TemplateSelector";
+import { useToast } from "@/hooks/useToast";
+import { resumeApi, userApi } from "@/lib/api";
 import { profileDefault } from "@/lib/constant";
 import type { Experience, Resume } from "@/lib/type";
-import { dummyResumeData, extractSkillsFromJD, scoreResumeAgainstJD } from "@/lib/utils";
-import { resumeApi, userApi } from "@/lib/api";
-import { useToast } from "@/hooks/useToast";
-import { Button, Form, Modal, Popover, Select, Input, Tag } from "antd";
+import { Button, Form, Modal, Select } from "antd";
 import dayjs, { Dayjs } from "dayjs";
-import html2canvas from "html2canvas";
-import { jsPDF } from "jspdf";
 import {
   AlertCircle,
   ArrowLeftIcon,
   Briefcase,
   ChevronLeft,
   ChevronRight,
-  DownloadIcon,
-  EyeIcon,
-  FileDown,
   FileText,
   FolderIcon,
   GraduationCap,
-  PrinterIcon,
-  Share2Icon,
   Sparkles,
   User,
-  UserCheck,
+  UserCheck
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -107,18 +98,7 @@ export default function ResumeBuilder() {
   const [showAutoFillModal, setShowAutoFillModal] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
   const initialFormData = useRef<Resume | null>(null);
-  const [showShareDialog, setShowShareDialog] = useState(false);
   const [isAutoFilling, setIsAutoFilling] = useState(false);
-  const [jdText, setJdText] = useState("");
-  const [isScoring, setIsScoring] = useState(false);
-  const [showScoreModal, setShowScoreModal] = useState(false);
-  const [scoreResult, setScoreResult] = useState<{
-    score: number;
-    missingSkills: string[];
-    weakSections: string[];
-    suggestions: string[];
-    matchedRole?: string;
-  } | null>(null);
 
   const loadExitstingResume = async () => {
     if (!resumeId) return;
@@ -164,19 +144,6 @@ export default function ResumeBuilder() {
 
   const activeSection = sections[activeSectionIndex];
 
-  const handleScoreByJD = async () => {
-    if (!jdText.trim()) return;
-    setIsScoring(true);
-    try {
-      const skills = extractSkillsFromJD(jdText, resumeData.skills || []);
-      const scored = await scoreResumeAgainstJD(resumeData, jdText, skills);
-      setScoreResult(scored);
-      setShowScoreModal(true);
-    } finally {
-      setIsScoring(false);
-    }
-  };
-
   useEffect(() => {
     loadExitstingResume();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -204,22 +171,22 @@ export default function ResumeBuilder() {
         },
         experience: resumeData.experience
           ? resumeData.experience.map((exp) => ({
-              ...exp,
-              start_date: exp.start_date
-                ? dayjs(exp.start_date, "MM/YYYY")
-                : undefined,
-              end_date: exp.end_date
-                ? dayjs(exp.end_date, "MM/YYYY")
-                : undefined,
-            }))
+            ...exp,
+            start_date: exp.start_date
+              ? dayjs(exp.start_date, "MM/YYYY")
+              : undefined,
+            end_date: exp.end_date
+              ? dayjs(exp.end_date, "MM/YYYY")
+              : undefined,
+          }))
           : [],
         education: resumeData.education
           ? resumeData.education.map((edu) => ({
-              ...edu,
-              graduation_date: edu.graduation_date
-                ? dayjs(edu.graduation_date, "MM/YYYY")
-                : undefined,
-            }))
+            ...edu,
+            graduation_date: edu.graduation_date
+              ? dayjs(edu.graduation_date, "MM/YYYY")
+              : undefined,
+          }))
           : [],
       };
       form.setFieldsValue(formData);
@@ -248,50 +215,50 @@ export default function ResumeBuilder() {
           : current.professional_summary,
       experience: allValues.experience
         ? allValues.experience.map((exp) => {
-            const startDate = exp.start_date
-              ? typeof exp.start_date === "string"
-                ? exp.start_date
-                : (exp.start_date as Dayjs).format("MM/YYYY")
-              : "";
-            const endDate = exp.is_current
-              ? ""
-              : exp.end_date
+          const startDate = exp.start_date
+            ? typeof exp.start_date === "string"
+              ? exp.start_date
+              : (exp.start_date as Dayjs).format("MM/YYYY")
+            : "";
+          const endDate = exp.is_current
+            ? ""
+            : exp.end_date
               ? typeof exp.end_date === "string"
                 ? exp.end_date
                 : (exp.end_date as Dayjs).format("MM/YYYY")
               : "";
-            return {
-              company: exp.company,
-              position: exp.position,
-              description: exp.description,
-              is_current: exp.is_current || false,
-              start_date: startDate,
-              end_date: endDate,
-            };
-          })
+          return {
+            company: exp.company,
+            position: exp.position,
+            description: exp.description,
+            is_current: exp.is_current || false,
+            start_date: startDate,
+            end_date: endDate,
+          };
+        })
         : current.experience || [],
       education: allValues.education
         ? allValues.education.map((edu) => {
-            const graduationDate = edu.graduation_date
-              ? typeof edu.graduation_date === "string"
-                ? edu.graduation_date
-                : (edu.graduation_date as Dayjs).format("MM/YYYY")
-              : "";
-            return {
-              institution: edu.institution,
-              degree: edu.degree,
-              field: edu.field,
-              graduation_date: graduationDate,
-              gpa: edu.gpa,
-            };
-          })
+          const graduationDate = edu.graduation_date
+            ? typeof edu.graduation_date === "string"
+              ? edu.graduation_date
+              : (edu.graduation_date as Dayjs).format("MM/YYYY")
+            : "";
+          return {
+            institution: edu.institution,
+            degree: edu.degree,
+            field: edu.field,
+            graduation_date: graduationDate,
+            gpa: edu.gpa,
+          };
+        })
         : current.education || [],
       project: allValues.project
         ? allValues.project.map((proj) => ({
-            name: proj.name,
-            description: proj.description,
-            technologies: proj.technologies || [],
-          }))
+          name: proj.name,
+          description: proj.description,
+          technologies: proj.technologies || [],
+        }))
         : current.project || [],
       skills:
         allValues.skills !== undefined && Array.isArray(allValues.skills)
@@ -301,6 +268,11 @@ export default function ResumeBuilder() {
       template: current.template || 'classic',
       accent_color: current.accent_color || '#3B82F6',
     };
+  };
+
+  const syncResumeFromForm = () => {
+    const allValues = form.getFieldsValue(true) as FormResume;
+    setResumeData((prev) => buildResumeFromForm(allValues, prev));
   };
 
   const handleCancel = () => {
@@ -327,7 +299,7 @@ export default function ResumeBuilder() {
       setResumeData(updated);
       initialFormData.current = { ...updated };
       setIsDirty(false);
-      navigate("/app");
+      navigate(-1);
     } catch (e) {
       console.error(e);
     }
@@ -335,10 +307,10 @@ export default function ResumeBuilder() {
 
   const handleBackToDashboard = () => {
     if (isDirty) {
-      setPendingAction(() => () => navigate("/app"));
+      setPendingAction(() => () => navigate(-1));
       setShowConfirmModal(true);
     } else {
-      navigate("/app");
+      navigate(-1);
     }
   };
 
@@ -355,49 +327,6 @@ export default function ResumeBuilder() {
     setPendingAction(null);
   };
 
-  const changeResumeVisibility = async () => {
-    if (!resumeId) return;
-    try {
-      const updated = await resumeApi.setVisibility(resumeId, !resumeData.public);
-      setResumeData((prev) => ({
-        ...prev,
-        public: updated.public,
-      }));
-      toast.success(
-        updated.public ? t("Resume is now public") : t("Resume is now private"),
-      );
-    } catch (error) {
-      console.error("Failed to change visibility", error);
-      toast.error(t("Failed to change visibility"));
-    }
-  };
-
-  const handleShare = () => {
-    setShowShareDialog(true);
-  };
-
-  const onPrint = () => {
-    window.print();
-  };
-
-  const onDownloadPdf = async () => {
-    try {
-      if (!resumeId) return;
-      const blob = await resumeApi.downloadPdf(resumeId);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      const fileName = resumeData.title
-        ? `${resumeData.title.replace(/[^a-z0-9]/gi, "_")}.pdf`
-        : `resume_${Date.now()}.pdf`;
-      a.href = url;
-      a.download = fileName;
-      a.click();
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Error downloading PDF:", error);
-    }
-  };
-
   return (
     <div>
       <div className="max-w-7xl mx-auto px-4 py-6 flex items-center justify-between">
@@ -405,74 +334,20 @@ export default function ResumeBuilder() {
           onClick={handleBackToDashboard}
           className="!border-0 !bg-[#f9fafb] hover:!text-purple-600 !text-lg !shadow-none !px-0"
         >
-          <ArrowLeftIcon className="size-4" /> {t("backToDashboard")}
+          <ArrowLeftIcon className="size-4" /> {t("Back")}
         </Button>
 
         <div className="flex items-center gap-2">
+          <Button onClick={handleCancel}>{t("Cancel")}</Button>
           <Button
-            onClick={() => setShowScoreModal(true)}
-            className="!bg-gradient-to-br !from-purple-50 !to-purple-200 !text-purple-700 hover:!border-purple-400"
+            onClick={handleSave}
+            // disabled={!isDirty}
+            color="default"
+            variant="solid"
+            className="flex mt-4 !bg-purple-600 max-w-fit disabled:!text-white/75"
           >
-            <Sparkles className="size-4" />
-            {t("AnalyzeScoreWithAI")}
+            {t("Save changes")}
           </Button>
-          <Button
-            onClick={() => {
-              navigate(`/app/preview/${resumeId}`);
-            }}
-            className="!bg-gradient-to-br !from-yellow-50 !to-yellow-100 !text-yellow-500
-             hover:!border-yellow-400"
-          >
-            <EyeIcon className="size-4" />
-            {t("Preview")}
-          </Button>
-          {resumeData.public && (
-            <Button
-              onClick={handleShare}
-              className="!bg-gradient-to-br !from-blue-100 !to-blue-200 !text-blue-600 hover:!border-blue-400"
-            >
-              <Share2Icon className="size-4" /> {t("Share")}
-            </Button>
-          )}
-          <Button
-            onClick={changeResumeVisibility}
-            className="!bg-gradient-to-br !from-purple-100 !to-purple-200 !text-purple-600 hover:!border-purple-400"
-          >
-            {resumeData.public ? t("Public") : t("Private")}
-          </Button>
-
-          <Popover
-            content={
-              <div className="flex flex-col gap-2">
-                <Button
-                  type="text"
-                  icon={<PrinterIcon className="size-4" />}
-                  onClick={onPrint}
-                  className="flex !justify-start"
-                >
-                  {t("Print")}
-                </Button>
-
-                <Button
-                  type="text"
-                  icon={<FileDown className="size-4" />}
-                  onClick={onDownloadPdf}
-                  className="flex !justify-start"
-                >
-                  {t("Download PDF")}
-                </Button>
-              </div>
-            }
-            trigger="click"
-            placement="bottom"
-          >
-            <Button
-              className="!bg-gradient-to-br !from-green-100 !to-green-200 
-                   !text-green-600 hover:!border-green-400"
-            >
-              <DownloadIcon className="size-4" /> {t("Download")}
-            </Button>
-          </Popover>
         </div>
       </div>
 
@@ -486,9 +361,8 @@ export default function ResumeBuilder() {
               <hr
                 className="absolute top-0 left-0 h-1 bg-gradient-to-r from-purple-500 to-purple-600 border-none transition-all duration-2000"
                 style={{
-                  width: `${
-                    (activeSectionIndex * 100) / (sections.length - 1)
-                  }%`,
+                  width: `${(activeSectionIndex * 100) / (sections.length - 1)
+                    }%`,
                 }}
               />
 
@@ -557,10 +431,9 @@ export default function ResumeBuilder() {
                           );
                         }
                       }}
-                      className={`flex items-center gap-1 p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all ${
-                        activeSectionIndex === sections.length - 1 &&
+                      className={`flex items-center gap-1 p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all ${activeSectionIndex === sections.length - 1 &&
                         "opacity-50"
-                      }`}
+                        }`}
                       disabled={activeSectionIndex === sections.length - 1}
                     >
                       {t("next")} <ChevronRight className="size-4" />
@@ -655,7 +528,7 @@ export default function ResumeBuilder() {
                   )}
 
                   {activeSection.id === "summary" && (
-                    <ProfessionalSummaryForm />
+                    <ProfessionalSummaryForm onChangeWithAi={syncResumeFromForm} />
                   )}
 
                   {activeSection.id === "experience" && (
@@ -667,6 +540,7 @@ export default function ResumeBuilder() {
                           experience: data,
                         }));
                       }}
+                      onChangeWithAi={syncResumeFromForm}
                     />
                   )}
 
@@ -691,6 +565,7 @@ export default function ResumeBuilder() {
                           project: data,
                         }));
                       }}
+                      onChangeWithAi={syncResumeFromForm}
                     />
                   )}
 
@@ -709,19 +584,6 @@ export default function ResumeBuilder() {
                     />
                   )}
                 </div>
-
-                <div className="flex gap-2 justify-end">
-                  <Button onClick={handleCancel}>{t("Cancel")}</Button>
-                  <Button
-                    onClick={handleSave}
-                    // disabled={!isDirty}
-                    color="default"
-                    variant="solid"
-                    className="flex mt-4 !bg-purple-600 max-w-fit disabled:!text-white/75"
-                  >
-                    {t("Save changes")}
-                  </Button>
-                </div>
               </Form>
             </div>
           </div>
@@ -732,7 +594,6 @@ export default function ResumeBuilder() {
               data={resumeData}
               template={resumeData.template || "classic"}
               accentColor={resumeData.accent_color || "#3B82F6"}
-              classes="shadow-lg"
             />
           </div>
         </div>
@@ -831,121 +692,6 @@ export default function ResumeBuilder() {
           )}
         </p>
       </Modal>
-
-      <Modal
-        open={showScoreModal}
-        onCancel={() => setShowScoreModal(false)}
-        footer={null}
-        title={
-          <span className="flex items-center gap-2">
-            <Sparkles className="size-4 text-purple-600" />
-            {t("ScoreAgainstJD")}
-          </span>
-        }
-      >
-        <div className="space-y-3">
-          <Input.TextArea
-            value={jdText}
-            onChange={(e) => setJdText(e.target.value)}
-            rows={5}
-            placeholder={t("PasteJDPlaceholder")}
-            autoSize={{ minRows: 5, maxRows: 10 }}
-            showCount
-          />
-          <div className="flex items-center justify-between">
-            <div className="text-xs text-gray-500">{t("JDScoreHelper")}</div>
-            <Button
-              size="small"
-              type="primary"
-              className="!bg-purple-600 disabled:!bg-purple-300"
-              loading={isScoring}
-              disabled={isScoring || !jdText.trim()}
-              onClick={handleScoreByJD}
-            >
-              <Sparkles className="size-4 mr-1" />
-              {t("AnalyzeJDButton")}
-            </Button>
-          </div>
-
-          {scoreResult && (
-            <div className="border border-slate-200 rounded-lg p-3 bg-white">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="size-4 text-purple-600" />
-                  <p className="text-sm font-semibold text-slate-800">
-                    {t("CVScoreTitle", {
-                      score: scoreResult.score,
-                      role: scoreResult.matchedRole || "",
-                    })}
-                  </p>
-                </div>
-                <Tag
-                  color={
-                    scoreResult.score >= 75
-                      ? "green"
-                      : scoreResult.score >= 60
-                      ? "blue"
-                      : "orange"
-                  }
-                >
-                  {scoreResult.score}/100
-                </Tag>
-              </div>
-
-              <div className="space-y-2 text-sm text-slate-700">
-                {scoreResult.missingSkills.length > 0 && (
-                  <div>
-                    <p className="font-medium text-slate-800">
-                      {t("MissingSkills")}
-                    </p>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {scoreResult.missingSkills.map((s) => (
-                        <Tag key={s} color="red">
-                          {s}
-                        </Tag>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {scoreResult.weakSections.length > 0 && (
-                  <div>
-                    <p className="font-medium text-slate-800">
-                      {t("WeakSections")}
-                    </p>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {scoreResult.weakSections.map((s) => (
-                        <Tag key={s} color="gold">
-                          {t(s) || s}
-                        </Tag>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {scoreResult.suggestions.length > 0 && (
-                  <div>
-                    <p className="font-medium text-slate-800">
-                      {t("Suggestions")}
-                    </p>
-                    <ul className="list-disc list-inside text-slate-700 space-y-1">
-                      {scoreResult.suggestions.map((s, idx) => (
-                        <li key={idx}>{s}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      </Modal>
-
-      <ShareDialog
-        open={showShareDialog}
-        onOpenChange={setShowShareDialog}
-        resumeId={resumeId || ""}
-      />
     </div>
   );
 }

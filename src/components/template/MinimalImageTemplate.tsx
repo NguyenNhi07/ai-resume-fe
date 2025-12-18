@@ -51,7 +51,7 @@ export const MinimalImageTemplate = ({
   };
 
   return (
-    <div className="bg-white p-8 max-w-4xl mx-auto" style={{ fontFamily }}>
+    <div className="bg-white p-8 max-w-4xl mx-auto rounded-lg" style={{ fontFamily }}>
       {/* Header với ảnh đại diện */}
       <div className="flex items-start gap-8 mb-12">
         {/* Ảnh đại diện */}

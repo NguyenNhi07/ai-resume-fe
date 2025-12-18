@@ -1,10 +1,20 @@
-import { Form } from "antd";
+import { Form, Spin } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { FileText, Sparkles } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { aiApi } from "@/lib/api";
+import { useToast } from "@/hooks/useToast";
 
-export const ProfessionalSummaryForm = () => {
+export const ProfessionalSummaryForm = ({
+  onChangeWithAi,
+}: {
+  onChangeWithAi?: () => void;
+}) => {
   const { t } = useTranslation();
+  const form = Form.useFormInstance();
+  const toast = useToast();
+  const [isOptimizing, setIsOptimizing] = useState(false);
 
   return (
     <div>
@@ -19,9 +29,30 @@ export const ProfessionalSummaryForm = () => {
         </div>
         <button
           type="button"
+          onClick={async () => {
+            const currentText = form.getFieldValue('professional_summary') || '';
+            if (!currentText.trim()) {
+              toast.error(t('Please enter some text first'));
+              return;
+            }
+            setIsOptimizing(true);
+            try {
+              const optimized = await aiApi.optimizeText(currentText);
+              form.setFieldValue("professional_summary", optimized);
+              // đồng bộ lại preview
+              onChangeWithAi?.();
+              toast.success(t("Text optimized successfully"));
+            } catch (error: any) {
+              console.error(error);
+              toast.error(error?.response?.data?.message || t('Failed to optimize text'));
+            } finally {
+              setIsOptimizing(false);
+            }
+          }}
+          disabled={isOptimizing}
           className="flex items-center gap-2 px-3 py-1 text-sm !bg-purple-100 !text-purple-700 rounded hover:bg-purple-200 transition-colors disabled:opacity-50"
         >
-          <Sparkles className="size-4" />
+          {isOptimizing ? <Spin size="small" /> : <Sparkles className="size-4" />}
           {t("AI Enhance")}
         </button>
       </div>

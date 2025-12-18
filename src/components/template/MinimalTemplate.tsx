@@ -52,7 +52,7 @@ export const MinimalTemplate = ({
   };
 
   return (
-    <div className="bg-white p-8 max-w-4xl mx-auto" style={{ fontFamily }}>
+    <div className="bg-white p-8 max-w-4xl mx-auto rounded-lg" style={{ fontFamily }}>
       {/* Header - Minimal */}
       <div className="text-center mb-12">
         {/* Avatar */}

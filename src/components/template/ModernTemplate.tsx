@@ -52,7 +52,7 @@ export const ModernTemplate = ({
   };
 
   return (
-    <div className="bg-white min-h-screen" style={{ fontFamily }}>
+    <div className="bg-white min-h-screen rounded-lg" style={{ fontFamily }}>
       {/* Header với background gradient */}
       <div
         className="relative"

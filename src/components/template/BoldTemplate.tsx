@@ -31,7 +31,7 @@ export const BoldTemplate = ({
   };
 
   return (
-    <div className="bg-gray-900 text-white p-10 max-w-4xl mx-auto min-h-screen">
+    <div className="bg-gray-900 text-white p-10 max-w-4xl mx-auto min-h-screen rounded-lg">
       {/* Hero */}
       <div className="mb-12">
         <div className="flex items-end justify-between mb-6">

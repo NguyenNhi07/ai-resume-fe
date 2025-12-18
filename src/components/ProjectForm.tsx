@@ -1,17 +1,25 @@
 import type { Project } from "@/lib/type";
-import { Button, Form, Input, Select } from "antd";
+import { Button, Form, Input, Select, Spin } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { FolderIcon, Plus, Trash2, Code, Sparkles } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { aiApi } from "@/lib/api";
+import { useToast } from "@/hooks/useToast";
 
 export const ProjectForm = ({
   data,
   onChange,
+  onChangeWithAi,
 }: {
   data: Project[];
   onChange: (value: Project[]) => void;
+  onChangeWithAi?: () => void;
 }) => {
   const { t } = useTranslation();
+  const form = Form.useFormInstance();
+  const toast = useToast();
+  const [optimizingIndex, setOptimizingIndex] = useState<number | null>(null);
 
   const addProject = () => {
     const newProject: Project = {
@@ -99,9 +107,47 @@ export const ProjectForm = ({
                     </span>
                     <button
                       type="button"
+                      onClick={async () => {
+                        const currentText =
+                          form.getFieldValue([
+                            "project",
+                            index,
+                            "description",
+                          ]) || "";
+                        if (!currentText.trim()) {
+                          toast.error(t("Please enter some text first"));
+                          return;
+                        }
+                        setOptimizingIndex(index);
+                        try {
+                          const optimized = await aiApi.optimizeText(
+                            currentText
+                          );
+                          form.setFieldValue(
+                            ["project", index, "description"],
+                            optimized
+                          );
+                          // đồng bộ lại preview
+                          onChangeWithAi?.();
+                          toast.success(t("Text optimized successfully"));
+                        } catch (error: any) {
+                          console.error(error);
+                          toast.error(
+                            error?.response?.data?.message ||
+                              t("Failed to optimize text")
+                          );
+                        } finally {
+                          setOptimizingIndex(null);
+                        }
+                      }}
+                      disabled={optimizingIndex === index}
                       className="flex items-center gap-1 px-2 py-1 text-xs bg-purple-100 !text-purple-700 rounded hover:bg-purple-200 transition-colors disabled:opacity-50"
                     >
-                      <Sparkles className="w-3 h-3" />
+                      {optimizingIndex === index ? (
+                        <Spin size="small" />
+                      ) : (
+                        <Sparkles className="w-3 h-3" />
+                      )}
                       {t("Enhance with AI")}
                     </button>
                   </div>

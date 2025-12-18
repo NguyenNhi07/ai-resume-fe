@@ -14,7 +14,7 @@ export const ResumePreview = ({
   data: Resume;
   template: string;
   accentColor: string;
-  classes: string;
+  classes?: string;
 }) => {
   const fontMap: Record<string, string> = {
     times: "Times New Roman, serif",
@@ -53,11 +53,11 @@ export const ResumePreview = ({
   };
 
   return (
-    <div className="w-full bg-gray-100">
+    <div className="w-full bg-gray-100 rounded-lg">
       <div
         id="resume-preview"
         className={
-          "border border-gray-200 print:shadow-none print:border-none " +
+          "border border-gray-200 print:shadow-none print:border-none rounded-lg " +
           classes
         }
       >

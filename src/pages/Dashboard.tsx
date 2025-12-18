@@ -45,9 +45,19 @@ export default function Dashboard() {
   const [tableSort, setTableSort] = useState<{
     field?: 'title' | 'createdAt' | 'updatedAt';
     order?: 'ascend' | 'descend';
-  }>({ field: 'updatedAt', order: 'descend' });
+  }>({});
+  const [pagination, setPagination] = useState<{
+    current: number;
+    pageSize: number;
+    total: number;
+  }>({
+    current: 1,
+    pageSize: 10,
+    total: 0,
+  });
 
   const loadAllResumes = async (options?: {
+    page?: number;
     sortField?: 'title' | 'createdAt' | 'updatedAt';
     sortOrder?: 'ascend' | 'descend';
   }) => {
@@ -61,12 +71,20 @@ export default function Dashboard() {
         sortOrder = options.sortOrder === 'ascend' ? 'asc' : 'desc';
       }
 
-      const data = await resumeApi.list({
-        page: 1,
-        pageSize: 99,
+      const page = options?.page ?? pagination.current;
+      const result = await resumeApi.list({
+        page,
+        pageSize: pagination.pageSize,
         ...(sortBy && sortOrder ? { sortBy, sortOrder } : {}),
       });
-      setAllResumes(data);
+      setAllResumes(result.data);
+      if (result.pagination) {
+        setPagination((prev) => ({
+          ...prev,
+          current: result.pagination!.page,
+          total: result.pagination!.total,
+        }));
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -77,13 +95,13 @@ export default function Dashboard() {
   const loadRecentResumes = async () => {
     setLoadingRecent(true);
     try {
-      const data = await resumeApi.list({
+      const result = await resumeApi.list({
         page: 1,
         pageSize: 5,
         sortBy: 'updatedAt',
         sortOrder: 'desc',
       });
-      setRecentResumes(data);
+      setRecentResumes(result.data);
     } catch (e) {
       console.error(e);
     } finally {
@@ -105,7 +123,8 @@ export default function Dashboard() {
     setShowCreateResume(false);
     try {
       const created = await resumeApi.createWithTitle(title || "New Resume");
-      setAllResumes((prev) => [created, ...prev]);
+      // Reload first page to show new resume
+      loadAllResumes({ page: 1 });
       setRecentResumes((prev) => [created, ...prev].slice(0, 5));
       navigate(`/app/builder/${created.id}`);
     } catch (e) {
@@ -126,10 +145,9 @@ export default function Dashboard() {
       const target = allResumes.find((r) => String(r.id) === String(editResumeId));
       if (!target) return;
       const updatedResume: Resume = { ...target, title: title.trim() };
-      const saved = await resumeApi.update(String(updatedResume.id), updatedResume);
-      setAllResumes((prev) =>
-        prev.map((r) => (String(r.id) === String(saved.id) ? saved : r)),
-      );
+      await resumeApi.update(String(updatedResume.id), updatedResume);
+      // Reload current page
+      loadAllResumes({ page: pagination.current });
       toast.success(t("updateSuccess") || "Updated resume title successfully");
     } catch (e) {
       console.error(e);
@@ -143,9 +161,8 @@ export default function Dashboard() {
   const handleDeleteResume = async (resumeId: number) => {
     try {
       await resumeApi.remove(String(resumeId));
-      setAllResumes((prev) =>
-        prev.filter((resume) => Number(resume.id) !== resumeId)
-      );
+      // Reload current page
+      loadAllResumes({ page: pagination.current });
       setRecentResumes((prev) =>
         prev.filter((resume) => Number(resume.id) !== resumeId)
       );
@@ -162,8 +179,8 @@ export default function Dashboard() {
       navigate(`/auth/login?state=${state}`);
       return;
     }
-    // default: table sort by updatedAt desc, recents by updatedAt desc (pageSize 5)
-    loadAllResumes({ sortField: 'updatedAt', sortOrder: 'descend' });
+    // default: load first page, recents by updatedAt desc (pageSize 5)
+    loadAllResumes({ page: 1 });
     loadRecentResumes();
   }, [searchParams, navigate]);
 
@@ -216,14 +233,16 @@ export default function Dashboard() {
                       className="absolute top-1 right-1 hidden group-hover:flex items-center "
                     >
                       <Popover
-                        open={openPopoverId === String(resume.id)}
+                        open={openPopoverId === `recent-${resume.id}`}
                         onOpenChange={(visible) =>
-                          setOpenPopoverId(visible ? String(resume.id) : null)
+                          setOpenPopoverId(visible ? `recent-${resume.id}` : null)
                         }
+                        getPopupContainer={(trigger) => trigger.parentElement || document.body}
                         content={
-                          <div className="flex flex-col gap-1 py-1">
+                          <div className="flex flex-col gap-1 py-1" onClick={(e) => e.stopPropagation()}>
                             <button
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 setDeleteResume(true);
                                 setDeleteResumeId(Number(resume.id));
                                 setOpenPopoverId(null);
@@ -235,7 +254,8 @@ export default function Dashboard() {
                             </button>
 
                             <button
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 setEditResumeId(resume.id ?? "");
                                 setTitle(resume.title ?? "");
                                 setOpenPopoverId(null);
@@ -247,7 +267,8 @@ export default function Dashboard() {
                             </button>
 
                             <button
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 // TODO: implement duplicate logic
                                 setDuplicateResumeId(resume.id ?? "");
                                 setTitle(`${resume.title || t("enterResumeTitle")} (copy)`);
@@ -257,39 +278,6 @@ export default function Dashboard() {
                             >
                               <Copy className="size-4 text-purple-600 transition-colors" />
                               {t("Duplicate")}
-                            </button>
-
-                            <button
-                              onClick={() => {
-                                navigate(`/app/tailor/${resume.id}`);
-                                setOpenPopoverId(null);
-                              }}
-                              className="flex items-center gap-2 px-3 py-1.5 rounded-md text-violet-600 hover:bg-violet-50 transition-colors"
-                            >
-                              <Sparkles className="size-4 text-violet-600 transition-colors" />
-                              {t("TailorCVByJDMenu")}
-                            </button>
-
-                            <button
-                              onClick={() => {
-                                navigate(`/app/mock-interview/${resume.id}`);
-                                setOpenPopoverId(null);
-                              }}
-                              className="flex items-center gap-2 px-3 py-1.5 rounded-md text-indigo-600 hover:bg-indigo-50 transition-colors"
-                            >
-                              <Sparkles className="size-4 text-indigo-600 transition-colors" />
-                              {t("MockInterviewMenu")}
-                            </button>
-
-                            <button
-                              onClick={() => {
-                                navigate(`/app/cover-letter/${resume.id}`);
-                                setOpenPopoverId(null);
-                              }}
-                              className="flex items-center gap-2 px-3 py-1.5 rounded-md text-emerald-600 hover:bg-emerald-50 transition-colors"
-                            >
-                              <Sparkles className="size-4 text-emerald-600 transition-colors" />
-                              {t("CoverLetterMenu")}
                             </button>
                           </div>
                         }
@@ -310,15 +298,25 @@ export default function Dashboard() {
         <div className="bg-white rounded-xl mt-5 gap-2 flex flex-col">
           <div className="text-[32px] font-medium text-black/70 p-4">{t('Resumes')}</div>
           {view === 'list' ? (
-          <Table
+            <Table
               onRow={(record) => ({
                 onClick: () => {
                   navigate(`/app/builder/${record.id}`);
                 },
               })}
-              dataSource={filteredResumes}
+              dataSource={search.trim() ? filteredResumes : allResumes}
               loading={loadingTable}
-              pagination={allResumes.length > 9 ? { pageSize: 9 } : false}
+              pagination={{
+                current: pagination.current,
+                pageSize: pagination.pageSize,
+                total: search.trim() ? filteredResumes.length : pagination.total,
+                showSizeChanger: false,
+                onChange: (page) => {
+                  if (!search.trim()) {
+                    loadAllResumes({ page });
+                  }
+                },
+              }}
               onChange={(_, __, sorter: any) => {
                 const field = sorter.field as 'title' | 'createdAt' | 'updatedAt' | undefined;
                 const order = sorter.order as 'ascend' | 'descend' | undefined;
@@ -326,10 +324,10 @@ export default function Dashboard() {
                   setTableSort({ field, order });
                   const sortField: 'title' | 'createdAt' | 'updatedAt' =
                     field === 'title' ? 'title' : field === 'createdAt' ? 'createdAt' : 'updatedAt';
-                  loadAllResumes({ sortField, sortOrder: order });
+                  loadAllResumes({ page: pagination.current, sortField, sortOrder: order });
                 } else {
                   setTableSort({});
-                  loadAllResumes();
+                  loadAllResumes({ page: pagination.current });
                 }
               }}
             >
@@ -390,35 +388,11 @@ export default function Dashboard() {
                   >
                     <Copy className="size-4 text-purple-600 transition-colors cursor-pointer" />
                   </button></Tooltip>
-                  <Tooltip title={t("TailorCVByJDMenu")}><button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      navigate(`/app/tailor/${record.id}`);
-                    }}
-                  >
-                    <Sparkles className="size-4 text-violet-600 transition-colors cursor-pointer" />
-                  </button></Tooltip>
-                  <Tooltip title={t("MockInterviewMenu")}><button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      navigate(`/app/mock-interview/${record.id}`);
-                    }}
-                  >
-                    <Sparkles className="size-4 text-indigo-600 transition-colors cursor-pointer" />
-                  </button></Tooltip>
-                  <Tooltip title={t("CoverLetterMenu")}><button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      navigate(`/app/cover-letter/${record.id}`);
-                    }}
-                  >
-                    <Sparkles className="size-4 text-emerald-600 transition-colors cursor-pointer" />
-                  </button></Tooltip>
                 </div>
               )} />
             </Table>
           ) : (
-            <div className={cn("flex gap-2 items-center", view === 'grid' ? 'px-4' : undefined)}>
+            <div className={cn("flex gap-2 items-center", view === 'grid' ? 'px-4 pb-4' : undefined)}>
               {loadingTable && (
                 <div className="w-full flex justify-center py-6">
                   <Spin />
@@ -438,14 +412,16 @@ export default function Dashboard() {
                         className="absolute top-1 right-1 hidden group-hover:flex items-center "
                       >
                         <Popover
-                          open={openPopoverId === String(resume.id)}
+                          open={openPopoverId === `grid-${resume.id}`}
                           onOpenChange={(visible) =>
-                            setOpenPopoverId(visible ? String(resume.id) : null)
+                            setOpenPopoverId(visible ? `grid-${resume.id}` : null)
                           }
+                          getPopupContainer={(trigger) => trigger.parentElement || document.body}
                           content={
-                            <div className="flex flex-col gap-1 py-1">
+                            <div className="flex flex-col gap-1 py-1" onClick={(e) => e.stopPropagation()}>
                               <button
-                                onClick={() => {
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                   setDeleteResume(true);
                                   setDeleteResumeId(Number(resume.id));
                                   setOpenPopoverId(null);
@@ -457,7 +433,8 @@ export default function Dashboard() {
                               </button>
 
                               <button
-                                onClick={() => {
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                   setEditResumeId(resume.id ?? "");
                                   setTitle(resume.title ?? "");
                                   setOpenPopoverId(null);
@@ -469,7 +446,8 @@ export default function Dashboard() {
                               </button>
 
                               <button
-                                onClick={() => {
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                   // TODO: implement duplicate logic
                                   setDuplicateResumeId(resume.id ?? "");
                                   setTitle(`${resume.title || t("enterResumeTitle")} (copy)`);
@@ -479,39 +457,6 @@ export default function Dashboard() {
                               >
                                 <Copy className="size-4 text-purple-600 transition-colors" />
                                 {t("Duplicate")}
-                              </button>
-
-                              <button
-                                onClick={() => {
-                                  navigate(`/app/tailor/${resume.id}`);
-                                  setOpenPopoverId(null);
-                                }}
-                                className="flex items-center gap-2 px-3 py-1.5 rounded-md text-violet-600 hover:bg-violet-50 transition-colors"
-                              >
-                                <Sparkles className="size-4 text-violet-600 transition-colors" />
-                                {t("TailorCVByJDMenu")}
-                              </button>
-
-                              <button
-                                onClick={() => {
-                                  navigate(`/app/mock-interview/${resume.id}`);
-                                  setOpenPopoverId(null);
-                                }}
-                                className="flex items-center gap-2 px-3 py-1.5 rounded-md text-indigo-600 hover:bg-indigo-50 transition-colors"
-                              >
-                                <Sparkles className="size-4 text-indigo-600 transition-colors" />
-                                {t("MockInterviewMenu")}
-                              </button>
-
-                              <button
-                                onClick={() => {
-                                  navigate(`/app/cover-letter/${resume.id}`);
-                                  setOpenPopoverId(null);
-                                }}
-                                className="flex items-center gap-2 px-3 py-1.5 rounded-md text-emerald-600 hover:bg-emerald-50 transition-colors"
-                              >
-                                <Sparkles className="size-4 text-emerald-600 transition-colors" />
-                                {t("CoverLetterMenu")}
                               </button>
                             </div>
                           }
@@ -671,7 +616,8 @@ export default function Dashboard() {
                 title: title.trim(),
               };
               const created = await resumeApi.create(payload);
-              setAllResumes((prev) => [created, ...prev]);
+              // Reload first page to show new resume
+              loadAllResumes({ page: 1 });
               setRecentResumes((prev) => [created, ...prev].slice(0, 5));
               toast.success(t("createResumeSuccess") || "Duplicated resume successfully");
               navigate(`/app/builder/${created.id}`);

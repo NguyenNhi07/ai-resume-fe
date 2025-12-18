@@ -181,32 +181,76 @@ export interface UploadImageResponse {
 // ----------------- resume mapping helpers -----------------
 const DEFAULT_PAGE_SIZE = 99;
 
-const toBackendResume = (r: Resume) => ({
-  // BE field `name` là tên người; `title` là tên CV
-  name: r.personal_info?.full_name || r.title,
-  title: r.title,
-  avatar: r.personal_info?.image || undefined,
-  dateOfBirth: r.personal_info?.birthDate
-    ? dayjs(r.personal_info.birthDate, 'DD/MM/YYYY').toISOString()
-    : undefined,
-  gender: r.personal_info?.gender,
-  email: r.personal_info?.email,
-  phoneNumber: r.personal_info?.phone,
-  address: r.personal_info?.location,
-  profession: r.personal_info?.profession,
-  language: r.personal_info?.language,
-  website: r.personal_info?.website || undefined,
-  professional: r.professional_summary,
-  summary: r.professional_summary,
-  skills: r.skills,
-  experiences: r.experience,
-  educations: r.education,
-  projects: r.project,
-  template: r.template || 'classic',
-  accentColor: r.accent_color || '#3B82F6',
-  fontFamily: r.font_family || 'inter',
-  isPublic: r.public,
-});
+const toBackendResume = (r: Resume) => {
+  const experiences =
+    Array.isArray(r.experience) && r.experience.length
+      ? r.experience.map((exp) => ({
+          companyName: exp.company ?? '',
+          jobTitle: exp.position ?? '',
+          jobDescription: exp.description ?? '',
+          isCurrent: exp.is_current ?? false,
+          startDate: exp.start_date
+            ? dayjs(exp.start_date, 'MM/YYYY').toISOString()
+            : undefined,
+          endDate: exp.end_date
+            ? dayjs(exp.end_date, 'MM/YYYY').toISOString()
+            : undefined,
+        }))
+      : undefined;
+
+  const educations =
+    Array.isArray(r.education) && r.education.length
+      ? r.education.map((edu) => ({
+          institutionName: edu.institution ?? '',
+          degree: edu.degree ?? '',
+          fieldOfStudy: edu.field ?? '',
+          graduationDate: edu.graduation_date
+            ? dayjs(edu.graduation_date, 'MM/YYYY').toISOString()
+            : undefined,
+          gpa: edu.gpa ?? '',
+        }))
+      : undefined;
+
+  const projects =
+    Array.isArray(r.project) && r.project.length
+      ? r.project.map((p) => ({
+          projectName: p.name ?? '',
+          description: p.description ?? '',
+          technologies: Array.isArray(p.technologies)
+            ? p.technologies.filter(Boolean)
+            : p.technologies
+            ? [String(p.technologies)]
+            : [],
+        }))
+      : undefined;
+
+  return {
+    // BE field `name` là tên người; `title` là tên CV
+    name: r.personal_info?.full_name || r.title,
+    title: r.title,
+    avatar: r.personal_info?.image || undefined,
+    dateOfBirth: r.personal_info?.birthDate
+      ? dayjs(r.personal_info.birthDate, 'DD/MM/YYYY').toISOString()
+      : undefined,
+    gender: r.personal_info?.gender,
+    email: r.personal_info?.email,
+    phoneNumber: r.personal_info?.phone,
+    address: r.personal_info?.location,
+    profession: r.personal_info?.profession,
+    language: r.personal_info?.language,
+    website: r.personal_info?.website || undefined,
+    professional: r.professional_summary,
+    summary: r.professional_summary,
+    skills: r.skills,
+    ...(experiences ? { experiences } : {}),
+    ...(educations ? { educations } : {}),
+    ...(projects ? { projects } : {}),
+    template: r.template || 'classic',
+    accentColor: r.accent_color || '#3B82F6',
+    fontFamily: r.font_family || 'inter',
+    isPublic: r.public,
+  };
+};
 
 const toFrontendResume = (data: any): Resume => ({
   id: String(data.id ?? ''),
@@ -228,11 +272,54 @@ const toFrontendResume = (data: any): Resume => ({
     profession: data.profession ?? '',
   },
   professional_summary: data.summary ?? data.professional ?? '',
-  experience: Array.isArray(data.experiences) ? data.experiences : [],
-  education: Array.isArray(data.educations) ? data.educations : [],
+  experience: Array.isArray(data.experiences)
+    ? data.experiences.map((e: any) => {
+        const start = e.start_date ?? e.startDate;
+        const end = e.end_date ?? e.endDate;
+        const isCurrent = e.is_current ?? e.isCurrent ?? false;
+        const startStr = start
+          ? dayjs(start).isValid()
+            ? dayjs(start).format('MM/YYYY')
+            : String(start)
+          : '';
+        const endStr = isCurrent
+          ? ''
+          : end
+          ? dayjs(end).isValid()
+            ? dayjs(end).format('MM/YYYY')
+            : String(end)
+          : '';
+        return {
+          company: e.company ?? e.companyName ?? '',
+          position: e.position ?? e.jobTitle ?? '',
+          description: e.description ?? e.jobDescription ?? '',
+          is_current: isCurrent,
+          start_date: startStr,
+          end_date: endStr,
+        };
+      })
+    : [],
+  education: Array.isArray(data.educations)
+    ? data.educations.map((edu: any) => {
+        const grad = edu.graduation_date ?? edu.graduationDate;
+        const gradStr = grad
+          ? dayjs(grad).isValid()
+            ? dayjs(grad).format('MM/YYYY')
+            : String(grad)
+          : '';
+        return {
+          institution: edu.institution ?? edu.institutionName ?? '',
+          degree: edu.degree ?? '',
+          field: edu.field ?? edu.fieldOfStudy ?? '',
+          graduation_date: gradStr,
+          gpa: edu.gpa ?? '',
+        };
+      })
+    : [],
   project: Array.isArray(data.projects)
     ? data.projects.map((p: any) => ({
-        ...p,
+        name: p.name ?? p.projectName ?? '',
+        description: p.description ?? '',
         technologies: Array.isArray(p?.technologies)
           ? p.technologies.filter(Boolean)
           : p?.technologies
@@ -390,7 +477,7 @@ export const resumeApi = {
     lastItemId?: number;
     sortBy?: 'title' | 'createdAt' | 'updatedAt';
     sortOrder?: 'asc' | 'desc';
-  }): Promise<Resume[]> => {
+  }): Promise<{ data: Resume[]; pagination?: { page: number; pageSize: number; total: number; totalPages: number } }> => {
     const orderBy: string[] = [];
     if (params?.sortBy) {
       orderBy.push(`${params.sortBy}:${params.sortOrder || 'desc'}`);
@@ -404,7 +491,10 @@ export const resumeApi = {
     };
     const res = await api.get('/resume', { params: query });
     const items = res.data?.data || res.data || [];
-    return items.map(toFrontendResume);
+    return {
+      data: items.map(toFrontendResume),
+      pagination: res.data?.pagination,
+    };
   },
   detail: async (id: string | number): Promise<Resume> => {
     const res = await api.get(`/resume/${id}`);
@@ -453,6 +543,19 @@ export const fileApi = {
     const filename = res.data.filename;
     // public URL to access the stored image
     return `${API_BASE_URL}/storage/local/${filename}`;
+  },
+};
+
+export const aiApi = {
+  optimizeText: async (text: string): Promise<string> => {
+    if (USE_MOCK_API) {
+      await mockDelay(1000);
+      // Mock optimized text
+      return `[Optimized] ${text}`;
+    }
+    // BE đã có prefix /api và versioning /v1, nên FE chỉ cần gọi /ai/optimize-text
+    const res = await api.post<{ optimizedText: string }>('/ai/optimize-text', { text });
+    return res.data.optimizedText;
   },
 };
 

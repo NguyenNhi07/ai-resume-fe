@@ -51,7 +51,7 @@ export const ClassicTemplate = ({
   };
 
   return (
-    <div className="bg-white p-8 max-w-4xl mx-auto" style={{ fontFamily }}>
+    <div className="bg-white p-8 max-w-4xl mx-auto rounded-lg" style={{ fontFamily }}>
       {/* Header */}
       <div
         className="text-center mb-8 border-b-2 pb-6"

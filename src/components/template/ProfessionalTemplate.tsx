@@ -30,7 +30,7 @@ export const ProfessionalTemplate = ({
   };
 
   return (
-    <div className="bg-white p-10 max-w-4xl mx-auto">
+    <div className="bg-white p-10 max-w-4xl mx-auto rounded-lg">
       {/* Header with Background */}
       <div
         className="p-8 mb-8 rounded-none -mx-10"

@@ -19,6 +19,7 @@ import MockInterview from './pages/MockInterview'
 import CoverLetter from './pages/CoverLetter'
 import TailorByJD from './pages/TailorByJD'
 import { Toaster } from 'sonner';
+import ResumeDetail from './pages/ResumeDetail'
 
 function App() {
 
@@ -30,7 +31,8 @@ function App() {
 
         <Route path='app' element={<Layout />}>
           <Route index element={<Dashboard />} />
-          <Route path='builder/:resumeId' element={<ResumeBuilder />} />
+          <Route path='builder/:resumeId' element={<ResumeDetail />} />
+          <Route path='builder/:resumeId/edit' element={<ResumeBuilder />} />
           <Route path='preview/:resumeId' element={<PreviewResume />} />
           <Route path='tailor/:resumeId' element={<TailorByJD />} />
           <Route path='mock-interview/:resumeId' element={<MockInterview />} />
