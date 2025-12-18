@@ -582,6 +582,17 @@ export const aiApi = {
     const res = await api.post('/ai/cover-letter', { resumeText, jdText, type });
     return res.data;
   },
+  generateInterviewQuestions: async (
+    resumeText: string,
+    jdText: string,
+  ): Promise<{
+    language: string;
+    matchedPosition?: string;
+    questions: { type: string; question: string; expectedAnswer: string }[];
+  }> => {
+    const res = await api.post('/ai/interview-questions', { resumeText, jdText });
+    return res.data;
+  },
 };
 
 export default api;

@@ -3,13 +3,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button, Input, Tag } from "antd";
 import { Sparkles, ArrowLeftIcon, FileText } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import {
-  extractSkillsFromJD,
-  generateInterviewQuestions,
-  scoreInterviewAnswers,
-} from "@/lib/utils";
+import { extractSkillsFromJD, scoreInterviewAnswers } from "@/lib/utils";
 import type { Resume } from "@/lib/type";
-import { resumeApi } from "@/lib/api";
+import { resumeApi, aiApi } from "@/lib/api";
 
 const { TextArea } = Input;
 
@@ -21,7 +17,7 @@ export default function MockInterview() {
   const [resume, setResume] = useState<Resume | null>(null);
   const [jdText, setJdText] = useState("");
   const [questions, setQuestions] = useState<
-    Array<{ id: string; type: "technical" | "behavioral"; question: string; hint?: string }>
+    Array<{ id: string; type: "technical" | "behavioral" | "experience" | "situational" | "soft-skill"; question: string; hint?: string }>
   >([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [score, setScore] = useState<{ total: number; perQuestion: Array<{ id: string; score: number; feedback: string }> } | null>(null);
@@ -38,16 +34,76 @@ export default function MockInterview() {
 
   const jdSkills = useMemo(() => extractSkillsFromJD(jdText, resume?.skills || []), [jdText, resume]);
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!resume) return;
     setIsGenerating(true);
-    setTimeout(() => {
-      const qs = generateInterviewQuestions(resume, jdText, jdSkills);
-      setQuestions(qs);
+    try {
+      // Build resumeText giống cách làm ở CoverLetter để gửi cho AI
+      const parts: string[] = [];
+      if (resume.personal_info?.full_name) {
+        parts.push(`Name: ${resume.personal_info.full_name}`);
+      }
+      if (resume.personal_info?.profession) {
+        parts.push(`Profession: ${resume.personal_info.profession}`);
+      }
+      if (resume.professional_summary) {
+        parts.push(`Summary: ${resume.professional_summary}`);
+      }
+      if (resume.experience?.length) {
+        parts.push(
+          "Experience:",
+          ...resume.experience.map((e) =>
+            `- ${e.position || ""} at ${e.company || ""} (${e.start_date || ""} - ${
+              e.is_current ? "Present" : e.end_date || ""
+            }) ${e.description || ""}`,
+          ),
+        );
+      }
+      if (resume.education?.length) {
+        parts.push(
+          "Education:",
+          ...resume.education.map((ed) =>
+            `- ${ed.degree || ""} in ${ed.field || ""} at ${ed.institution || ""} (${
+              ed.graduation_date || ""
+            }) GPA: ${ed.gpa || ""}`,
+          ),
+        );
+      }
+      if (resume.project?.length) {
+        parts.push(
+          "Projects:",
+          ...resume.project.map((p) =>
+            `- ${p.name || ""}: ${p.description || ""} (Tech: ${(p.technologies || []).join(
+              ", ",
+            )})`,
+          ),
+        );
+      }
+      if (resume.skills?.length) {
+        parts.push(`Skills: ${resume.skills.join(", ")}`);
+      }
+      const resumeText = parts.join("\n");
+
+      const res = await aiApi.generateInterviewQuestions(resumeText, jdText);
+
+      const mapped = (res.questions || []).map((q, idx) => ({
+        id: `q-${idx + 1}`,
+        // fallback: mọi type không phải technical → behavioral để mapping màu Tag đơn giản
+        type: (q.type as any) || "Technical",
+        question: q.question,
+        hint: q.expectedAnswer,
+      }));
+
+      setQuestions(mapped);
       setAnswers({});
       setScore(null);
+    } catch (e: any) {
+      console.error(e);
+      // eslint-disable-next-line no-alert
+      alert(e?.response?.data?.message || "Failed to generate interview questions");
+    } finally {
       setIsGenerating(false);
-    }, 300);
+    }
   };
 
   const handleScore = () => {
@@ -171,11 +227,11 @@ export default function MockInterview() {
               <div className="space-y-4">
                 {questions.map((q) => (
                   <div key={q.id} className="border border-slate-200 rounded-lg p-3">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Tag color={q.type === "technical" ? "blue" : "gold"}>{q.type}</Tag>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Tag color={q.type === "technical" ? "blue" : "gold"}>{q.type.charAt(0).toUpperCase() + q.type.slice(1)}</Tag>
                       <p className="text-sm font-semibold text-slate-800">{q.question}</p>
                     </div>
-                    {q.hint && <p className="text-xs text-slate-500 mb-2">{q.hint}</p>}
+                    {q.hint && <div className="text-xs text-slate-500 mb-3">{q.hint}</div>}
                     <TextArea
                       value={answers[q.id] || ""}
                       onChange={(e) =>
@@ -187,7 +243,6 @@ export default function MockInterview() {
                       rows={4}
                       placeholder={t("YourAnswerPlaceholder")}
                       autoSize={{ minRows: 4, maxRows: 8 }}
-                      showCount
                     />
                     {score?.perQuestion.find((p) => p.id === q.id) && (
                       <div className="mt-2 flex items-center justify-between">
