@@ -557,6 +557,19 @@ export const aiApi = {
     const res = await api.post<{ optimizedText: string }>('/ai/optimize-text', { text });
     return res.data.optimizedText;
   },
+  scoreResumeByJD: async (
+    resumeText: string,
+    jdText: string,
+  ): Promise<{
+    score: number;
+    missingSkills: string[];
+    weakSections: string[];
+    suggestions: string[];
+    matchedRole?: string;
+  }> => {
+    const res = await api.post('/ai/score-resume-jd', { resumeText, jdText });
+    return res.data;
+  },
 };
 
 export default api;

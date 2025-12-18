@@ -10,8 +10,8 @@ import { SkillsForm } from "@/components/SkillsForm";
 import { TemplateSelector } from "@/components/TemplateSelector";
 import { profileDefault } from "@/lib/constant";
 import type { Experience, Resume } from "@/lib/type";
-import { cn, dummyResumeData, extractSkillsFromJD, scoreResumeAgainstJD } from "@/lib/utils";
-import { resumeApi, userApi } from "@/lib/api";
+import { cn, dummyResumeData, extractSkillsFromJD } from "@/lib/utils";
+import { resumeApi, userApi, aiApi } from "@/lib/api";
 import { useToast } from "@/hooks/useToast";
 import { Button, Form, Modal, Popover, Select, Input, Tag } from "antd";
 import dayjs, { Dayjs } from "dayjs";
@@ -173,14 +173,54 @@ export default function ResumeDetail() {
         if (!jdText.trim()) return;
         setIsScoring(true);
         try {
-            const skills = extractSkillsFromJD(jdText, resumeData.skills || []);
-            const scored = await scoreResumeAgainstJD(resumeData, jdText, skills);
+            const parts: string[] = [];
+            if (resumeData.personal_info?.full_name) {
+                parts.push(`Name: ${resumeData.personal_info.full_name}`);
+            }
+            if (resumeData.personal_info?.profession) {
+                parts.push(`Profession: ${resumeData.personal_info.profession}`);
+            }
+            if (resumeData.professional_summary) {
+                parts.push(`Summary: ${resumeData.professional_summary}`);
+            }
+            if (resumeData.experience?.length) {
+                parts.push(
+                    "Experience:",
+                    ...resumeData.experience.map((e) =>
+                        `- ${e.position || ""} at ${e.company || ""} (${e.start_date || ""} - ${e.is_current ? "Present" : e.end_date || ""}) ${e.description || ""}`,
+                    ),
+                );
+            }
+            if (resumeData.education?.length) {
+                parts.push(
+                    "Education:",
+                    ...resumeData.education.map((ed) =>
+                        `- ${ed.degree || ""} in ${ed.field || ""} at ${ed.institution || ""} (${ed.graduation_date || ""}) GPA: ${ed.gpa || ""}`,
+                    ),
+                );
+            }
+            if (resumeData.project?.length) {
+                parts.push(
+                    "Projects:",
+                    ...resumeData.project.map((p) =>
+                        `- ${p.name || ""}: ${p.description || ""} (Tech: ${(p.technologies || []).join(", ")})`,
+                    ),
+                );
+            }
+            if (resumeData.skills?.length) {
+                parts.push(`Skills: ${resumeData.skills.join(", ")}`);
+            }
+            const resumeText = parts.join("\n");
+
+            const scored = await aiApi.scoreResumeByJD(resumeText, jdText);
             setScoreResult(scored);
             setShowScoreModal(true);
+        } catch (error: any) {
+            console.error(error);
+            toast.error(error?.response?.data?.message || t("Failed to score resume by JD"));
         } finally {
             setIsScoring(false);
             setJdText("");
-            setScoreResult(null);
         }
     };
 
