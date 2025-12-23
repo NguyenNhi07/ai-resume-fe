@@ -118,7 +118,8 @@ export const PersonalInfoForm = ({
         required={false}
       >
         <AllowedCharsInput
-          allowedPattern={/^[A-Za-z ]+$/}
+          // Cho phép chữ cái Unicode + khoảng trắng (hỗ trợ tiếng Việt có dấu)
+          allowedPattern={onlyLettersRegex}
           size="large"
           placeholder={t("input_name")}
           maxLength={50}
@@ -247,7 +248,8 @@ export const PersonalInfoForm = ({
         required={false}
       >
         <AllowedCharsInput
-          allowedPattern={/^[A-Za-z0-9., ]+$/}
+          // Cho phép chữ cái Unicode, số, dấu chấm, phẩy, khoảng trắng (hỗ trợ tiếng Việt có dấu)
+          allowedPattern={/^[\p{L}0-9.,\s]+$/u}
           size="large"
           placeholder={t("input_location")}
           maxLength={200}
@@ -273,7 +275,8 @@ export const PersonalInfoForm = ({
         required={false}
       >
         <AllowedCharsInput
-          allowedPattern={/^[A-Za-z0-9., ]+$/}
+          // Cho phép chữ cái Unicode, số, dấu chấm, phẩy, khoảng trắng (hỗ trợ tiếng Việt có dấu)
+          allowedPattern={/^[\p{L}0-9.,\s]+$/u}
           size="large"
           placeholder={t("input_profession")}
           maxLength={200}

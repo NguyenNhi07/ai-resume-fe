@@ -36,15 +36,9 @@ export default function VeirifyEmail() {
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleResendOTP = async () => {
-        setCountdown(120)
-        try {
-            await authApi.forgotPassword(email);
-            toast.success(t("We have sent a reset link/OTP to your email"));
-        } catch (error: any) {
-            const msg = error?.response?.data?.message || error.message || t("Something went wrong");
-            toast.error(msg);
-        }
+    const handleResendOTP = () => {
+        // Quay lại màn quên mật khẩu để nhập email + mật khẩu mới
+        navigate('/auth/forgot-password');
     }
 
     const handleInputChange = (index: number, value: string) => {
@@ -79,8 +73,8 @@ export default function VeirifyEmail() {
         setLoading(true);
         try {
             await authApi.verifyOtp(email, otpCode);
-            toast.success(t("Code verified. Please set a new password."));
-            navigate(`/auth/reset-password?email=${encodeURIComponent(email)}&otp=${otpCode}`);
+            toast.success(t("Code verified. Your password has been updated."));
+            navigate(`/auth/login?state=login`);
         } catch (error: any) {
             const msg = error?.response?.data?.message || error.message || t("Invalid code");
             toast.error(msg);

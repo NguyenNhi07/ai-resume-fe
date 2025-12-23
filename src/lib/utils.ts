@@ -188,6 +188,8 @@ export function extractSkillsFromJD(jd: string, knownSkills: string[] = []): str
     "tailwind css",
     "figma",
     "ui/ux",
+    "html",
+    "css"
   ];
 
   commonSkills.forEach((skill) => {

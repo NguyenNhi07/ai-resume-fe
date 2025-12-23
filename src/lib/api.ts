@@ -410,12 +410,12 @@ export const authApi = {
     };
   },
 
-  forgotPassword: async (email: string): Promise<void> => {
+  forgotPassword: async (email: string, newPassword: string): Promise<void> => {
     if (USE_MOCK_API) {
       await mockDelay(600);
       return;
     }
-    await api.post('/auth/forget-password', { email });
+    await api.post('/auth/forget-password', { email, newPassword });
   },
 
   verifyOtp: async (email: string, otp: string): Promise<void> => {
@@ -426,12 +426,9 @@ export const authApi = {
     await api.post('/auth/verify-otp', { email, otp });
   },
 
-  resetPassword: async (email: string, otp: string, newPassword: string): Promise<void> => {
-    if (USE_MOCK_API) {
-      await mockDelay(400);
-      return;
-    }
-    await api.post('/auth/reset-password', { email, otp, password: newPassword });
+  // Deprecated in new flow (OTP verify will set password)
+  resetPassword: async (_email: string, _otp: string, _newPassword: string): Promise<void> => {
+    throw new Error('resetPassword is deprecated; use forgotPassword + verifyOtp flow');
   },
 
   me: async (): Promise<MeResponse> => {

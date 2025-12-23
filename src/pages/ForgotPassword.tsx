@@ -21,8 +21,8 @@ export default function ForgotPassword() {
         e.preventDefault();
         setLoading(true);
         try {
-            await authApi.forgotPassword(formData.email);
-            toast.success(t("We have sent a reset link/OTP to your email"));
+            await authApi.forgotPassword(formData.email, formData.password);
+            toast.success(t("We have sent a reset OTP to your email"));
             navigate(`/auth/verify-email?email=${encodeURIComponent(formData.email)}`);
         } catch (error: any) {
             const msg = error?.response?.data?.message || error.message || t("Something went wrong");

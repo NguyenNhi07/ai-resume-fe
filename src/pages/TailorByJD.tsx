@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Button, Input, Modal, Segmented, Tag } from "antd";
+import { Button, Input, Modal, Tag } from "antd";
 import {
   ArrowLeftIcon,
   FileText,
@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import { extractSkillsFromJD } from "@/lib/utils";
 import type { Resume } from "@/lib/type";
 import { ResumePreview } from "@/components/ResumePreview";
+import { TailoredResumePreview } from "@/components/TailoredResumePreview";
 import { resumeApi, aiApi } from "@/lib/api";
 
 const { TextArea } = Input;
@@ -22,23 +23,28 @@ export default function TailorByJD() {
   const navigate = useNavigate();
   const { resumeId } = useParams();
 
-  const [sourceMode, setSourceMode] = useState<SourceMode>("existing");
+  const [sourceMode] = useState<SourceMode>("existing");
   const [baseResume, setBaseResume] = useState<Resume | null>(null);
-  const [rawCVText, setRawCVText] = useState<string>("");
+  const [rawCVText] = useState<string>("");
   const [jdText, setJdText] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [tailoredResume, setTailoredResume] = useState<Resume | null>(null);
+  const [tailoredInfo, setTailoredInfo] = useState<{
+    language: string;
+    matchedPosition?: string;
+    summary: { original: string; optimized: string };
+    sections: {
+      section: string;
+      title: string;
+      original: string;
+      optimized: string;
+      changes: string[];
+    }[];
+    overallSuggestions: string[];
+  } | null>(null);
   const [jdSkills, setJdSkills] = useState<string[]>([]);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [saveAsNewTitle, setSaveAsNewTitle] = useState<string>("");
-  const [saveMode, setSaveMode] = useState<"overwrite" | "new" | null>(null);
-  const [scoreResult, setScoreResult] = useState<{
-    score: number;
-    missingSkills: string[];
-    weakSections: string[];
-    suggestions: string[];
-    matchedRole?: string;
-  } | null>(null);
 
   useEffect(() => {
     if (!resumeId) return;
@@ -131,35 +137,16 @@ export default function TailorByJD() {
       }
       const resumeText = parts.join("\n");
 
-      const tailoredInfo = await aiApi.tailorResumeByJD(resumeText, jdText);
+      const tailoredInfoResult = await aiApi.tailorResumeByJD(resumeText, jdText);
+      setTailoredInfo(tailoredInfoResult);
 
-      // Apply AI result vào Resume (MVP: summary + skills từ sections nếu có)
-      const newResume: Resume = {
-        ...resumeSource,
-        title: tailoredInfo.matchedPosition
-          ? `${resumeSource.title || ""}`.trim() || tailoredInfo.matchedPosition
-          : resumeSource.title,
-        professional_summary: tailoredInfo.summary?.optimized || resumeSource.professional_summary,
-      };
-
-      const skillsSection = tailoredInfo.sections.find(
-        (s) => s.section === "skills" || s.title.toLowerCase().includes("skill"),
-      );
-      if (skillsSection?.optimized) {
-        const optimizedSkills = skillsSection.optimized
-          .split(/[,;\n]/)
-          .map((s) => s.trim())
-          .filter(Boolean);
-        if (optimizedSkills.length) {
-          newResume.skills = optimizedSkills;
-        }
-      }
-
-      setTailoredResume(newResume);
+      // Initialize tailoredResume với baseResume (chưa apply changes)
+      // Changes sẽ được apply qua TailoredResumePreview component
+      setTailoredResume(resumeSource);
 
       // Dùng AI thật để chấm điểm CV đã tailor
-      const scored = await aiApi.scoreResumeByJD(resumeText, jdText);
-      setScoreResult(scored);
+      // const scored = await aiApi.scoreResumeByJD(resumeText, jdText);
+      // setScoreResult(scored);
     } finally {
       setIsProcessing(false);
     }
@@ -176,7 +163,6 @@ export default function TailorByJD() {
 
   const handleSaveAsNew = () => {
     if (!tailoredResume) return;
-    setSaveMode("new");
     setSaveAsNewTitle(tailoredResume.title || "");
     setIsSaveModalOpen(true);
   };
@@ -227,22 +213,6 @@ export default function TailorByJD() {
               </span>
             </div>
 
-            <Segmented
-              size="large"
-              value={sourceMode}
-              onChange={(val) => setSourceMode(val as SourceMode)}
-              options={[
-                {
-                  label: t("UseExistingCV"),
-                  value: "existing",
-                },
-                {
-                  label: t("PasteCVText"),
-                  value: "plain-text",
-                },
-              ]}
-            />
-
             {sourceMode === "existing" && (
               <div className="mt-3 rounded-lg border border-dashed border-slate-200 bg-slate-50/60 px-4 py-3">
                 {baseResume ? (
@@ -267,7 +237,7 @@ export default function TailorByJD() {
               </div>
             )}
 
-            {sourceMode === "plain-text" && (
+            {/* {sourceMode === "plain-text" && (
               <div className="mt-3">
                 <p className="text-xs text-slate-500 mb-1">
                   {t("PasteYourExistingCVDescription")}
@@ -281,7 +251,7 @@ export default function TailorByJD() {
                   showCount
                 />
               </div>
-            )}
+            )} */}
           </div>
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 space-y-3">
@@ -325,7 +295,7 @@ export default function TailorByJD() {
               </Button>
             </div>
 
-            {scoreResult && (
+            {/* {scoreResult && (
               <div className="mt-4 border border-slate-200 rounded-lg p-3 bg-slate-50">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
@@ -381,7 +351,7 @@ export default function TailorByJD() {
                   )}
                 </div>
               </div>
-            )}
+            )} */}
           </div>
         </div>
 
@@ -422,12 +392,25 @@ export default function TailorByJD() {
             </div>
 
             {currentPreview ? (
-              <ResumePreview
-                data={currentPreview}
-                template={currentPreview.template || "classic"}
-                accentColor={currentPreview.accent_color || "#3B82F6"}
-                classes="shadow-lg"
-              />
+              tailoredInfo && baseResume ? (
+                <TailoredResumePreview
+                  baseResume={baseResume}
+                  tailoredInfo={tailoredInfo}
+                  template={currentPreview.template || "classic"}
+                  accentColor={currentPreview.accent_color || "#3B82F6"}
+                  classes="shadow-lg"
+                  onResumeChange={(updatedResume) => {
+                    setTailoredResume(updatedResume);
+                  }}
+                />
+              ) : (
+                <ResumePreview
+                  data={currentPreview}
+                  template={currentPreview.template || "classic"}
+                  accentColor={currentPreview.accent_color || "#3B82F6"}
+                  classes="shadow-lg"
+                />
+              )
             ) : (
               <div className="flex items-center justify-center h-64 text-slate-400 text-sm">
                 {t("NoResumeToPreview")}

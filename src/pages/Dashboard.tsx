@@ -212,87 +212,91 @@ export default function Dashboard() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <span className="text-[32px] font-medium text-black/70">{t('Recents')}</span>
-          <div className="flex gap-2 items-center">
-            {loadingRecent && (
-              <div className="w-full flex justify-center py-6">
-                <Spin />
-              </div>
-            )}
-            {recentResumes.map(
-              (resume: Resume & { updatedAt?: string | Date }, index: number) => {
-                return (
-                  <div onClick={() => navigate(`/app/builder/${resume.id}`)} key={index} className="flex flex-col cursor-pointer relative group group-hover:shadow-lg transition-all duration-300">
-                    <div className="mb-2 bg-gray-100 rounded-xl p-2 w-[150px] h-[150px] flex items-center justify-center">
-                      <FileTextIcon className="size-6 text-gray-500" />
-                    </div>
-                    <span className="text-base text-black/70">{resume.title}</span>
-                    <span className="text-sm text-gray-500">{t('Updated on ')}{resume.updatedAt ? new Date(resume.updatedAt).toLocaleDateString() : ''}</span>
-                    <div
-                      onClick={(e) => e.stopPropagation()}
-                      className="absolute top-1 right-1 hidden group-hover:flex items-center "
-                    >
-                      <Popover
-                        open={openPopoverId === `recent-${resume.id}`}
-                        onOpenChange={(visible) =>
-                          setOpenPopoverId(visible ? `recent-${resume.id}` : null)
-                        }
-                        getPopupContainer={(trigger) => trigger.parentElement || document.body}
-                        content={
-                          <div className="flex flex-col gap-1 py-1" onClick={(e) => e.stopPropagation()}>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setDeleteResume(true);
-                                setDeleteResumeId(Number(resume.id));
-                                setOpenPopoverId(null);
-                              }}
-                              className="flex items-center gap-2 px-3 py-1.5 rounded-md text-red-700 hover:bg-red-50 transition-colors"
-                            >
-                              <TrashIcon className="size-4 text-red-700 transition-colors" />
-                              {t("Delete")}
-                            </button>
-
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setEditResumeId(resume.id ?? "");
-                                setTitle(resume.title ?? "");
-                                setOpenPopoverId(null);
-                              }}
-                              className="flex items-center gap-2 px-3 py-1.5 rounded-md text-blue-600 hover:bg-blue-50 transition-colors"
-                            >
-                              <PencilIcon className="size-4 text-blue-600 transition-colors" />
-                              {t("Edit")}
-                            </button>
-
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                // TODO: implement duplicate logic
-                                setDuplicateResumeId(resume.id ?? "");
-                                setTitle(`${resume.title || t("enterResumeTitle")} (copy)`);
-                                setOpenPopoverId(null);
-                              }}
-                              className="flex items-center gap-2 px-3 py-1.5 rounded-md text-purple-600 hover:bg-purple-50 transition-colors"
-                            >
-                              <Copy className="size-4 text-purple-600 transition-colors" />
-                              {t("Duplicate")}
-                            </button>
-                          </div>
-                        }
-                        trigger="click"
-                        className="cursor-pointer"
-                        arrow={false}
-                      >
-                        <MoreVertical className="size-5 text-black/65" />
-                      </Popover>
-                    </div>
+          {recentResumes.length > 0 && (
+            <>
+              <span className="text-[32px] font-medium text-black/70">{t('Recents')}</span>
+              <div className="flex gap-2 items-center">
+                {loadingRecent && (
+                  <div className="w-full flex justify-center py-6">
+                    <Spin />
                   </div>
-                )
-              }
-            )}
-          </div>
+                )}
+                {recentResumes.map(
+                  (resume: Resume & { updatedAt?: string | Date }, index: number) => {
+                    return (
+                      <div onClick={() => navigate(`/app/builder/${resume.id}`)} key={index} className="flex flex-col cursor-pointer relative group group-hover:shadow-lg transition-all duration-300">
+                        <div className="mb-2 bg-gray-100 rounded-xl p-2 w-[150px] h-[150px] flex items-center justify-center">
+                          <FileTextIcon className="size-6 text-gray-500" />
+                        </div>
+                        <span className="text-base text-black/70">{resume.title}</span>
+                        <span className="text-sm text-gray-500">{t('Updated on ')}{resume.updatedAt ? new Date(resume.updatedAt).toLocaleDateString() : ''}</span>
+                        <div
+                          onClick={(e) => e.stopPropagation()}
+                          className="absolute top-1 right-1 hidden group-hover:flex items-center "
+                        >
+                          <Popover
+                            open={openPopoverId === `recent-${resume.id}`}
+                            onOpenChange={(visible) =>
+                              setOpenPopoverId(visible ? `recent-${resume.id}` : null)
+                            }
+                            getPopupContainer={(trigger) => trigger.parentElement || document.body}
+                            content={
+                              <div className="flex flex-col gap-1 py-1" onClick={(e) => e.stopPropagation()}>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setDeleteResume(true);
+                                    setDeleteResumeId(Number(resume.id));
+                                    setOpenPopoverId(null);
+                                  }}
+                                  className="flex items-center gap-2 px-3 py-1.5 rounded-md text-red-700 hover:bg-red-50 transition-colors"
+                                >
+                                  <TrashIcon className="size-4 text-red-700 transition-colors" />
+                                  {t("Delete")}
+                                </button>
+
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditResumeId(resume.id ?? "");
+                                    setTitle(resume.title ?? "");
+                                    setOpenPopoverId(null);
+                                  }}
+                                  className="flex items-center gap-2 px-3 py-1.5 rounded-md text-blue-600 hover:bg-blue-50 transition-colors"
+                                >
+                                  <PencilIcon className="size-4 text-blue-600 transition-colors" />
+                                  {t("Edit")}
+                                </button>
+
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    // TODO: implement duplicate logic
+                                    setDuplicateResumeId(resume.id ?? "");
+                                    setTitle(`${resume.title || t("enterResumeTitle")} (copy)`);
+                                    setOpenPopoverId(null);
+                                  }}
+                                  className="flex items-center gap-2 px-3 py-1.5 rounded-md text-purple-600 hover:bg-purple-50 transition-colors"
+                                >
+                                  <Copy className="size-4 text-purple-600 transition-colors" />
+                                  {t("Duplicate")}
+                                </button>
+                              </div>
+                            }
+                            trigger="click"
+                            className="cursor-pointer"
+                            arrow={false}
+                          >
+                            <MoreVertical className="size-5 text-black/65" />
+                          </Popover>
+                        </div>
+                      </div>
+                    )
+                  }
+                )}
+              </div>
+            </>
+          )}
         </div>
 
         <div className="bg-white rounded-xl mt-5 gap-2 flex flex-col">
