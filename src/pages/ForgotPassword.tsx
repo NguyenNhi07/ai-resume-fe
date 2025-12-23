@@ -16,6 +16,7 @@ export default function ForgotPassword() {
         email: "",
         password: "",
     });
+  const [resendLoading, setResendLoading] = React.useState(false);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -36,6 +37,23 @@ export default function ForgotPassword() {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
+
+  const handleResend = async () => {
+    if (!formData.email || !formData.password) {
+      toast.error(t("Please enter email and new password first"));
+      return;
+    }
+    setResendLoading(true);
+    try {
+      await authApi.forgotPassword(formData.email, formData.password);
+      toast.success(t("OTP has been resent to your email"));
+    } catch (error: any) {
+      const msg = error?.response?.data?.message || error.message || t("Something went wrong");
+      toast.error(msg);
+    } finally {
+      setResendLoading(false);
+    }
+  };
 
     return (
         <div className="z-20 w-full flex flex-col items-center justify-center">
@@ -81,6 +99,14 @@ export default function ForgotPassword() {
                 >
                     {loading ? t("Loading") : t("Continue")}
                 </Button>
+        <Button
+          type="link"
+          onClick={handleResend}
+          disabled={resendLoading || loading}
+          className="!px-0"
+        >
+          {resendLoading ? t("Sending...") : t("Resend OTP")}
+        </Button>
             </form>
         </div>
     )
