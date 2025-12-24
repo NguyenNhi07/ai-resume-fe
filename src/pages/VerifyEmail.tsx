@@ -26,19 +26,32 @@ export default function VeirifyEmail() {
         }
     }, [countdown])
 
-    const [formData, setFormData] = React.useState({
-        email: "",
-        password: "",
-    });
+    const [resendLoading, setResendLoading] = React.useState(false);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
-    };
-
-    const handleResendOTP = () => {
-        // Quay lại màn quên mật khẩu để nhập email + mật khẩu mới
-        navigate('/auth/forgot-password');
+    const handleResendOTP = async () => {
+        if (!email) {
+            toast.error(t("Email is missing"));
+            return;
+        }
+        // Lấy password từ sessionStorage
+        const password = sessionStorage.getItem('reset_password');
+        if (!password) {
+            toast.error(t("Session expired. Please go back to forgot password page."));
+            navigate('/auth/forgot-password');
+            return;
+        }
+        setResendLoading(true);
+        try {
+            await authApi.forgotPassword(email, password);
+            toast.success(t("OTP has been resent to your email"));
+            // Reset countdown
+            setCountdown(120);
+        } catch (error: any) {
+            const msg = error?.response?.data?.message || error.message || t("Something went wrong");
+            toast.error(msg);
+        } finally {
+            setResendLoading(false);
+        }
     }
 
     const handleInputChange = (index: number, value: string) => {
@@ -73,6 +86,8 @@ export default function VeirifyEmail() {
         setLoading(true);
         try {
             await authApi.verifyOtp(email, otpCode);
+            // Xóa password khỏi sessionStorage sau khi verify thành công
+            sessionStorage.removeItem('reset_password');
             toast.success(t("Code verified. Your password has been updated."));
             navigate(`/auth/login?state=login`);
         } catch (error: any) {
@@ -94,8 +109,7 @@ export default function VeirifyEmail() {
                     {t("Verify your email")}
                 </h2>
                 <p className="text-sm text-gray-500/90 mt-3 text-center">
-                    {t("Enter the verification code sent to your email nhi.nguyen2gg@sotatek.com")}
-
+                    {t("Enter the verification code sent to your email")} {email && <span className="font-semibold">{email}</span>}
                 </p>
 
                 <div className="flex justify-between gap-3 my-2">
@@ -139,8 +153,11 @@ export default function VeirifyEmail() {
                                 {t('Resend later')} {countdown}s
                             </span>
                         ) : (
-                            <span className="text-button-text-brand font-bold cursor-pointer" onClick={handleResendOTP}>
-                                {t('Resend')}
+                            <span 
+                                className={`font-bold cursor-pointer ${resendLoading ? 'text-gray-400 cursor-not-allowed' : 'text-button-text-brand'}`} 
+                                onClick={resendLoading ? undefined : handleResendOTP}
+                            >
+                                {resendLoading ? t('Sending...') : t('Resend')}
                             </span>
                         )}
                     </span>

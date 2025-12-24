@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { extractSkillsFromJD } from "@/lib/utils";
 import type { Resume } from "@/lib/type";
 import { resumeApi, aiApi } from "@/lib/api";
+import { useToast } from "@/hooks/useToast";
 
 const { TextArea } = Input;
 
@@ -15,6 +16,7 @@ export default function CoverLetter() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { resumeId } = useParams();
+  const toast = useToast();
 
   const [resume, setResume] = useState<Resume | null>(null);
   const [jdText, setJdText] = useState("");
@@ -93,8 +95,7 @@ export default function CoverLetter() {
       setLetter(res.coverLetter);
     } catch (error: any) {
       console.error(error);
-      // eslint-disable-next-line no-alert
-      alert(error?.response?.data?.message || "Failed to generate cover letter");
+      toast.error(error?.response?.data?.message || t("Failed to generate cover letter"));
     } finally {
       setIsGenerating(false);
     }

@@ -6,11 +6,13 @@ import { useTranslation } from "react-i18next";
 import { extractSkillsFromJD } from "@/lib/utils";
 import type { Resume } from "@/lib/type";
 import { resumeApi, aiApi } from "@/lib/api";
+import { useToast } from "@/hooks/useToast";
 
 const { TextArea } = Input;
 
 export default function MockInterview() {
   const { t } = useTranslation();
+  const toast = useToast();
   const navigate = useNavigate();
   const { resumeId } = useParams();
 
@@ -97,7 +99,7 @@ export default function MockInterview() {
       const mapped = (res.questions || []).map((q, idx) => ({
         id: `q-${idx + 1}`,
         // fallback: mọi type không phải technical → behavioral để mapping màu Tag đơn giản
-        type: (q.type as any) || "Technical",
+        type: (q.type as any) || t("Technical"),
         question: q.question,
         hint: q.expectedAnswer,
       }));
@@ -107,8 +109,7 @@ export default function MockInterview() {
       setScore(null);
     } catch (e: any) {
       console.error(e);
-      // eslint-disable-next-line no-alert
-      alert(e?.response?.data?.message || "Failed to generate interview questions");
+      toast.error(e?.response?.data?.message || t("Failed to generate interview questions"));
     } finally {
       setIsGenerating(false);
     }
@@ -135,8 +136,7 @@ export default function MockInterview() {
       });
     } catch (e: any) {
       console.error(e);
-      // eslint-disable-next-line no-alert
-      alert(e?.response?.data?.message || "Failed to score interview answers");
+      toast.error(e?.response?.data?.message || t("Failed to score interview answers"));
     } finally {
       setIsScoring(false);
     }

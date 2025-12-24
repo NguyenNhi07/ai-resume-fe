@@ -1,7 +1,7 @@
 import { useToast } from "@/hooks/useToast";
 import { authApi } from "@/lib/api";
 import { Button } from "antd";
-import { Lock, Mail, User2Icon } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, User2Icon } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
@@ -14,6 +14,7 @@ export default function Login() {
   const urlState = query.get("state");
   const [state, setState] = React.useState(urlState || "login");
   const [loading, setLoading] = React.useState(false);
+  const [showPassword, setShowPassword] = React.useState(false);
 
   const [formData, setFormData] = React.useState({
     name: "",
@@ -130,17 +131,28 @@ export default function Login() {
           />
         </div>
 
-        <div className="flex items-center mt-6 w-full bg-transparent border border-gray-300/60 h-12 rounded-full overflow-hidden pl-6 gap-2">
+        <div className="flex items-center mt-6 w-full bg-transparent border border-gray-300/60 h-12 rounded-full overflow-hidden pl-6 gap-2 pr-4">
           <Lock size={13} color="#6B7280" />
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             name="password"
             placeholder={t("password")}
-            className="border-none outline-none ring-0"
+            className="border-none outline-none ring-0 flex-1"
             value={formData.password}
             onChange={handleChange}
             required
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity"
+          >
+            {showPassword ? (
+              <EyeOff size={16} color="#6B7280" />
+            ) : (
+              <Eye size={16} color="#6B7280" />
+            )}
+          </button>
         </div>
 
         <div className="mt-4 text-left text-purple-500">

@@ -1,10 +1,3 @@
-import EditIcon from "@/components/icons/EditIcon";
-import { Navbar } from "@/components/Navbar";
-import { UnsavedChangesProvider } from "@/components/setting/context/UnsavedChangesContext";
-import { MenuSideBar } from "@/components/setting/MenuSideBar";
-import { Avatar, Button } from "antd";
-import { useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { Outlet } from "react-router-dom";
 
 export default function AuthLayout() {

@@ -1,43 +1,24 @@
-import { ColorPicker } from "@/components/ColorPicker";
-import { EducationForm } from "@/components/EducationForm";
-import { ExperienceForm } from "@/components/ExperienceForm";
-import { PersonalInfoForm } from "@/components/PersonalInfoForm";
-import { ProfessionalSummaryForm } from "@/components/ProfessionalSummaryForm";
-import { ProjectForm } from "@/components/ProjectForm";
 import { ResumePreview } from "@/components/ResumePreview";
 import ShareDialog from "@/components/ShareDialog";
-import { SkillsForm } from "@/components/SkillsForm";
-import { TemplateSelector } from "@/components/TemplateSelector";
-import { profileDefault } from "@/lib/constant";
-import type { Experience, Resume } from "@/lib/type";
-import { cn, dummyResumeData, extractSkillsFromJD } from "@/lib/utils";
-import { resumeApi, userApi, aiApi } from "@/lib/api";
 import { useToast } from "@/hooks/useToast";
-import { Button, Form, Modal, Popover, Select, Input, Tag } from "antd";
+import { aiApi, resumeApi } from "@/lib/api";
+import type { Experience, Resume } from "@/lib/type";
+import { cn } from "@/lib/utils";
+import { Button, Form, Input, Modal, Popover, Tag } from "antd";
 import dayjs, { Dayjs } from "dayjs";
-import html2canvas from "html2canvas";
-import { jsPDF } from "jspdf";
 import {
     AlertCircle,
     ArrowLeftIcon,
-    Briefcase,
-    ChevronLeft,
-    ChevronRight,
     DownloadIcon,
     EyeIcon,
     FileDown,
-    FileText,
-    FolderIcon,
     GlobeIcon,
-    GraduationCap,
     LockIcon,
     PencilIcon,
     PrinterIcon,
     Share2Icon,
     Sparkles,
-    TrashIcon,
-    User,
-    UserCheck,
+    TrashIcon
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -71,22 +52,6 @@ export default function ResumeDetail() {
     const { resumeId } = useParams();
     const navigate = useNavigate();
 
-    const fontOptions = [
-        { value: "inter", label: "Inter" },
-        { value: "times", label: "Times New Roman" },
-        { value: "georgia", label: "Georgia" },
-        { value: "arial", label: "Arial" },
-        { value: "helvetica", label: "Helvetica / Helvetica Neue" },
-        { value: "calibri", label: "Calibri" },
-        { value: "garamond", label: "Garamond" },
-        { value: "cambria", label: "Cambria" },
-        { value: "roboto", label: "Roboto" },
-        { value: "poppins", label: "Poppins" },
-        { value: "mulish", label: "Mulish" },
-        { value: "nunito", label: "Nunito" },
-        { value: "montserrat", label: "Montserrat" },
-    ];
-
     const [resumeData, setResumeData] = useState<Resume>({
         id: "",
         title: "",
@@ -108,11 +73,9 @@ export default function ResumeDetail() {
     const toast = useToast();
     const [isDirty, setIsDirty] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
-    const [showAutoFillModal, setShowAutoFillModal] = useState(false);
     const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
     const initialFormData = useRef<Resume | null>(null);
     const [showShareDialog, setShowShareDialog] = useState(false);
-    const [isAutoFilling, setIsAutoFilling] = useState(false);
     const [jdText, setJdText] = useState("");
     const [isScoring, setIsScoring] = useState(false);
     const [showScoreModal, setShowScoreModal] = useState(false);
@@ -154,20 +117,6 @@ export default function ResumeDetail() {
             setIsDirty(false);
         }
     };
-
-    const [activeSectionIndex, setActiveSectionIndex] = useState(0);
-    const [removeBackground, setRemoveBackground] = useState(false);
-
-    const sections = [
-        { id: "personal", name: t("Personal Info"), icon: User },
-        { id: "summary", name: t("Summary"), icon: FileText },
-        { id: "experience", name: t("Experience"), icon: Briefcase },
-        { id: "education", name: t("Education"), icon: GraduationCap },
-        { id: "projects", name: t("Projects"), icon: FolderIcon },
-        { id: "skills", name: t("Skills"), icon: Sparkles },
-    ];
-
-    const activeSection = sections[activeSectionIndex];
 
     const handleScoreByJD = async () => {
         if (!jdText.trim()) return;
@@ -360,58 +309,6 @@ export default function ResumeDetail() {
             template: current.template || 'classic',
             accent_color: current.accent_color || '#3B82F6',
         };
-    };
-
-    const handleCancel = () => {
-        if (isDirty) {
-            setPendingAction(() => () => navigate("/app"));
-            setShowConfirmModal(true);
-        } else {
-            navigate("/app");
-        }
-    };
-
-    const handleSave = async () => {
-        try {
-            const allValues = await form.validateFields();
-            const payload = buildResumeFromForm(allValues, resumeData);
-
-            let updated: Resume;
-            if (payload.id) {
-                updated = await resumeApi.update(payload.id, payload);
-            } else {
-                updated = await resumeApi.create(payload);
-                navigate(`/app/builder/${updated.id}`);
-            }
-            setResumeData(updated);
-            initialFormData.current = { ...updated };
-            setIsDirty(false);
-            navigate("/app");
-        } catch (e) {
-            console.error(e);
-        }
-    };
-
-    const handleBackToDashboard = () => {
-        if (isDirty) {
-            setPendingAction(() => () => navigate("/app"));
-            setShowConfirmModal(true);
-        } else {
-            navigate("/app");
-        }
-    };
-
-    const handleConfirmExit = () => {
-        if (pendingAction) {
-            pendingAction();
-        }
-        setShowConfirmModal(false);
-        setPendingAction(null);
-    };
-
-    const handleCancelExit = () => {
-        setShowConfirmModal(false);
-        setPendingAction(null);
     };
 
     const changeResumeVisibility = async () => {

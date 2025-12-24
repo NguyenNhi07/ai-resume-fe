@@ -1,25 +1,24 @@
-import type { Resume } from "@/lib/type";
-import { resumeApi } from "@/lib/api";
-import { Button, Input, Modal, Popover, Spin, Table, Tooltip } from "antd";
 import { useToast } from "@/hooks/useToast";
+import { resumeApi } from "@/lib/api";
+import type { Resume } from "@/lib/type";
+import { cn } from "@/lib/utils";
+import { Button, Input, Modal, Popover, Spin, Table, Tooltip } from "antd";
 import {
   AlertCircle,
   Copy,
+  FileTextIcon,
   LayoutGrid,
+  List,
   MoreVertical,
   PencilIcon,
   PlusIcon,
   SearchIcon,
-  Sparkles,
   TrashIcon,
-  UploadCloud,
-  List,
-  FileTextIcon
+  UploadCloud
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { cn } from "@/lib/utils";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export default function Dashboard() {
   const { t } = useTranslation();
@@ -197,7 +196,7 @@ export default function Dashboard() {
             <SearchIcon className="size-4 text-gray-500" />
             <input
               className="flex-1 outline-none text-sm"
-              placeholder="Search resume"
+              placeholder={t("Search resume")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
