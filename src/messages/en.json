@@ -345,5 +345,9 @@
   "Overall Suggestions": "Overall suggestions",
   "Technical": "Technical",
   "Behavioral": "Behavioral",
-  "Reject": "Reject"
+  "Reject": "Reject",
+  "Duplicate resume successfully": "Duplicate resume successfully",
+  "Duplicate resume failed": "Duplicate resume failed",
+  "Title": "Title",
+  "Status": "Status"
 }

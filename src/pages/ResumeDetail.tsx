@@ -169,7 +169,6 @@ export default function ResumeDetail() {
             toast.error(error?.response?.data?.message || t("Failed to score resume by JD"));
         } finally {
             setIsScoring(false);
-            setJdText("");
         }
     };
 
@@ -564,6 +563,11 @@ export default function ResumeDetail() {
                         placeholder={t("PasteJDPlaceholder")}
                         autoSize={{ minRows: 5, maxRows: 10 }}
                         showCount
+                        className="[&_textarea::-webkit-scrollbar]:bg-white [&_textarea::-webkit-scrollbar-thumb]:bg-gray-300 [&_textarea::-webkit-scrollbar-thumb]:rounded [&_textarea::-webkit-scrollbar]:w-2"
+                        style={{
+                            scrollbarColor: '#cbd5e1 white',
+                            scrollbarWidth: 'thin'
+                        }}
                     />
                     <div className="flex items-center mt-4 justify-between">
                         <div className="text-xs text-gray-500">{t("JDScoreHelper")}</div>
@@ -626,10 +630,19 @@ export default function ResumeDetail() {
                                         <p className="font-medium text-slate-800">
                                             {t("WeakSections")}
                                         </p>
-                                        <div className="flex flex-wrap gap-1 mt-1">
+                                        <div className="flex flex-wrap gap-1 mt-1 overflow-hidden">
                                             {scoreResult.weakSections.map((s) => (
-                                                <Tag key={s} color="gold">
-                                                    {t(s) || s}
+                                                <Tag 
+                                                    key={s} 
+                                                    color="gold"
+                                                    style={{ 
+                                                        maxWidth: '100%',
+                                                        wordBreak: 'break-word',
+                                                        whiteSpace: 'normal',
+                                                        display: 'inline-block'
+                                                    }}
+                                                >
+                                                    <span className="break-words">{t(s) || s}</span>
                                                 </Tag>
                                             ))}
                                         </div>

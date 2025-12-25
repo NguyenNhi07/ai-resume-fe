@@ -44,6 +44,15 @@ export default function MockInterview() {
 
   const jdSkills = useMemo(() => extractSkillsFromJD(jdText, resume?.skills || []), [jdText, resume]);
 
+  // Check if all questions have been answered
+  const allQuestionsAnswered = useMemo(() => {
+    if (questions.length === 0) return false;
+    return questions.every((q) => {
+      const answer = answers[q.id];
+      return answer && answer.trim().length > 0;
+    });
+  }, [questions, answers]);
+
   const handleGenerate = async () => {
     if (!resume) return;
     setIsGenerating(true);
@@ -63,8 +72,7 @@ export default function MockInterview() {
         parts.push(
           "Experience:",
           ...resume.experience.map((e) =>
-            `- ${e.position || ""} at ${e.company || ""} (${e.start_date || ""} - ${
-              e.is_current ? "Present" : e.end_date || ""
+            `- ${e.position || ""} at ${e.company || ""} (${e.start_date || ""} - ${e.is_current ? "Present" : e.end_date || ""
             }) ${e.description || ""}`,
           ),
         );
@@ -73,8 +81,7 @@ export default function MockInterview() {
         parts.push(
           "Education:",
           ...resume.education.map((ed) =>
-            `- ${ed.degree || ""} in ${ed.field || ""} at ${ed.institution || ""} (${
-              ed.graduation_date || ""
+            `- ${ed.degree || ""} in ${ed.field || ""} at ${ed.institution || ""} (${ed.graduation_date || ""
             }) GPA: ${ed.gpa || ""}`,
           ),
         );
@@ -186,6 +193,11 @@ export default function MockInterview() {
                 placeholder={t("PasteJDPlaceholder")}
                 autoSize={{ minRows: 6, maxRows: 10 }}
                 showCount
+                className="[&_textarea::-webkit-scrollbar]:bg-white [&_textarea::-webkit-scrollbar-thumb]:bg-gray-300 [&_textarea::-webkit-scrollbar-thumb]:rounded [&_textarea::-webkit-scrollbar]:w-2"
+                style={{
+                  scrollbarColor: '#cbd5e1 white',
+                  scrollbarWidth: 'thin'
+                }}
               />
               <div className="flex flex-wrap gap-1">
                 {jdSkills.map((skill) => (
@@ -222,8 +234,8 @@ export default function MockInterview() {
                     score.averageScore >= 75
                       ? "green"
                       : score.averageScore >= 60
-                      ? "blue"
-                      : "orange"
+                        ? "blue"
+                        : "orange"
                   }
                 >
                   {score.averageScore}/100
@@ -248,8 +260,8 @@ export default function MockInterview() {
               <Button
                 size="small"
                 type="primary"
-                className="!bg-green-600 disabled:!bg-green-300"
-                disabled={!questions.length || isScoring}
+                className="!bg-green-600 disabled:!bg-green-300 flex items-center justify-between"
+                disabled={!questions.length || isScoring || !allQuestionsAnswered}
                 loading={isScoring}
                 onClick={handleScore}
               >
@@ -279,6 +291,11 @@ export default function MockInterview() {
                       rows={4}
                       placeholder={t("YourAnswerPlaceholder")}
                       autoSize={{ minRows: 4, maxRows: 8 }}
+                      className="[&_textarea::-webkit-scrollbar]:bg-white [&_textarea::-webkit-scrollbar-thumb]:bg-gray-300 [&_textarea::-webkit-scrollbar-thumb]:rounded [&_textarea::-webkit-scrollbar]:w-2"
+                      style={{
+                        scrollbarColor: '#cbd5e1 white',
+                        scrollbarWidth: 'thin'
+                      }}
                     />
                     {score?.results[index] && (
                       <div className="mt-2 flex items-center justify-between">
@@ -287,8 +304,8 @@ export default function MockInterview() {
                             (score.results[index].score || 0) >= 75
                               ? "green"
                               : (score.results[index].score || 0) >= 60
-                              ? "blue"
-                              : "orange"
+                                ? "blue"
+                                : "orange"
                           }
                         >
                           {score.results[index].score}/100

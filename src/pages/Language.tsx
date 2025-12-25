@@ -1,12 +1,17 @@
 import { LANGUAGE_OPTIONS } from "@/constants/languageOptions";
 import { Select } from "antd";
 import { Globe } from "lucide-react";
-import React from "react";
+import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 export default function Language() {
     const { t, i18n } = useTranslation();
-    const [language, setLanguage] = React.useState<string>(LANGUAGE_OPTIONS[0].value as string);
+    const [language, setLanguage] = React.useState<string>(i18n.language || "en");
+
+    // Update language state when i18n language changes
+    useEffect(() => {
+        setLanguage(i18n.language || "en");
+    }, [i18n.language]);
 
     return (
         <div className="flex flex-col items-start p-0 lg:p-8 gap-6 w-full max-w-full h-full bg-white">

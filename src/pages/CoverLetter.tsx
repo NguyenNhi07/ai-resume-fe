@@ -59,8 +59,7 @@ export default function CoverLetter() {
         parts.push(
           "Experience:",
           ...resume.experience.map((e) =>
-            `- ${e.position || ""} at ${e.company || ""} (${e.start_date || ""} - ${
-              e.is_current ? "Present" : e.end_date || ""
+            `- ${e.position || ""} at ${e.company || ""} (${e.start_date || ""} - ${e.is_current ? "Present" : e.end_date || ""
             }) ${e.description || ""}`,
           ),
         );
@@ -69,8 +68,7 @@ export default function CoverLetter() {
         parts.push(
           "Education:",
           ...resume.education.map((ed) =>
-            `- ${ed.degree || ""} in ${ed.field || ""} at ${ed.institution || ""} (${
-              ed.graduation_date || ""
+            `- ${ed.degree || ""} in ${ed.field || ""} at ${ed.institution || ""} (${ed.graduation_date || ""
             }) GPA: ${ed.gpa || ""}`,
           ),
         );
@@ -195,6 +193,11 @@ export default function CoverLetter() {
                 placeholder={t("PasteJDPlaceholder")}
                 autoSize={{ minRows: 6, maxRows: 10 }}
                 showCount
+                className="[&_textarea::-webkit-scrollbar]:bg-white [&_textarea::-webkit-scrollbar-thumb]:bg-gray-300 [&_textarea::-webkit-scrollbar-thumb]:rounded [&_textarea::-webkit-scrollbar]:w-2"
+                style={{
+                  scrollbarColor: '#cbd5e1 white',
+                  scrollbarWidth: 'thin'
+                }}
               />
               <div className="flex flex-wrap gap-1 mt-2">
                 {jdSkills.map((skill) => (

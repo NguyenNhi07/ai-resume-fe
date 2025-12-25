@@ -532,11 +532,8 @@ export const fileApi = {
   uploadImage: async (file: File): Promise<string> => {
     const formData = new FormData();
     formData.append('file', file);
-    const res = await api.post<UploadImageResponse>('/storage/local', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    // Don't set Content-Type header manually - let axios set it automatically with boundary
+    const res = await api.post<UploadImageResponse>('/storage/local', formData);
     const filename = res.data.filename;
     // public URL to access the stored image
     return `${API_BASE_URL}/storage/local/${filename}`;

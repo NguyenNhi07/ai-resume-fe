@@ -13,6 +13,7 @@ import type { Resume } from "@/lib/type";
 import { ResumePreview } from "@/components/ResumePreview";
 import { TailoredResumePreview } from "@/components/TailoredResumePreview";
 import { resumeApi, aiApi } from "@/lib/api";
+import { useToast } from "@/hooks/useToast";
 
 const { TextArea } = Input;
 
@@ -22,6 +23,7 @@ export default function TailorByJD() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { resumeId } = useParams();
+  const toast = useToast();
 
   const [sourceMode] = useState<SourceMode>("existing");
   const [baseResume, setBaseResume] = useState<Resume | null>(null);
@@ -106,8 +108,7 @@ export default function TailorByJD() {
         parts.push(
           "Experience:",
           ...resumeSource.experience.map((e) =>
-            `- ${e.position || ""} at ${e.company || ""} (${e.start_date || ""} - ${
-              e.is_current ? "Present" : e.end_date || ""
+            `- ${e.position || ""} at ${e.company || ""} (${e.start_date || ""} - ${e.is_current ? "Present" : e.end_date || ""
             }) ${e.description || ""}`,
           ),
         );
@@ -116,8 +117,7 @@ export default function TailorByJD() {
         parts.push(
           "Education:",
           ...resumeSource.education.map((ed) =>
-            `- ${ed.degree || ""} in ${ed.field || ""} at ${ed.institution || ""} (${
-              ed.graduation_date || ""
+            `- ${ed.degree || ""} in ${ed.field || ""} at ${ed.institution || ""} (${ed.graduation_date || ""
             }) GPA: ${ed.gpa || ""}`,
           ),
         );
@@ -156,9 +156,16 @@ export default function TailorByJD() {
 
   const canSave = Boolean(tailoredResume && (baseResume || sourceMode === "plain-text"));
 
-  const handleSaveOverwrite = () => {
+  const handleSaveOverwrite = async () => {
     if (!tailoredResume || !baseResume || !baseResume.id) return;
-    navigate(`/app/builder/${baseResume.id}`);
+    try {
+      await resumeApi.update(String(baseResume.id), tailoredResume);
+      toast.success(t("Resume saved successfully"));
+      navigate(`/app/builder/${baseResume.id}`);
+    } catch (error) {
+      console.error("Failed to save resume:", error);
+      toast.error(t("Failed to save resume"));
+    }
   };
 
   const handleSaveAsNew = () => {
@@ -167,12 +174,20 @@ export default function TailorByJD() {
     setIsSaveModalOpen(true);
   };
 
-  const handleConfirmSaveAsNew = () => {
+  const handleConfirmSaveAsNew = async () => {
     if (!tailoredResume) return;
 
     const title = saveAsNewTitle.trim() || tailoredResume.title || t("UntitledResume");
     setIsSaveModalOpen(false);
-    navigate(`/app/builder/new?title=${encodeURIComponent(title)}`);
+    try {
+      const newResume = { ...tailoredResume, id: "", title };
+      const created = await resumeApi.create(newResume);
+      toast.success(t("Resume created successfully"));
+      navigate(`/app/builder/${created.id}`);
+    } catch (error) {
+      console.error("Failed to create new resume:", error);
+      toast.error(t("Failed to create new resume"));
+    }
   };
 
   return (
@@ -268,6 +283,11 @@ export default function TailorByJD() {
               placeholder={t("PasteJDPlaceholder")}
               autoSize={{ minRows: 8, maxRows: 14 }}
               showCount
+              className="[&_textarea::-webkit-scrollbar]:bg-white [&_textarea::-webkit-scrollbar-thumb]:bg-gray-300 [&_textarea::-webkit-scrollbar-thumb]:rounded [&_textarea::-webkit-scrollbar]:w-2"
+              style={{
+                scrollbarColor: '#cbd5e1 white',
+                scrollbarWidth: 'thin'
+              }}
             />
 
             <div className="flex justify-between items-center mt-2">

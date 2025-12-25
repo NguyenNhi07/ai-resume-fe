@@ -345,5 +345,9 @@
   "Overall Suggestions": "整体建议",
   "Technical": "技术",
   "Behavioral": "行为",
-  "Reject": "拒绝"
+  "Reject": "拒绝",
+  "Duplicate resume successfully": "复制简历成功",
+  "Duplicate resume failed": "复制简历失败",
+  "Title": "标题",
+  "Status": "状态"
 }

@@ -345,5 +345,9 @@
   "Overall Suggestions": "全体的な提案",
   "Technical": "技術",
   "Behavioral": "行動",
-  "Reject": "却下"
+  "Reject": "却下",
+  "Duplicate resume successfully": "履歴書を複製しました",
+  "Duplicate resume failed": "履歴書の複製に失敗しました",
+  "Title": "タイトル",
+  "Status": "ステータス"
 }

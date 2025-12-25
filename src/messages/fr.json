@@ -345,5 +345,9 @@
   "Overall Suggestions": "Suggestions globales",
   "Technical": "Technique",
   "Behavioral": "Comportemental",
-  "Reject": "Rejeter"
+  "Reject": "Rejeter",
+  "Duplicate resume successfully": "Dupliquer le CV réussie",
+  "Duplicate resume failed": "Échec de la duplication du CV",
+  "Title": "Titre",
+  "Status": "Statut"
 }

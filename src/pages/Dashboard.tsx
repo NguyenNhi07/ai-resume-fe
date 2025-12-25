@@ -147,10 +147,10 @@ export default function Dashboard() {
       await resumeApi.update(String(updatedResume.id), updatedResume);
       // Reload current page
       loadAllResumes({ page: pagination.current });
-      toast.success(t("updateSuccess") || "Updated resume title successfully");
+      toast.success(t("Update resume title success"));
     } catch (e) {
       console.error(e);
-      toast.error(t("updateFailed") || "Update resume title failed");
+      toast.error(t("Update resume title failed"));
     } finally {
       setEditResumeId("");
       setTitle("");
@@ -342,7 +342,7 @@ export default function Dashboard() {
                 sorter
                 sortOrder={tableSort.field === 'title' ? tableSort.order : null}
               />
-              <Table.Column width={200} title={t("People")} dataIndex="isPublic" key="isPublic" render={(value) => !value ? t("Private") : t("Public")} />
+              <Table.Column width={200} title={t("Status")} dataIndex="isPublic" key="isPublic" render={(value) => !value ? t("Private") : t("Public")} />
               <Table.Column
                 width={200}
                 title={t("Created on")}
@@ -622,11 +622,11 @@ export default function Dashboard() {
               // Reload first page to show new resume
               loadAllResumes({ page: 1 });
               setRecentResumes((prev) => [created, ...prev].slice(0, 5));
-              toast.success(t("createResumeSuccess") || "Duplicated resume successfully");
+              toast.success(t("Duplicate resume successfully"));
               navigate(`/app/builder/${created.id}`);
             } catch (e) {
               console.error(e);
-              toast.error(t("createResumeFailed") || "Duplicate resume failed");
+              toast.error(t("Duplicate resume failed"));
             } finally {
               setDuplicateResumeId(null);
               setTitle("");

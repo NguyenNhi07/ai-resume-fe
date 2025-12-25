@@ -16,8 +16,10 @@ export default function SettingLayout() {
     email: string;
     avatarUrl?: string;
   } | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const toast = useToast();
+  
   useEffect(() => {
     const userStr = localStorage.getItem("user");
     if (userStr) {
@@ -35,16 +37,51 @@ export default function SettingLayout() {
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user) return;
+    if (!file) return;
+    
+    if (!user) {
+      toast.error(t("User not found"));
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error(t("Please select an image file"));
+      // Reset input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      toast.error(t("File size must be less than 5MB"));
+      // Reset input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
+    }
+
+    setIsUploading(true);
     try {
       const imageUrl = await fileApi.uploadImage(file);
       const updatedUser = { ...user, avatarUrl: imageUrl };
       setUser(updatedUser);
       localStorage.setItem("user", JSON.stringify(updatedUser));
       toast.success(t("Avatar updated successfully"));
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to upload avatar", error);
-      toast.error(t("Failed to upload avatar"));
+      const errorMessage = error?.response?.data?.message || error?.message || t("Failed to upload avatar");
+      toast.error(errorMessage);
+    } finally {
+      setIsUploading(false);
+      // Reset input to allow selecting the same file again
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
   return (
@@ -70,6 +107,8 @@ export default function SettingLayout() {
                 type="link"
                 onClick={handleClick}
                 className="text-xs !text-black/55 flex gap-2 !px-0"
+                disabled={isUploading}
+                loading={isUploading}
               >
                 <EditIcon /> {t("Change Avatar")}
               </Button>

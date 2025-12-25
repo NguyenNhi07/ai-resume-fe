@@ -345,5 +345,9 @@
   "Overall Suggestions": "전체 제안",
   "Technical": "기술",
   "Behavioral": "행동",
-  "Reject": "거부"
+  "Reject": "거부",
+  "Duplicate resume successfully": "이력서 복제 성공",
+  "Duplicate resume failed": "이력서 복제 실패",
+  "Title": "제목",
+  "Status": "상태"
 }

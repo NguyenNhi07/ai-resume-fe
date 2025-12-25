@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button, Tag, Collapse } from "antd";
 import { Check, X, Sparkles } from "lucide-react";
 import type { Resume } from "@/lib/type";
@@ -50,6 +50,12 @@ export const TailoredResumePreview = ({
   const { t } = useTranslation();
   const [decisions, setDecisions] = useState<SectionDecision>({});
   const [currentResume, setCurrentResume] = useState<Resume>(baseResume);
+  const onResumeChangeRef = useRef(onResumeChange);
+
+  // Update ref when callback changes
+  useEffect(() => {
+    onResumeChangeRef.current = onResumeChange;
+  }, [onResumeChange]);
 
   // Initialize decisions as "pending" for all sections
   useEffect(() => {
@@ -133,8 +139,8 @@ export const TailoredResumePreview = ({
     });
 
     setCurrentResume(updatedResume);
-    onResumeChange(updatedResume);
-  }, [decisions, baseResume, tailoredInfo, onResumeChange]);
+    onResumeChangeRef.current(updatedResume);
+  }, [decisions, baseResume, tailoredInfo]);
 
   const handleAccept = (sectionKey: string) => {
     setDecisions((prev) => ({ ...prev, [sectionKey]: "accepted" }));
@@ -149,8 +155,7 @@ export const TailoredResumePreview = ({
     title: string,
     original: string,
     optimized: string,
-    changes: string[],
-    sectionType: string
+    changes: string[]
   ) => {
     const decision = decisions[sectionKey] || "pending";
     const isAccepted = decision === "accepted";
@@ -284,8 +289,7 @@ export const TailoredResumePreview = ({
                     t("Professional Summary"),
                     tailoredInfo.summary.original,
                     tailoredInfo.summary.optimized,
-                    [],
-                    "summary"
+                    []
                   )}
                 </Panel>
               )}
@@ -314,8 +318,7 @@ export const TailoredResumePreview = ({
                     section.title || section.section,
                     section.original,
                     section.optimized,
-                    section.changes,
-                    section.section
+                    section.changes
                   )}
                 </Panel>
               );
