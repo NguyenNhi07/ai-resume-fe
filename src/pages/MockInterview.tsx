@@ -193,11 +193,6 @@ export default function MockInterview() {
                 placeholder={t("PasteJDPlaceholder")}
                 autoSize={{ minRows: 6, maxRows: 10 }}
                 showCount
-                className="[&_textarea::-webkit-scrollbar]:bg-white [&_textarea::-webkit-scrollbar-thumb]:bg-gray-300 [&_textarea::-webkit-scrollbar-thumb]:rounded [&_textarea::-webkit-scrollbar]:w-2"
-                style={{
-                  scrollbarColor: '#cbd5e1 white',
-                  scrollbarWidth: 'thin'
-                }}
               />
               <div className="flex flex-wrap gap-1">
                 {jdSkills.map((skill) => (
@@ -291,11 +286,6 @@ export default function MockInterview() {
                       rows={4}
                       placeholder={t("YourAnswerPlaceholder")}
                       autoSize={{ minRows: 4, maxRows: 8 }}
-                      className="[&_textarea::-webkit-scrollbar]:bg-white [&_textarea::-webkit-scrollbar-thumb]:bg-gray-300 [&_textarea::-webkit-scrollbar-thumb]:rounded [&_textarea::-webkit-scrollbar]:w-2"
-                      style={{
-                        scrollbarColor: '#cbd5e1 white',
-                        scrollbarWidth: 'thin'
-                      }}
                     />
                     {score?.results[index] && (
                       <div className="mt-2 flex items-center justify-between">

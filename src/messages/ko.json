@@ -349,5 +349,12 @@
   "Duplicate resume successfully": "이력서 복제 성공",
   "Duplicate resume failed": "이력서 복제 실패",
   "Title": "제목",
-  "Status": "상태"
+  "Status": "상태",
+  "History": "기록",
+  "Score History": "점수 기록",
+  "Matched Role": "일치하는 역할",
+  "No score history found": "점수 기록을 찾을 수 없습니다",
+  "more": "더보기",
+  "Show less": "간략히 보기",
+  "Show more": "더 보기"
 }

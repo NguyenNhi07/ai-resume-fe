@@ -349,5 +349,12 @@
   "Duplicate resume successfully": "Duplicate resume successfully",
   "Duplicate resume failed": "Duplicate resume failed",
   "Title": "Title",
-  "Status": "Status"
+  "Status": "Status",
+  "History": "History",
+  "Score History": "Score History",
+  "Matched Role": "Matched Role",
+  "No score history found": "No score history found",
+  "more": "more",
+  "Show less": "Show less",
+  "Show more": "Show more"
 }

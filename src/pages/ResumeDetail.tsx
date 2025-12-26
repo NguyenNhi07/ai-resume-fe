@@ -1,5 +1,6 @@
 import { ResumePreview } from "@/components/ResumePreview";
 import ShareDialog from "@/components/ShareDialog";
+import ScoreHistoryModal from "@/components/ScoreHistoryModal";
 import { useToast } from "@/hooks/useToast";
 import { aiApi, resumeApi } from "@/lib/api";
 import type { Experience, Resume } from "@/lib/type";
@@ -9,6 +10,7 @@ import dayjs, { Dayjs } from "dayjs";
 import {
     AlertCircle,
     ArrowLeftIcon,
+    Clock,
     DownloadIcon,
     EyeIcon,
     FileDown,
@@ -87,6 +89,7 @@ export default function ResumeDetail() {
         matchedRole?: string;
     } | null>(null);
     const [deleteResume, setDeleteResume] = useState(false);
+    const [showHistoryModal, setShowHistoryModal] = useState(false);
 
     const loadExitstingResume = async () => {
         if (!resumeId) return;
@@ -164,6 +167,24 @@ export default function ResumeDetail() {
             const scored = await aiApi.scoreResumeByJD(resumeText, jdText);
             setScoreResult(scored);
             setShowScoreModal(true);
+
+            // Save score to history
+            if (resumeId) {
+                try {
+                    await resumeApi.createScore({
+                        resumeId: Number(resumeId),
+                        score: scored.score,
+                        jdText: jdText,
+                        matchedRole: scored.matchedRole,
+                        missingSkills: scored.missingSkills,
+                        weakSections: scored.weakSections,
+                        suggestions: scored.suggestions,
+                    });
+                } catch (error) {
+                    console.error("Failed to save score history:", error);
+                    // Don't show error to user, just log it
+                }
+            }
         } catch (error: any) {
             console.error(error);
             toast.error(error?.response?.data?.message || t("Failed to score resume by JD"));
@@ -563,14 +584,20 @@ export default function ResumeDetail() {
                         placeholder={t("PasteJDPlaceholder")}
                         autoSize={{ minRows: 5, maxRows: 10 }}
                         showCount
-                        className="[&_textarea::-webkit-scrollbar]:bg-white [&_textarea::-webkit-scrollbar-thumb]:bg-gray-300 [&_textarea::-webkit-scrollbar-thumb]:rounded [&_textarea::-webkit-scrollbar]:w-2"
-                        style={{
-                            scrollbarColor: '#cbd5e1 white',
-                            scrollbarWidth: 'thin'
-                        }}
                     />
                     <div className="flex items-center mt-4 justify-between">
-                        <div className="text-xs text-gray-500">{t("JDScoreHelper")}</div>
+                        <div className="flex items-center gap-2">
+                            <div className="text-xs text-gray-500">{t("JDScoreHelper")}</div>
+                            <Button
+                                size="small"
+                                type="text"
+                                className="!text-purple-600 hover:!bg-purple-50"
+                                onClick={() => setShowHistoryModal(true)}
+                            >
+                                <Clock className="size-3 mr-1" />
+                                {t("History")}
+                            </Button>
+                        </div>
                         <Button
                             size="small"
                             type="primary"
@@ -692,6 +719,12 @@ export default function ResumeDetail() {
                 open={showShareDialog}
                 onOpenChange={setShowShareDialog}
                 resumeId={resumeId || ""}
+            />
+
+            <ScoreHistoryModal
+                open={showHistoryModal}
+                onCancel={() => setShowHistoryModal(false)}
+                resumeId={resumeId}
             />
         </div>
     );

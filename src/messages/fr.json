@@ -349,5 +349,12 @@
   "Duplicate resume successfully": "Dupliquer le CV réussie",
   "Duplicate resume failed": "Échec de la duplication du CV",
   "Title": "Titre",
-  "Status": "Statut"
+  "Status": "Statut",
+  "History": "Historique",
+  "Score History": "Historique des scores",
+  "Matched Role": "Rôle correspondant",
+  "No score history found": "Aucun historique de score trouvé",
+  "more": "plus",
+  "Show less": "Afficher moins",
+  "Show more": "Afficher plus"
 }

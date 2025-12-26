@@ -467,6 +467,34 @@ export const userApi = {
   },
 };
 
+export interface ResumeScore {
+  id: number;
+  resumeId: number;
+  userId?: number;
+  score: number;
+  jdText: string;
+  matchedRole?: string;
+  missingSkills: string[];
+  weakSections: string[];
+  suggestions: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ResumeScore {
+  id: number;
+  resumeId: number;
+  userId?: number;
+  score: number;
+  jdText: string;
+  matchedRole?: string;
+  missingSkills: string[];
+  weakSections: string[];
+  suggestions: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export const resumeApi = {
   list: async (params?: {
     page?: number;
@@ -525,6 +553,33 @@ export const resumeApi = {
   downloadPdf: async (id: string | number): Promise<Blob> => {
     const res = await api.get(`/resume/${id}/pdf`, { responseType: 'blob' });
     return res.data as Blob;
+  },
+  createScore: async (scoreData: {
+    resumeId: number;
+    score: number;
+    jdText: string;
+    matchedRole?: string;
+    missingSkills: string[];
+    weakSections: string[];
+    suggestions: string[];
+  }): Promise<ResumeScore> => {
+    const res = await api.post('/resume/score', scoreData);
+    return res.data;
+  },
+  getScoreList: async (resumeId: number, params?: {
+    page?: number;
+    pageSize?: number;
+  }): Promise<{ data: ResumeScore[]; pagination?: { page: number; pageSize: number; total: number; totalPages: number } }> => {
+    const query: any = {
+      resumeId,
+      page: params?.page ?? 1,
+      pageSize: Math.min(params?.pageSize ?? 10, 100),
+    };
+    const res = await api.get('/resume/score', { params: query });
+    return {
+      data: res.data?.data || res.data || [],
+      pagination: res.data?.pagination,
+    };
   },
 };
 

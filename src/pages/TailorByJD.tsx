@@ -283,11 +283,6 @@ export default function TailorByJD() {
               placeholder={t("PasteJDPlaceholder")}
               autoSize={{ minRows: 8, maxRows: 14 }}
               showCount
-              className="[&_textarea::-webkit-scrollbar]:bg-white [&_textarea::-webkit-scrollbar-thumb]:bg-gray-300 [&_textarea::-webkit-scrollbar-thumb]:rounded [&_textarea::-webkit-scrollbar]:w-2"
-              style={{
-                scrollbarColor: '#cbd5e1 white',
-                scrollbarWidth: 'thin'
-              }}
             />
 
             <div className="flex justify-between items-center mt-2">

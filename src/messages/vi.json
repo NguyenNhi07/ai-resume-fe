@@ -349,5 +349,12 @@
   "Duplicate resume successfully": "Nhân bản Sơ yếu lý lịch thành công",
   "Duplicate resume failed": "Nhân bản Sơ yếu lý lịch thất bại",
   "Title": "Tiêu đề",
-  "Status": "Trạng thái"
+  "Status": "Trạng thái",
+  "History": "Lịch sử",
+  "Score History": "Lịch sử điểm số",
+  "Matched Role": "Vị trí phù hợp",
+  "No score history found": "Không tìm thấy lịch sử điểm số",
+  "more": "thêm",
+  "Show less": "Ẩn bớt",
+  "Show more": "Xem thêm"
 }

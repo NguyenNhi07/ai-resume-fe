@@ -349,5 +349,12 @@
   "Duplicate resume successfully": "履歴書を複製しました",
   "Duplicate resume failed": "履歴書の複製に失敗しました",
   "Title": "タイトル",
-  "Status": "ステータス"
+  "Status": "ステータス",
+  "History": "履歴",
+  "Score History": "スコア履歴",
+  "Matched Role": "一致する役割",
+  "No score history found": "スコア履歴が見つかりません",
+  "more": "もっと見る",
+  "Show less": "折りたたむ",
+  "Show more": "もっと見る"
 }

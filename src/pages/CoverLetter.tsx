@@ -193,11 +193,6 @@ export default function CoverLetter() {
                 placeholder={t("PasteJDPlaceholder")}
                 autoSize={{ minRows: 6, maxRows: 10 }}
                 showCount
-                className="[&_textarea::-webkit-scrollbar]:bg-white [&_textarea::-webkit-scrollbar-thumb]:bg-gray-300 [&_textarea::-webkit-scrollbar-thumb]:rounded [&_textarea::-webkit-scrollbar]:w-2"
-                style={{
-                  scrollbarColor: '#cbd5e1 white',
-                  scrollbarWidth: 'thin'
-                }}
               />
               <div className="flex flex-wrap gap-1 mt-2">
                 {jdSkills.map((skill) => (

@@ -349,5 +349,12 @@
   "Duplicate resume successfully": "复制简历成功",
   "Duplicate resume failed": "复制简历失败",
   "Title": "标题",
-  "Status": "状态"
+  "Status": "状态",
+  "History": "历史",
+  "Score History": "分数历史",
+  "Matched Role": "匹配的角色",
+  "No score history found": "未找到分数历史",
+  "more": "更多",
+  "Show less": "显示更少",
+  "Show more": "显示更多"
 }
