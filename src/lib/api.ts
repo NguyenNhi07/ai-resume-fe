@@ -2,7 +2,7 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import type { Resume } from './type';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
 const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API === 'true' || !import.meta.env.VITE_API_BASE_URL;
 
 // Mock users database (in-memory for testing)
@@ -12,19 +12,19 @@ const mockUsers: Array<{
   email: string;
   password: string;
 }> = [
-  {
-    id: '1',
-    name: 'Test User',
-    email: 'test@example.com',
-    password: '123456',
-  },
-  {
-    id: '2',
-    name: 'Admin User',
-    email: 'admin@example.com',
-    password: 'admin123',
-  },
-];
+    {
+      id: '1',
+      name: 'Test User',
+      email: 'test@example.com',
+      password: '123456',
+    },
+    {
+      id: '2',
+      name: 'Admin User',
+      email: 'admin@example.com',
+      password: 'admin123',
+    },
+  ];
 
 // Mock API delay
 const mockDelay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -185,43 +185,43 @@ const toBackendResume = (r: Resume) => {
   const experiences =
     Array.isArray(r.experience) && r.experience.length
       ? r.experience.map((exp) => ({
-          companyName: exp.company ?? '',
-          jobTitle: exp.position ?? '',
-          jobDescription: exp.description ?? '',
-          isCurrent: exp.is_current ?? false,
-          startDate: exp.start_date
-            ? dayjs(exp.start_date, 'MM/YYYY').toISOString()
-            : undefined,
-          endDate: exp.end_date
-            ? dayjs(exp.end_date, 'MM/YYYY').toISOString()
-            : undefined,
-        }))
+        companyName: exp.company ?? '',
+        jobTitle: exp.position ?? '',
+        jobDescription: exp.description ?? '',
+        isCurrent: exp.is_current ?? false,
+        startDate: exp.start_date
+          ? dayjs(exp.start_date, 'MM/YYYY').toISOString()
+          : undefined,
+        endDate: exp.end_date
+          ? dayjs(exp.end_date, 'MM/YYYY').toISOString()
+          : undefined,
+      }))
       : undefined;
 
   const educations =
     Array.isArray(r.education) && r.education.length
       ? r.education.map((edu) => ({
-          institutionName: edu.institution ?? '',
-          degree: edu.degree ?? '',
-          fieldOfStudy: edu.field ?? '',
-          graduationDate: edu.graduation_date
-            ? dayjs(edu.graduation_date, 'MM/YYYY').toISOString()
-            : undefined,
-          gpa: edu.gpa ?? '',
-        }))
+        institutionName: edu.institution ?? '',
+        degree: edu.degree ?? '',
+        fieldOfStudy: edu.field ?? '',
+        graduationDate: edu.graduation_date
+          ? dayjs(edu.graduation_date, 'MM/YYYY').toISOString()
+          : undefined,
+        gpa: edu.gpa ?? '',
+      }))
       : undefined;
 
   const projects =
     Array.isArray(r.project) && r.project.length
       ? r.project.map((p) => ({
-          projectName: p.name ?? '',
-          description: p.description ?? '',
-          technologies: Array.isArray(p.technologies)
-            ? p.technologies.filter(Boolean)
-            : p.technologies
+        projectName: p.name ?? '',
+        description: p.description ?? '',
+        technologies: Array.isArray(p.technologies)
+          ? p.technologies.filter(Boolean)
+          : p.technologies
             ? [String(p.technologies)]
             : [],
-        }))
+      }))
       : undefined;
 
   return {
@@ -274,58 +274,58 @@ const toFrontendResume = (data: any): Resume => ({
   professional_summary: data.summary ?? data.professional ?? '',
   experience: Array.isArray(data.experiences)
     ? data.experiences.map((e: any) => {
-        const start = e.start_date ?? e.startDate;
-        const end = e.end_date ?? e.endDate;
-        const isCurrent = e.is_current ?? e.isCurrent ?? false;
-        const startStr = start
-          ? dayjs(start).isValid()
-            ? dayjs(start).format('MM/YYYY')
-            : String(start)
-          : '';
-        const endStr = isCurrent
-          ? ''
-          : end
+      const start = e.start_date ?? e.startDate;
+      const end = e.end_date ?? e.endDate;
+      const isCurrent = e.is_current ?? e.isCurrent ?? false;
+      const startStr = start
+        ? dayjs(start).isValid()
+          ? dayjs(start).format('MM/YYYY')
+          : String(start)
+        : '';
+      const endStr = isCurrent
+        ? ''
+        : end
           ? dayjs(end).isValid()
             ? dayjs(end).format('MM/YYYY')
             : String(end)
           : '';
-        return {
-          company: e.company ?? e.companyName ?? '',
-          position: e.position ?? e.jobTitle ?? '',
-          description: e.description ?? e.jobDescription ?? '',
-          is_current: isCurrent,
-          start_date: startStr,
-          end_date: endStr,
-        };
-      })
+      return {
+        company: e.company ?? e.companyName ?? '',
+        position: e.position ?? e.jobTitle ?? '',
+        description: e.description ?? e.jobDescription ?? '',
+        is_current: isCurrent,
+        start_date: startStr,
+        end_date: endStr,
+      };
+    })
     : [],
   education: Array.isArray(data.educations)
     ? data.educations.map((edu: any) => {
-        const grad = edu.graduation_date ?? edu.graduationDate;
-        const gradStr = grad
-          ? dayjs(grad).isValid()
-            ? dayjs(grad).format('MM/YYYY')
-            : String(grad)
-          : '';
-        return {
-          institution: edu.institution ?? edu.institutionName ?? '',
-          degree: edu.degree ?? '',
-          field: edu.field ?? edu.fieldOfStudy ?? '',
-          graduation_date: gradStr,
-          gpa: edu.gpa ?? '',
-        };
-      })
+      const grad = edu.graduation_date ?? edu.graduationDate;
+      const gradStr = grad
+        ? dayjs(grad).isValid()
+          ? dayjs(grad).format('MM/YYYY')
+          : String(grad)
+        : '';
+      return {
+        institution: edu.institution ?? edu.institutionName ?? '',
+        degree: edu.degree ?? '',
+        field: edu.field ?? edu.fieldOfStudy ?? '',
+        graduation_date: gradStr,
+        gpa: edu.gpa ?? '',
+      };
+    })
     : [],
   project: Array.isArray(data.projects)
     ? data.projects.map((p: any) => ({
-        name: p.name ?? p.projectName ?? '',
-        description: p.description ?? '',
-        technologies: Array.isArray(p?.technologies)
-          ? p.technologies.filter(Boolean)
-          : p?.technologies
+      name: p.name ?? p.projectName ?? '',
+      description: p.description ?? '',
+      technologies: Array.isArray(p?.technologies)
+        ? p.technologies.filter(Boolean)
+        : p?.technologies
           ? [String(p.technologies)]
           : [],
-      }))
+    }))
     : [],
   skills: Array.isArray(data.skills) ? data.skills : [],
   template: data.template ?? 'classic',
@@ -342,17 +342,17 @@ export const authApi = {
     if (USE_MOCK_API) {
       // Simulate API delay
       await mockDelay(800);
-      
+
       // Find user in mock database
       const user = mockUsers.find(u => u.email === data.email && u.password === data.password);
-      
+
       if (!user) {
         throw new Error('Email hoặc mật khẩu không đúng');
       }
-      
+
       // Generate mock token
       const token = `mock_token_${user.id}_${Date.now()}`;
-      
+
       return {
         accessToken: token,
         user: {
@@ -362,7 +362,7 @@ export const authApi = {
         },
       };
     }
-    
+
     const response = await api.post<AuthResponse>('/auth/login', data);
     return response.data;
   },
@@ -371,13 +371,13 @@ export const authApi = {
     if (USE_MOCK_API) {
       // Simulate API delay
       await mockDelay(800);
-      
+
       // Check if email already exists
       const existingUser = mockUsers.find(u => u.email === data.email);
       if (existingUser) {
         throw new Error('Email này đã được sử dụng');
       }
-      
+
       // Create new user
       const newUser = {
         id: String(mockUsers.length + 1),
@@ -385,12 +385,12 @@ export const authApi = {
         email: data.email,
         password: data.password,
       };
-      
+
       mockUsers.push(newUser);
-      
+
       // Generate mock token
       const token = `mock_token_${newUser.id}_${Date.now()}`;
-      
+
       return {
         accessToken: token,
         user: {
@@ -400,7 +400,7 @@ export const authApi = {
         },
       };
     }
-    
+
     // backend expects /auth/signup with { email, password, name }
     const payload = { email: data.email, password: data.password, name: data.name };
     const response = await api.post<AuthResponse>('/auth/signup', payload);
