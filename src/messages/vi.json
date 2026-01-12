@@ -356,5 +356,22 @@
   "No score history found": "Không tìm thấy lịch sử điểm số",
   "more": "thêm",
   "Show less": "Ẩn bớt",
-  "Show more": "Xem thêm"
+  "Show more": "Xem thêm",
+  "Certifications": "Chứng chỉ",
+  "Add your certifications and credentials": "Thêm chứng chỉ và chứng nhận của bạn",
+  "Add Certification": "Thêm chứng chỉ",
+  "No certifications added yet.": "Chưa có chứng chỉ nào được thêm.",
+  "Click \"Add Certification\" to get started.": "Nhấn \"Thêm chứng chỉ\" để bắt đầu.",
+  "Certification": "Chứng chỉ",
+  "Certification Name": "Tên chứng chỉ",
+  "Issuing Organization": "Tổ chức cấp",
+  "Issue Date": "Ngày cấp",
+  "Expiry Date": "Ngày hết hạn",
+  "Credential ID": "Mã chứng chỉ",
+  "Credential URL": "Liên kết chứng chỉ",
+  "please_select_an_image_file": "Vui lòng chọn file ảnh",
+  "file_size_must_be_less_than_10mb": "Kích thước file phải nhỏ hơn 10MB",
+  "image_uploaded_successfully": "Tải ảnh lên thành công",
+  "failed_to_upload_image": "Tải ảnh lên thất bại",
+  "uploading_image": "Đang tải ảnh lên..."
 }

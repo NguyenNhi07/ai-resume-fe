@@ -356,5 +356,22 @@
   "No score history found": "No score history found",
   "more": "more",
   "Show less": "Show less",
-  "Show more": "Show more"
+  "Show more": "Show more",
+  "Certifications": "Certifications",
+  "Add your certifications and credentials": "Add your certifications and credentials",
+  "Add Certification": "Add Certification",
+  "No certifications added yet.": "No certifications added yet.",
+  "Click \"Add Certification\" to get started.": "Click \"Add Certification\" to get started.",
+  "Certification": "Certification",
+  "Certification Name": "Certification Name",
+  "Issuing Organization": "Issuing Organization",
+  "Issue Date": "Issue Date",
+  "Expiry Date": "Expiry Date",
+  "Credential ID": "Credential ID",
+  "Credential URL": "Credential URL",
+  "please_select_an_image_file": "Please select an image file",
+  "file_size_must_be_less_than_10mb": "File size must be less than 10MB",
+  "image_uploaded_successfully": "Image uploaded successfully",
+  "failed_to_upload_image": "Failed to upload image",
+  "uploading_image": "Uploading image..."
 }

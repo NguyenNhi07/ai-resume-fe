@@ -1,9 +1,9 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
-import type { Resume } from "./type"
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+import type { Resume } from "./type";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 export const dummyResumeData: Resume[] = [
@@ -13,14 +13,14 @@ export const dummyResumeData: Resume[] = [
     personal_info: {
       full_name: "Nguyen Van A",
       email: "nguyenvana@example.com",
-      birthDate: '07/11/2003',
-      gender: 'Female',
+      birthDate: "07/11/2003",
+      gender: "Female",
       phone: "+84 912 345 678",
       location: "123 Le Duan, Hanoi, Vietnam",
       website: "https://nguyenvana.dev",
       language: "English",
-      image: 'https://avatars.githubusercontent.com/u/9919?v=4',
-      profession: "Frontend Developer"
+      image: "https://avatars.githubusercontent.com/u/9919?v=4",
+      profession: "Frontend Developer",
     },
     professional_summary:
       "Frontend Developer with 3+ years of experience building responsive, scalable web apps using React and TypeScript.",
@@ -40,7 +40,7 @@ export const dummyResumeData: Resume[] = [
         degree: "Bachelor of Information Technology",
         field: "Bachelor of Information Technology",
         graduation_date: "Bachelor of Information Technology",
-        gpa: '6.0'
+        gpa: "6.0",
       },
     ],
     project: [
@@ -62,14 +62,14 @@ export const dummyResumeData: Resume[] = [
     personal_info: {
       full_name: "Tran Thi B",
       email: "tranthib@example.com",
-      birthDate: '07/11/2003',
-      gender: 'Female',
+      birthDate: "07/11/2003",
+      gender: "Female",
       phone: "+84 988 765 432",
       location: "456 Nguyen Trai, Hanoi, Vietnam",
       website: "https://tranthib.dev",
       language: "English",
-      image: 'https://avatars.githubusercontent.com/u/9919?v=4',
-      profession: "Backend Developer"
+      image: "https://avatars.githubusercontent.com/u/9919?v=4",
+      profession: "Backend Developer",
     },
     professional_summary:
       "Backend Developer with expertise in Node.js, Express, and MongoDB, focused on building secure and efficient APIs.",
@@ -89,7 +89,7 @@ export const dummyResumeData: Resume[] = [
         degree: "Bachelor of Information Technology",
         field: "Bachelor of Information Technology",
         graduation_date: "Bachelor of Information Technology",
-        gpa: '6.0'
+        gpa: "6.0",
       },
     ],
     project: [
@@ -111,14 +111,14 @@ export const dummyResumeData: Resume[] = [
     personal_info: {
       full_name: "Le Thi C",
       email: "lethic@example.com",
-      birthDate: '07/11/2003',
-      gender: 'Female',
+      birthDate: "07/11/2003",
+      gender: "Female",
       phone: "+84 933 456 789",
       location: "789 Tran Hung Dao, Ho Chi Minh City, Vietnam",
       website: "https://lethic.design",
       language: "English",
-      image: 'https://avatars.githubusercontent.com/u/9919?v=4',
-      profession: "Creative UI/UX Designer"
+      image: "https://avatars.githubusercontent.com/u/9919?v=4",
+      profession: "Creative UI/UX Designer",
     },
     professional_summary:
       "Creative UI/UX Designer with 4 years of experience designing user-centered digital products and improving usability through research and testing.",
@@ -138,7 +138,7 @@ export const dummyResumeData: Resume[] = [
         degree: "Bachelor of Information Technology",
         field: "Bachelor of Information Technology",
         graduation_date: "Bachelor of Information Technology",
-        gpa: '6.0'
+        gpa: "6.0",
       },
     ],
     project: [
@@ -149,7 +149,13 @@ export const dummyResumeData: Resume[] = [
         technologies: ["Figma", "Adobe XD", "User Research"],
       },
     ],
-    skills: ["Figma", "Prototyping", "Wireframing", "User Research", "Adobe XD"],
+    skills: [
+      "Figma",
+      "Prototyping",
+      "Wireframing",
+      "User Research",
+      "Adobe XD",
+    ],
     template: "minimal",
     accent_color: "#F59E0B",
     public: true,
@@ -157,7 +163,10 @@ export const dummyResumeData: Resume[] = [
 ];
 
 // Phân tích JD để trích xuất các kỹ năng chính (dùng heuristics đơn giản)
-export function extractSkillsFromJD(jd: string, knownSkills: string[] = []): string[] {
+export function extractSkillsFromJD(
+  jd: string,
+  knownSkills: string[] = []
+): string[] {
   if (!jd) return [];
 
   const text = jd.toLowerCase();
@@ -189,7 +198,7 @@ export function extractSkillsFromJD(jd: string, knownSkills: string[] = []): str
     "figma",
     "ui/ux",
     "html",
-    "css"
+    "css",
   ];
 
   commonSkills.forEach((skill) => {
@@ -289,13 +298,15 @@ export function generateInterviewQuestions(
     {
       id: "beh-1",
       type: "behavioral",
-      question: "Kể về một lần bạn nhận feedback khó nghe và cách bạn điều chỉnh kế hoạch.",
+      question:
+        "Kể về một lần bạn nhận feedback khó nghe và cách bạn điều chỉnh kế hoạch.",
       hint: "STAR (Situation, Task, Action, Result).",
     },
     {
       id: "beh-2",
       type: "behavioral",
-      question: "Khi deadline gấp và yêu cầu thay đổi, bạn ưu tiên công việc và trao đổi với team ra sao?",
+      question:
+        "Khi deadline gấp và yêu cầu thay đổi, bạn ưu tiên công việc và trao đổi với team ra sao?",
       hint: "Nhấn vào giao tiếp, thương lượng phạm vi, quản lý rủi ro.",
     },
   ];
@@ -322,12 +333,18 @@ export function scoreInterviewAnswers(
 
     const feedbackParts: string[] = [];
     if (matched.length === 0 && jdSkills.length > 0) {
-      feedbackParts.push("Nên nhắc trực tiếp các kỹ năng trong JD để tăng độ khớp.");
+      feedbackParts.push(
+        "Nên nhắc trực tiếp các kỹ năng trong JD để tăng độ khớp."
+      );
     }
     if (ans.length < 80) {
-      feedbackParts.push("Câu trả lời còn ngắn, hãy bổ sung bối cảnh và kết quả cụ thể.");
+      feedbackParts.push(
+        "Câu trả lời còn ngắn, hãy bổ sung bối cảnh và kết quả cụ thể."
+      );
     } else {
-      feedbackParts.push("Trình bày đủ ý, có thể thêm số liệu/KPI để thuyết phục hơn.");
+      feedbackParts.push(
+        "Trình bày đủ ý, có thể thêm số liệu/KPI để thuyết phục hơn."
+      );
     }
 
     return {
@@ -345,6 +362,48 @@ export function scoreInterviewAnswers(
 }
 
 // Giả lập AI: sinh cover letter từ CV + JD + tone
+/**
+ * Format text with markdown-like formatting for resume display
+ * Converts markdown bullet points to clean text with proper line breaks
+ */
+export function formatResumeText(text: string): string {
+  if (!text) return "";
+
+  // Split by lines and process each line
+  const lines = text.split("\n");
+  const processedLines: string[] = [];
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      // Preserve empty lines for spacing
+      processedLines.push("");
+      continue;
+    }
+
+    // Check if line is a markdown bullet point
+    if (/^[-*•]\s/.test(trimmed)) {
+      // Remove bullet marker and keep content
+      const cleaned = trimmed.replace(/^[-*•]\s+/, "").trim();
+      if (cleaned) {
+        processedLines.push(cleaned);
+      }
+    } else if (/^\d+\.\s/.test(trimmed)) {
+      // Remove numbered list marker
+      const cleaned = trimmed.replace(/^\d+\.\s+/, "").trim();
+      if (cleaned) {
+        processedLines.push(cleaned);
+      }
+    } else {
+      // Regular line, keep as-is
+      processedLines.push(trimmed);
+    }
+  }
+
+  // Join lines with newlines (will be rendered as line breaks in HTML)
+  return processedLines.join("\n");
+}
+
 export function generateCoverLetter(
   resume: Resume,
   jd: string,
@@ -352,12 +411,11 @@ export function generateCoverLetter(
   jdSkills: string[]
 ): string {
   const name = resume.personal_info?.full_name || "Ứng viên";
-  const role = resume.personal_info?.profession || resume.title || "vị trí ứng tuyển";
+  const role =
+    resume.personal_info?.profession || resume.title || "vị trí ứng tuyển";
   const email = resume.personal_info?.email || "";
   const phone = resume.personal_info?.phone || "";
-  const skills = jdSkills.length
-    ? jdSkills
-    : (resume.skills || []).slice(0, 6);
+  const skills = jdSkills.length ? jdSkills : (resume.skills || []).slice(0, 6);
 
   const toneLine =
     tone === "formal"
@@ -377,12 +435,16 @@ export function generateCoverLetter(
     ? `Kỹ năng liên quan: ${skills.join(", ")}.`
     : "";
 
-  return `Kính gửi Nhà tuyển dụng,\n\n${toneLine}\n\n` +
+  return (
+    `Kính gửi Nhà tuyển dụng,\n\n${toneLine}\n\n` +
     `Tôi quan tâm đến vị trí ${role}. ${jdLine}\n\n` +
     `${skillLine}\n\n` +
     `Trong các dự án trước đây, tôi đã chủ động phối hợp với đội ngũ đa chức năng, tối ưu hiệu năng và đảm bảo chất lượng thông qua kiểm thử và phản hồi người dùng. Tôi tin rằng kinh nghiệm này sẽ hữu ích cho vai trò đang tuyển.\n\n` +
     `Rất mong có cơ hội trao đổi thêm. Xin cảm ơn và trân trọng.\n\n` +
-    `${name}\n${email ? `Email: ${email}\n` : ""}${phone ? `Phone: ${phone}\n` : ""}`;
+    `${name}\n${email ? `Email: ${email}\n` : ""}${
+      phone ? `Phone: ${phone}\n` : ""
+    }`
+  );
 }
 
 // Giả lập AI: chấm điểm CV theo JD và gợi ý cải thiện
@@ -412,7 +474,9 @@ export async function scoreResumeAgainstJD(
   score = Math.min(score, 95);
 
   // thiếu kỹ năng: lấy 5 kỹ năng JD chưa có trong CV
-  const knownSkills = new Set((resume.skills || []).map((s) => s.toLowerCase()));
+  const knownSkills = new Set(
+    (resume.skills || []).map((s) => s.toLowerCase())
+  );
   const missing = jdSkills
     .filter((s) => !knownSkills.has(s.toLowerCase()))
     .slice(0, 5);
@@ -456,4 +520,3 @@ export async function scoreResumeAgainstJD(
     matchedRole: match ? match[0] : undefined,
   };
 }
-

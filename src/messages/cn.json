@@ -356,5 +356,17 @@
   "No score history found": "未找到分数历史",
   "more": "更多",
   "Show less": "显示更少",
-  "Show more": "显示更多"
+  "Show more": "显示更多",
+  "Certifications": "证书",
+  "Add your certifications and credentials": "添加您的证书和凭证",
+  "Add Certification": "添加证书",
+  "No certifications added yet.": "尚未添加证书。",
+  "Click \"Add Certification\" to get started.": "点击“添加证书”开始。",
+  "Certification": "证书",
+  "Certification Name": "证书名称",
+  "Issuing Organization": "颁发机构",
+  "Issue Date": "颁发日期",
+  "Expiry Date": "到期日期",
+  "Credential ID": "凭证ID",
+  "Credential URL": "凭证链接"
 }

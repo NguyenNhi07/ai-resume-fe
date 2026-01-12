@@ -1,4 +1,5 @@
 import { ColorPicker } from "@/components/ColorPicker";
+import { CertificationForm } from "@/components/CertificationForm";
 import { EducationForm } from "@/components/EducationForm";
 import { ExperienceForm } from "@/components/ExperienceForm";
 import { PersonalInfoForm } from "@/components/PersonalInfoForm";
@@ -16,6 +17,7 @@ import dayjs, { Dayjs } from "dayjs";
 import {
   AlertCircle,
   ArrowLeftIcon,
+  Award,
   Briefcase,
   ChevronLeft,
   ChevronRight,
@@ -24,7 +26,7 @@ import {
   GraduationCap,
   Sparkles,
   User,
-  UserCheck
+  UserCheck,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -34,7 +36,7 @@ import { useNavigate, useParams } from "react-router-dom";
 interface FormResume
   extends Omit<
     Resume,
-    "personal_info" | "experience" | "education" | "project"
+    "personal_info" | "experience" | "education" | "project" | "certifications"
   > {
   personal_info: Omit<Resume["personal_info"], "birthDate"> & {
     birthDate?: Dayjs;
@@ -51,6 +53,15 @@ interface FormResume
     }
   >;
   project?: Resume["project"];
+  certifications?: Array<
+    Omit<
+      NonNullable<Resume["certifications"]>[0],
+      "issueDate" | "expiryDate"
+    > & {
+      issueDate?: Dayjs;
+      expiryDate?: Dayjs;
+    }
+  >;
 }
 
 export default function ResumeBuilder() {
@@ -81,6 +92,7 @@ export default function ResumeBuilder() {
     professional_summary: "",
     experience: [],
     education: [],
+    certifications: [],
     project: [],
     skills: [],
     template: "classic",
@@ -109,7 +121,7 @@ export default function ResumeBuilder() {
       document.title = resume.title;
       currentResumeId.current = resumeId;
       setIsDirty(false);
-    } catch (e) {
+    } catch {
       // Fallback to default for new resume
       const newResume: Resume = {
         id: "",
@@ -118,6 +130,7 @@ export default function ResumeBuilder() {
         professional_summary: "",
         experience: [],
         education: [],
+        certifications: [],
         project: [],
         skills: [],
         template: "classic",
@@ -138,6 +151,7 @@ export default function ResumeBuilder() {
     { id: "summary", name: t("Summary"), icon: FileText },
     { id: "experience", name: t("Experience"), icon: Briefcase },
     { id: "education", name: t("Education"), icon: GraduationCap },
+    { id: "certifications", name: t("Certifications"), icon: Award },
     { id: "projects", name: t("Projects"), icon: FolderIcon },
     { id: "skills", name: t("Skills"), icon: Sparkles },
   ];
@@ -166,27 +180,45 @@ export default function ResumeBuilder() {
         personal_info: {
           ...resumeData.personal_info,
           birthDate: resumeData.personal_info?.birthDate
-            ? dayjs(resumeData.personal_info.birthDate, "DD/MM/YYYY")
+            ? (() => {
+                const parsed = dayjs(
+                  resumeData.personal_info.birthDate,
+                  "DD/MM/YYYY",
+                  true
+                );
+                return parsed.isValid() ? parsed : undefined;
+              })()
             : undefined,
         },
         experience: resumeData.experience
           ? resumeData.experience.map((exp) => ({
-            ...exp,
-            start_date: exp.start_date
-              ? dayjs(exp.start_date, "MM/YYYY")
-              : undefined,
-            end_date: exp.end_date
-              ? dayjs(exp.end_date, "MM/YYYY")
-              : undefined,
-          }))
+              ...exp,
+              start_date: exp.start_date
+                ? dayjs(exp.start_date, "MM/YYYY")
+                : undefined,
+              end_date: exp.end_date
+                ? dayjs(exp.end_date, "MM/YYYY")
+                : undefined,
+            }))
           : [],
         education: resumeData.education
           ? resumeData.education.map((edu) => ({
-            ...edu,
-            graduation_date: edu.graduation_date
-              ? dayjs(edu.graduation_date, "MM/YYYY")
-              : undefined,
-          }))
+              ...edu,
+              graduation_date: edu.graduation_date
+                ? dayjs(edu.graduation_date, "MM/YYYY")
+                : undefined,
+            }))
+          : [],
+        certifications: resumeData.certifications
+          ? resumeData.certifications.map((cert) => ({
+              ...cert,
+              issueDate: cert.issueDate
+                ? dayjs(cert.issueDate, "MM/YYYY")
+                : undefined,
+              expiryDate: cert.expiryDate
+                ? dayjs(cert.expiryDate, "MM/YYYY")
+                : undefined,
+            }))
           : [],
       };
       form.setFieldsValue(formData);
@@ -196,7 +228,10 @@ export default function ResumeBuilder() {
     }
   }, [resumeId, resumeData, form]);
 
-  const buildResumeFromForm = (allValues: FormResume, current: Resume): Resume => {
+  const buildResumeFromForm = (
+    allValues: FormResume,
+    current: Resume
+  ): Resume => {
     return {
       ...current,
       ...allValues,
@@ -215,58 +250,80 @@ export default function ResumeBuilder() {
           : current.professional_summary,
       experience: allValues.experience
         ? allValues.experience.map((exp) => {
-          const startDate = exp.start_date
-            ? typeof exp.start_date === "string"
-              ? exp.start_date
-              : (exp.start_date as Dayjs).format("MM/YYYY")
-            : "";
-          const endDate = exp.is_current
-            ? ""
-            : exp.end_date
+            const startDate = exp.start_date
+              ? typeof exp.start_date === "string"
+                ? exp.start_date
+                : (exp.start_date as Dayjs).format("MM/YYYY")
+              : "";
+            const endDate = exp.is_current
+              ? ""
+              : exp.end_date
               ? typeof exp.end_date === "string"
                 ? exp.end_date
                 : (exp.end_date as Dayjs).format("MM/YYYY")
               : "";
-          return {
-            company: exp.company,
-            position: exp.position,
-            description: exp.description,
-            is_current: exp.is_current || false,
-            start_date: startDate,
-            end_date: endDate,
-          };
-        })
+            return {
+              company: exp.company,
+              position: exp.position,
+              description: exp.description,
+              is_current: exp.is_current || false,
+              start_date: startDate,
+              end_date: endDate,
+            };
+          })
         : current.experience || [],
       education: allValues.education
         ? allValues.education.map((edu) => {
-          const graduationDate = edu.graduation_date
-            ? typeof edu.graduation_date === "string"
-              ? edu.graduation_date
-              : (edu.graduation_date as Dayjs).format("MM/YYYY")
-            : "";
-          return {
-            institution: edu.institution,
-            degree: edu.degree,
-            field: edu.field,
-            graduation_date: graduationDate,
-            gpa: edu.gpa,
-          };
-        })
+            const graduationDate = edu.graduation_date
+              ? typeof edu.graduation_date === "string"
+                ? edu.graduation_date
+                : (edu.graduation_date as Dayjs).format("MM/YYYY")
+              : "";
+            return {
+              institution: edu.institution,
+              degree: edu.degree,
+              field: edu.field,
+              graduation_date: graduationDate,
+              gpa: edu.gpa,
+            };
+          })
         : current.education || [],
+      certifications: allValues.certifications
+        ? allValues.certifications.map((cert) => {
+            const issueDate = cert.issueDate
+              ? typeof cert.issueDate === "string"
+                ? cert.issueDate
+                : (cert.issueDate as Dayjs).format("MM/YYYY")
+              : "";
+            const expiryDate = cert.expiryDate
+              ? typeof cert.expiryDate === "string"
+                ? cert.expiryDate
+                : (cert.expiryDate as Dayjs).format("MM/YYYY")
+              : "";
+            return {
+              name: cert.name,
+              issuer: cert.issuer,
+              issueDate: issueDate || undefined,
+              expiryDate: expiryDate || undefined,
+              credentialId: cert.credentialId,
+              credentialUrl: cert.credentialUrl,
+            };
+          })
+        : current.certifications || [],
       project: allValues.project
         ? allValues.project.map((proj) => ({
-          name: proj.name,
-          description: proj.description,
-          technologies: proj.technologies || [],
-        }))
+            name: proj.name,
+            description: proj.description,
+            technologies: proj.technologies || [],
+          }))
         : current.project || [],
       skills:
         allValues.skills !== undefined && Array.isArray(allValues.skills)
           ? allValues.skills
           : current.skills || [],
       // Preserve template and accent_color from current state (set by TemplateSelector/ColorPicker)
-      template: current.template || 'classic',
-      accent_color: current.accent_color || '#3B82F6',
+      template: current.template || "classic",
+      accent_color: current.accent_color || "#3B82F6",
     };
   };
 
@@ -361,8 +418,9 @@ export default function ResumeBuilder() {
               <hr
                 className="absolute top-0 left-0 h-1 bg-gradient-to-r from-purple-500 to-purple-600 border-none transition-all duration-2000"
                 style={{
-                  width: `${(activeSectionIndex * 100) / (sections.length - 1)
-                    }%`,
+                  width: `${
+                    (activeSectionIndex * 100) / (sections.length - 1)
+                  }%`,
                 }}
               />
 
@@ -431,9 +489,10 @@ export default function ResumeBuilder() {
                           );
                         }
                       }}
-                      className={`flex items-center gap-1 p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all ${activeSectionIndex === sections.length - 1 &&
+                      className={`flex items-center gap-1 p-3 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-all ${
+                        activeSectionIndex === sections.length - 1 &&
                         "opacity-50"
-                        }`}
+                      }`}
                       disabled={activeSectionIndex === sections.length - 1}
                     >
                       {t("next")} <ChevronRight className="size-4" />
@@ -503,7 +562,10 @@ export default function ResumeBuilder() {
                     );
                   }
 
-                  const formData: Resume = buildResumeFromForm(allValues, resumeData);
+                  const formData: Resume = buildResumeFromForm(
+                    allValues,
+                    resumeData
+                  );
                   console.log("Setting resumeData:", formData);
                   setResumeData(formData);
                 }}
@@ -528,7 +590,9 @@ export default function ResumeBuilder() {
                   )}
 
                   {activeSection.id === "summary" && (
-                    <ProfessionalSummaryForm onChangeWithAi={syncResumeFromForm} />
+                    <ProfessionalSummaryForm
+                      onChangeWithAi={syncResumeFromForm}
+                    />
                   )}
 
                   {activeSection.id === "experience" && (
@@ -552,6 +616,29 @@ export default function ResumeBuilder() {
                           ...prev,
                           education: data,
                         }));
+                      }}
+                    />
+                  )}
+
+                  {activeSection.id === "certifications" && (
+                    <CertificationForm
+                      data={resumeData.certifications || []}
+                      onChange={(data) => {
+                        setResumeData((prev) => ({
+                          ...prev,
+                          certifications: data,
+                        }));
+                        form.setFieldsValue({
+                          certifications: data.map((cert) => ({
+                            ...cert,
+                            issueDate: cert.issueDate
+                              ? dayjs(cert.issueDate, "MM/YYYY")
+                              : undefined,
+                            expiryDate: cert.expiryDate
+                              ? dayjs(cert.expiryDate, "MM/YYYY")
+                              : undefined,
+                          })),
+                        });
                       }}
                     />
                   )}
@@ -631,7 +718,9 @@ export default function ResumeBuilder() {
             // Lấy profile thật từ BE và map vào personal_info của CV
             const me = await userApi.me();
 
-            const birthDateStr = me.dob ? dayjs(me.dob).format("DD/MM/YYYY") : undefined;
+            const birthDateStr = me.dob
+              ? dayjs(me.dob).format("DD/MM/YYYY")
+              : undefined;
 
             const updatedPersonalInfo = {
               ...resumeData.personal_info,
@@ -656,7 +745,14 @@ export default function ResumeBuilder() {
                 ...form.getFieldValue(["personal_info"]),
                 full_name: updatedPersonalInfo.full_name,
                 birthDate: updatedPersonalInfo.birthDate
-                  ? dayjs(updatedPersonalInfo.birthDate, "DD/MM/YYYY")
+                  ? (() => {
+                      const parsed = dayjs(
+                        updatedPersonalInfo.birthDate,
+                        "DD/MM/YYYY",
+                        true
+                      );
+                      return parsed.isValid() ? parsed : undefined;
+                    })()
                   : undefined,
                 gender: updatedPersonalInfo.gender,
                 email: updatedPersonalInfo.email,
@@ -667,7 +763,7 @@ export default function ResumeBuilder() {
 
             setIsDirty(true);
             toast.success(t("Auto filled from profile"));
-            setShowAutoFillModal(false)
+            setShowAutoFillModal(false);
           } finally {
             setIsAutoFilling(false);
           }

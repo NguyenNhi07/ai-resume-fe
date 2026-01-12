@@ -356,5 +356,17 @@
   "No score history found": "점수 기록을 찾을 수 없습니다",
   "more": "더보기",
   "Show less": "간략히 보기",
-  "Show more": "더 보기"
+  "Show more": "더 보기",
+  "Certifications": "자격증",
+  "Add your certifications and credentials": "자격증 및 인증서를 추가하세요",
+  "Add Certification": "자격증 추가",
+  "No certifications added yet.": "아직 추가된 자격증이 없습니다.",
+  "Click \"Add Certification\" to get started.": "\"자격증 추가\"를 클릭하여 시작하세요.",
+  "Certification": "자격증",
+  "Certification Name": "자격증명",
+  "Issuing Organization": "발급 기관",
+  "Issue Date": "취득일",
+  "Expiry Date": "만료일",
+  "Credential ID": "자격증 ID",
+  "Credential URL": "자격증 URL"
 }

@@ -6,6 +6,7 @@ export interface Resume {
   experience: Experience[];
   education: Education[];
   project: Project[];
+  certifications?: Certification[];
   skills?: string[];
   template?: string;
   accent_color?: string;
@@ -49,4 +50,13 @@ export interface Project {
   name?: string;
   description?: string;
   technologies?: string[];
+}
+
+export interface Certification {
+  name?: string;
+  issuer?: string;
+  issueDate?: string;
+  expiryDate?: string;
+  credentialId?: string;
+  credentialUrl?: string;
 }

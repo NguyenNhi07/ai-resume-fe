@@ -20,6 +20,7 @@ import { isValidPhoneNumber } from "@/lib/phone-utils";
 import { PhoneInput } from "./PhoneInput";
 import { UploadImage } from "./UploadImage";
 import { fileApi } from "@/lib/api";
+import { useToast } from "@/hooks/useToast";
 
 const genderOptions = [
   { label: "Male", value: "Male" },
@@ -40,8 +41,10 @@ export const PersonalInfoForm = ({
   setRemoveBackground: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const { t } = useTranslation();
+  const toast = useToast();
 
   const [errorPhone, setErrorPhone] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleChange = (field: string, value: string | File | null) => {
     if (field === "image") {
@@ -50,14 +53,51 @@ export const PersonalInfoForm = ({
         return;
       }
       if (value instanceof File) {
+        // Validate file type
+        if (!value.type.startsWith("image/")) {
+          toast.error(
+            t("please_select_an_image_file") || "Please select an image file"
+          );
+          return;
+        }
+
+        // Validate file size (max 10MB)
+        const maxSize = 10 * 1024 * 1024; // 10MB
+        if (value.size > maxSize) {
+          toast.error(
+            t("file_size_must_be_less_than_10mb") ||
+              "File size must be less than 10MB"
+          );
+          return;
+        }
+
+        setIsUploading(true);
         // Upload image to backend and save URL
         fileApi
           .uploadImage(value)
           .then((url) => {
             onChange({ ...data, image: url });
+            toast.success(
+              t("image_uploaded_successfully") || "Image uploaded successfully"
+            );
           })
-          .catch(() => {
-            // fallback: do nothing or keep old image
+          .catch((error: unknown) => {
+            console.error("Failed to upload image:", error);
+            const errorMessage =
+              (
+                error as {
+                  response?: { data?: { message?: string } };
+                  message?: string;
+                }
+              )?.response?.data?.message ||
+              (error as { message?: string })?.message ||
+              t("failed_to_upload_image") ||
+              "Failed to upload image";
+            toast.error(errorMessage);
+            // Keep old image on error
+          })
+          .finally(() => {
+            setIsUploading(false);
           });
         return;
       }
@@ -66,9 +106,33 @@ export const PersonalInfoForm = ({
     onChange({ ...data, [field]: value as string });
   };
 
-  const validateAge = (_: unknown, value: Dayjs) => {
-    if (!value) return Promise.reject(new Error(t("this_field_is_required")));
-    const age = dayjs().diff(value, "year");
+  const validateAge = (
+    _: unknown,
+    value: Dayjs | string | null | undefined
+  ) => {
+    // Normalize value to dayjs object
+    let dateValue: Dayjs | null = null;
+
+    if (!value) {
+      return Promise.reject(new Error(t("this_field_is_required")));
+    }
+
+    if (dayjs.isDayjs(value)) {
+      dateValue = value;
+    } else if (typeof value === "string") {
+      dateValue = dayjs(value, "DD/MM/YYYY", true);
+      if (!dateValue.isValid()) {
+        return Promise.reject(new Error(t("this_field_is_required")));
+      }
+    } else {
+      return Promise.reject(new Error(t("this_field_is_required")));
+    }
+
+    if (!dateValue || !dateValue.isValid()) {
+      return Promise.reject(new Error(t("this_field_is_required")));
+    }
+
+    const age = dayjs().diff(dateValue, "year");
     if (age < 18) {
       return Promise.reject(new Error(t("age_must_be_at_least_18_years")));
     }
@@ -91,7 +155,13 @@ export const PersonalInfoForm = ({
           }}
           removeBackground={removeBackground}
           setRemoveBackground={setRemoveBackground}
+          disabled={isUploading}
         />
+        {isUploading && (
+          <p className="text-sm text-gray-500 mt-2">
+            {t("uploading_image") || "Uploading image..."}
+          </p>
+        )}
       </div>
 
       <Form.Item
@@ -139,8 +209,51 @@ export const PersonalInfoForm = ({
         required={false}
         validateTrigger={["onBlur", "onChange"]}
         className="text-[14px] font-normal leading-[22px] text-black/85"
+        normalize={(value) => {
+          // Normalize value to dayjs object or undefined
+          if (!value) return undefined;
+          if (dayjs.isDayjs(value)) {
+            return value.isValid() ? value : undefined;
+          }
+          if (typeof value === "string") {
+            const parsed = dayjs(value, "DD/MM/YYYY", true);
+            return parsed.isValid() ? parsed : undefined;
+          }
+          // If value is not dayjs or string, try to parse it
+          try {
+            const parsed = dayjs(value);
+            return parsed.isValid() ? parsed : undefined;
+          } catch {
+            return undefined;
+          }
+        }}
+        getValueFromEvent={(value) => {
+          // Ensure we return dayjs object or undefined
+          if (!value) return undefined;
+          if (dayjs.isDayjs(value)) {
+            return value.isValid() ? value : undefined;
+          }
+          return undefined;
+        }}
+        getValueProps={(value) => {
+          // Ensure value prop is always a valid dayjs object or undefined
+          if (!value) return { value: undefined };
+          if (dayjs.isDayjs(value)) {
+            return { value: value.isValid() ? value : undefined };
+          }
+          if (typeof value === "string") {
+            const parsed = dayjs(value, "DD/MM/YYYY", true);
+            return { value: parsed.isValid() ? parsed : undefined };
+          }
+          return { value: undefined };
+        }}
       >
-        <DatePicker size="large" className="w-full" format={"DD/MM/YYYY"} />
+        <DatePicker
+          size="large"
+          className="w-full"
+          format={"DD/MM/YYYY"}
+          allowClear
+        />
       </Form.Item>
 
       <Form.Item

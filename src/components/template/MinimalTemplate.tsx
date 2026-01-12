@@ -171,9 +171,9 @@ export const MinimalTemplate = ({
                       </div>
                     </div>
                     {exp.description && (
-                      <p className="text-sm text-gray-700 leading-relaxed font-light">
+                      <div className="text-sm text-gray-700 leading-relaxed font-light whitespace-pre-line">
                         {exp.description}
-                      </p>
+                      </div>
                     )}
                   </div>
                 ))}
@@ -211,6 +211,49 @@ export const MinimalTemplate = ({
                         </p>
                       )}
                     </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Certifications */}
+          {data.certifications && data.certifications.length > 0 && (
+            <div>
+              <h2
+                className="text-lg font-medium text-gray-900 mb-6 uppercase tracking-wide"
+                style={{ color: accentColor }}
+              >
+                {t("Certifications")}
+              </h2>
+              <div className="space-y-4">
+                {data.certifications.map((cert, index) => (
+                  <div key={index}>
+                    <h3 className="font-medium text-gray-900">{cert.name}</h3>
+                    {cert.issuer && (
+                      <p className="text-sm text-gray-600">{cert.issuer}</p>
+                    )}
+                    <div className="flex justify-between items-center mt-1">
+                      <p className="text-xs text-gray-500 font-light">
+                        {cert.issueDate && formatDate(cert.issueDate)}
+                        {cert.expiryDate && ` - ${formatDate(cert.expiryDate)}`}
+                      </p>
+                      {cert.credentialId && (
+                        <p className="text-xs text-gray-500 font-light">
+                          ID: {cert.credentialId}
+                        </p>
+                      )}
+                    </div>
+                    {cert.credentialUrl && (
+                      <a
+                        href={cert.credentialUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs mt-1 inline-block text-gray-600 hover:underline"
+                      >
+                        {t("View Credential")}
+                      </a>
+                    )}
                   </div>
                 ))}
               </div>
@@ -255,9 +298,9 @@ export const MinimalTemplate = ({
                       {project.name}
                     </h3>
                     {project.description && (
-                      <p className="text-sm text-gray-700 leading-relaxed font-light mb-2">
+                      <div className="text-sm text-gray-700 leading-relaxed font-light mb-2 whitespace-pre-line">
                         {project.description}
-                      </p>
+                      </div>
                     )}
                     {project.technologies &&
                       project.technologies.length > 0 && (

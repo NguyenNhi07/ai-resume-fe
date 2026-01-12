@@ -160,9 +160,9 @@ export const BoldTemplate = ({
                       </div>
                     </div>
                     {exp.description && (
-                      <p className="text-gray-300 leading-relaxed ml-8">
+                      <div className="text-gray-300 leading-relaxed ml-8 whitespace-pre-line">
                         {exp.description}
-                      </p>
+                      </div>
                     )}
                   </div>
                 ))}
@@ -185,9 +185,9 @@ export const BoldTemplate = ({
                   >
                     <h3 className="text-xl font-bold mb-2">{project.name}</h3>
                     {project.description && (
-                      <p className="text-gray-300 mb-3">
+                      <div className="text-gray-300 mb-3 whitespace-pre-line">
                         {project.description}
-                      </p>
+                      </div>
                     )}
                     {project.technologies &&
                       project.technologies.length > 0 && (
@@ -249,6 +249,42 @@ export const BoldTemplate = ({
                   <div key={index}>
                     <p className="font-bold text-lg">{edu.degree}</p>
                     <p className="text-gray-400 text-sm">{edu.institution}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Certifications */}
+          {data.certifications && data.certifications.length > 0 && (
+            <div className="mb-8">
+              <h3 className="text-xl font-black mb-4 uppercase">
+                {t("Certifications")}
+              </h3>
+              <div className="space-y-4">
+                {data.certifications.map((cert, index) => (
+                  <div key={index}>
+                    <p className="font-bold text-lg">{cert.name}</p>
+                    {cert.issuer && (
+                      <p className="text-gray-400 text-sm">{cert.issuer}</p>
+                    )}
+                    {(cert.issueDate || cert.credentialId) && (
+                      <p className="text-gray-500 text-xs mt-1">
+                        {cert.issueDate && formatDate(cert.issueDate)}
+                        {cert.credentialId && ` • ID: ${cert.credentialId}`}
+                      </p>
+                    )}
+                    {cert.credentialUrl && (
+                      <a
+                        href={cert.credentialUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs mt-1 inline-block"
+                        style={{ color: accentColor }}
+                      >
+                        {t("View Credential")} →
+                      </a>
+                    )}
                   </div>
                 ))}
               </div>

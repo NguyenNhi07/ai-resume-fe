@@ -194,9 +194,9 @@ export const ModernTemplate = ({
                             </div>
                           </div>
                           {exp.description && (
-                            <p className="text-gray-700 leading-relaxed">
+                            <div className="text-gray-700 leading-relaxed whitespace-pre-line">
                               {exp.description}
-                            </p>
+                            </div>
                           )}
                         </div>
                       </div>
@@ -227,9 +227,9 @@ export const ModernTemplate = ({
                         {project.name}
                       </h3>
                       {project.description && (
-                        <p className="text-gray-700 leading-relaxed mb-4">
+                        <div className="text-gray-700 leading-relaxed mb-4 whitespace-pre-line">
                           {project.description}
-                        </p>
+                        </div>
                       )}
                       {project.technologies &&
                         project.technologies.length > 0 && (
@@ -295,6 +295,59 @@ export const ModernTemplate = ({
                           </p>
                         )}
                       </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Certifications */}
+            {data.certifications && data.certifications.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold mb-6 flex items-center">
+                  <div
+                    className="w-1 h-8 mr-3 rounded"
+                    style={{ backgroundColor: accentColor }}
+                  ></div>
+                  {t("Certifications")}
+                </h2>
+                <div className="space-y-4">
+                  {data.certifications.map((cert, index) => (
+                    <div
+                      key={index}
+                      className="border-l-4 pl-4"
+                      style={{ borderColor: accentColor }}
+                    >
+                      <h3 className="font-bold text-lg text-gray-900">
+                        {cert.name}
+                      </h3>
+                      {cert.issuer && (
+                        <p className="font-semibold text-gray-700 mb-1">
+                          {cert.issuer}
+                        </p>
+                      )}
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm text-gray-600">
+                          {cert.issueDate && formatDate(cert.issueDate)}
+                          {cert.expiryDate && ` - ${formatDate(cert.expiryDate)}`}
+                        </p>
+                        {cert.credentialId && (
+                          <p className="text-sm text-gray-500">
+                            ID: {cert.credentialId}
+                          </p>
+                        )}
+                      </div>
+                      {cert.credentialUrl && (
+                        <a
+                          href={cert.credentialUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm mt-2 inline-block"
+                          style={{ color: accentColor }}
+                        >
+                          {t("View Credential")} →
+                        </a>
+                      )}
                     </div>
                   ))}
                 </div>

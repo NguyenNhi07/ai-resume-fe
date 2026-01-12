@@ -73,6 +73,14 @@ export default function CoverLetter() {
           ),
         );
       }
+      if (resume.certifications?.length) {
+        parts.push(
+          "Certifications:",
+          ...resume.certifications.map((cert) =>
+            `- ${cert.name || ""}${cert.issuer ? ` from ${cert.issuer}` : ""}${cert.issueDate ? ` (${cert.issueDate})` : ""}${cert.credentialId ? ` ID: ${cert.credentialId}` : ""}`,
+          ),
+        );
+      }
       if (resume.project?.length) {
         parts.push(
           "Projects:",

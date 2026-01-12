@@ -122,6 +122,14 @@ export default function TailorByJD() {
           ),
         );
       }
+      if (resumeSource.certifications?.length) {
+        parts.push(
+          "Certifications:",
+          ...resumeSource.certifications.map((cert) =>
+            `- ${cert.name || ""}${cert.issuer ? ` from ${cert.issuer}` : ""}${cert.issueDate ? ` (${cert.issueDate})` : ""}${cert.credentialId ? ` ID: ${cert.credentialId}` : ""}`,
+          ),
+        );
+      }
       if (resumeSource.project?.length) {
         parts.push(
           "Projects:",

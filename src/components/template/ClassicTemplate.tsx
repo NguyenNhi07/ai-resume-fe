@@ -167,9 +167,9 @@ export const ClassicTemplate = ({
                   </div>
                 </div>
                 {exp.description && (
-                  <p className="text-gray-700 leading-relaxed">
+                  <div className="text-gray-700 leading-relaxed whitespace-pre-line">
                     {exp.description}
-                  </p>
+                  </div>
                 )}
               </div>
             ))}
@@ -213,6 +213,54 @@ export const ClassicTemplate = ({
         </div>
       )}
 
+      {/* Certifications */}
+      {data.certifications && data.certifications.length > 0 && (
+        <div className="mb-6">
+          <h2 className="text-xl font-bold mb-4" style={{ color: accentColor }}>
+            {t("Certifications")}
+          </h2>
+          <div className="space-y-3">
+            {data.certifications.map((cert, index) => (
+              <div
+                key={index}
+                className="border-l-4 pl-4"
+                style={{ borderColor: accentColor }}
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-semibold text-lg text-gray-900">
+                      {cert.name}
+                    </h3>
+                    {cert.issuer && (
+                      <p className="font-medium text-gray-700">{cert.issuer}</p>
+                    )}
+                    {cert.credentialId && (
+                      <p className="text-sm text-gray-600">
+                        ID: {cert.credentialId}
+                      </p>
+                    )}
+                    {cert.credentialUrl && (
+                      <a
+                        href={cert.credentialUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-blue-600 hover:underline"
+                      >
+                        {t("View Credential")}
+                      </a>
+                    )}
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    {cert.issueDate && formatDate(cert.issueDate)}
+                    {cert.expiryDate && ` - ${formatDate(cert.expiryDate)}`}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Projects */}
       {data.project && data.project.length > 0 && (
         <div className="mb-6">
@@ -230,9 +278,9 @@ export const ClassicTemplate = ({
                   {project.name}
                 </h3>
                 {project.description && (
-                  <p className="text-gray-700 leading-relaxed mb-2">
+                  <div className="text-gray-700 leading-relaxed mb-2 whitespace-pre-line">
                     {project.description}
-                  </p>
+                  </div>
                 )}
                 {project.technologies && project.technologies.length > 0 && (
                   <div className="flex flex-wrap gap-2">

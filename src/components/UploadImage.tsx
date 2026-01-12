@@ -7,6 +7,7 @@ interface UploadImageProps {
   onChange: (file: File | string | null) => void;
   removeBackground: boolean;
   setRemoveBackground: React.Dispatch<React.SetStateAction<boolean>>;
+  disabled?: boolean;
 }
 
 export const UploadImage: React.FC<UploadImageProps> = ({
@@ -14,6 +15,7 @@ export const UploadImage: React.FC<UploadImageProps> = ({
   onChange,
   removeBackground,
   setRemoveBackground,
+  disabled = false,
 }) => {
   const { t } = useTranslation();
   const previewUrl =
@@ -25,7 +27,7 @@ export const UploadImage: React.FC<UploadImageProps> = ({
 
   return (
     <div className="flex items-center gap-4">
-      <label className="cursor-pointer">
+      <label className={`cursor-pointer ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}>
         {previewUrl ? (
           <img
             src={previewUrl}
@@ -43,6 +45,7 @@ export const UploadImage: React.FC<UploadImageProps> = ({
           type="file"
           accept="image/jpeg, image/png"
           hidden
+          disabled={disabled}
           onChange={(e) => onChange(e.target.files?.[0] ?? null)}
         />
       </label>

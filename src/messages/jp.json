@@ -356,5 +356,17 @@
   "No score history found": "スコア履歴が見つかりません",
   "more": "もっと見る",
   "Show less": "折りたたむ",
-  "Show more": "もっと見る"
+  "Show more": "もっと見る",
+  "Certifications": "資格・認定",
+  "Add your certifications and credentials": "資格・認定情報を追加してください",
+  "Add Certification": "資格を追加",
+  "No certifications added yet.": "まだ資格が追加されていません。",
+  "Click \"Add Certification\" to get started.": "「資格を追加」をクリックして始めてください。",
+  "Certification": "資格",
+  "Certification Name": "資格名",
+  "Issuing Organization": "発行機関",
+  "Issue Date": "取得日",
+  "Expiry Date": "有効期限",
+  "Credential ID": "資格ID",
+  "Credential URL": "資格URL"
 }

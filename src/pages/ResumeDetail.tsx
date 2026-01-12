@@ -151,6 +151,14 @@ export default function ResumeDetail() {
                     ),
                 );
             }
+            if (resumeData.certifications?.length) {
+                parts.push(
+                    "Certifications:",
+                    ...resumeData.certifications.map((cert) =>
+                        `- ${cert.name || ""}${cert.issuer ? ` from ${cert.issuer}` : ""}${cert.issueDate ? ` (${cert.issueDate})` : ""}${cert.credentialId ? ` ID: ${cert.credentialId}` : ""}`,
+                    ),
+                );
+            }
             if (resumeData.project?.length) {
                 parts.push(
                     "Projects:",

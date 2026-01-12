@@ -4,6 +4,7 @@ import { Check, X, Sparkles } from "lucide-react";
 import type { Resume } from "@/lib/type";
 import { ResumePreview } from "./ResumePreview";
 import { useTranslation } from "react-i18next";
+import { formatResumeText } from "@/lib/utils";
 
 const { Panel } = Collapse;
 
@@ -75,7 +76,7 @@ export const TailoredResumePreview = ({
 
     // Apply summary if accepted
     if (decisions["summary"] === "accepted" && tailoredInfo.summary) {
-      updatedResume.professional_summary = tailoredInfo.summary.optimized;
+      updatedResume.professional_summary = formatResumeText(tailoredInfo.summary.optimized);
     }
 
     // Apply sections if accepted
@@ -85,7 +86,7 @@ export const TailoredResumePreview = ({
         // Apply optimized content based on section type
         switch (section.section) {
           case "summary":
-            updatedResume.professional_summary = section.optimized;
+            updatedResume.professional_summary = formatResumeText(section.optimized);
             break;
           case "skills":
             const optimizedSkills = section.optimized
@@ -97,41 +98,181 @@ export const TailoredResumePreview = ({
             }
             break;
           case "experience":
-            // For experience, we need to parse and update specific experience items
-            // This is more complex, so we'll handle it differently
-            // For now, we'll just update the description if it's a single experience
+            // Update experience descriptions with optimized content
             if (updatedResume.experience && updatedResume.experience.length > 0) {
               updatedResume.experience = [...updatedResume.experience];
-              // Try to match and update based on content
-              const expIndex = updatedResume.experience.findIndex(
-                (exp) => exp.description === section.original
-              );
-              if (expIndex >= 0) {
-                updatedResume.experience[expIndex] = {
-                  ...updatedResume.experience[expIndex],
-                  description: section.optimized,
-                };
+              
+              // If original is empty, this is a new section - update first experience
+              if (!section.original || section.original.trim() === "") {
+                if (updatedResume.experience.length > 0) {
+                  updatedResume.experience[0] = {
+                    ...updatedResume.experience[0],
+                    description: formatResumeText(section.optimized),
+                  };
+                }
+              } else {
+                // Try to match by partial content match (more flexible)
+                const originalPreview = section.original.slice(0, 100);
+                const expIndex = updatedResume.experience.findIndex(
+                  (exp) => 
+                    exp.description && 
+                    (exp.description.includes(originalPreview) || 
+                     originalPreview.includes(exp.description.slice(0, 50)))
+                );
+                
+                if (expIndex >= 0) {
+                  updatedResume.experience[expIndex] = {
+                    ...updatedResume.experience[expIndex],
+                    description: formatResumeText(section.optimized),
+                  };
+                } else {
+                  // If no match found, update first experience
+                  updatedResume.experience[0] = {
+                    ...updatedResume.experience[0],
+                    description: formatResumeText(section.optimized),
+                  };
+                }
               }
+            } else {
+              // No existing experiences, create new one
+              updatedResume.experience = [{
+                company: "",
+                position: "",
+                description: formatResumeText(section.optimized),
+                is_current: false,
+                start_date: "",
+                end_date: "",
+              }];
             }
             break;
           case "projects":
             if (updatedResume.project && updatedResume.project.length > 0) {
               updatedResume.project = [...updatedResume.project];
-              const projIndex = updatedResume.project.findIndex(
-                (proj) => proj.description === section.original
-              );
-              if (projIndex >= 0) {
-                updatedResume.project[projIndex] = {
-                  ...updatedResume.project[projIndex],
+              
+              if (!section.original || section.original.trim() === "") {
+                // New section
+                updatedResume.project[0] = {
+                  ...updatedResume.project[0],
                   description: section.optimized,
                 };
+              } else {
+                // Try flexible matching
+                const originalPreview = section.original.slice(0, 100);
+                const projIndex = updatedResume.project.findIndex(
+                  (proj) => 
+                    proj.description && 
+                    (proj.description.includes(originalPreview) || 
+                     originalPreview.includes(proj.description.slice(0, 50)))
+                );
+                
+                if (projIndex >= 0) {
+                  updatedResume.project[projIndex] = {
+                    ...updatedResume.project[projIndex],
+                    description: formatResumeText(section.optimized),
+                  };
+                } else {
+                  updatedResume.project[0] = {
+                    ...updatedResume.project[0],
+                    description: formatResumeText(section.optimized),
+                  };
+                }
               }
+            } else {
+              // No existing projects, create new one
+              updatedResume.project = [{
+                name: "",
+                description: formatResumeText(section.optimized),
+                technologies: [],
+              }];
             }
             break;
           case "education":
             if (updatedResume.education && updatedResume.education.length > 0) {
               updatedResume.education = [...updatedResume.education];
-              // Education updates are less common, but we can handle field updates
+              
+              if (!section.original || section.original.trim() === "") {
+                // New section - update field
+                updatedResume.education[0] = {
+                  ...updatedResume.education[0],
+                  field: section.optimized,
+                };
+              } else {
+                // Try to match by field or institution
+                const originalPreview = section.original.slice(0, 50);
+                const eduIndex = updatedResume.education.findIndex(
+                  (edu) => 
+                    (edu.field && edu.field.includes(originalPreview)) ||
+                    (edu.institution && edu.institution.includes(originalPreview))
+                );
+                
+                if (eduIndex >= 0) {
+                  // Update field with optimized content
+                  updatedResume.education[eduIndex] = {
+                    ...updatedResume.education[eduIndex],
+                    field: formatResumeText(section.optimized),
+                  };
+                } else {
+                  // Update first education entry
+                  updatedResume.education[0] = {
+                    ...updatedResume.education[0],
+                    field: formatResumeText(section.optimized),
+                  };
+                }
+              }
+            } else {
+              // No existing education, create new entry
+              updatedResume.education = [{
+                institution: "",
+                degree: "",
+                field: formatResumeText(section.optimized),
+                graduation_date: "",
+                gpa: "",
+              }];
+            }
+            break;
+          case "certifications":
+            // Initialize certifications array if it doesn't exist
+            if (!updatedResume.certifications) {
+              updatedResume.certifications = [];
+            }
+            
+            if (!section.original || section.original.trim() === "") {
+              // New section - add new certification
+              const certName = section.optimized.split('\n')[0]?.trim() || section.optimized.slice(0, 100);
+              updatedResume.certifications.push({
+                name: certName,
+                issuer: "",
+                issueDate: undefined,
+                expiryDate: undefined,
+                credentialId: undefined,
+                credentialUrl: undefined,
+              });
+            } else {
+              // Try to match existing certification
+              const originalPreview = section.original.slice(0, 50);
+              const certIndex = updatedResume.certifications.findIndex(
+                (cert) => cert.name && cert.name.includes(originalPreview)
+              );
+              
+              if (certIndex >= 0) {
+                // Update existing certification
+                const certName = section.optimized.split('\n')[0]?.trim() || section.optimized.slice(0, 200);
+                updatedResume.certifications[certIndex] = {
+                  ...updatedResume.certifications[certIndex],
+                  name: certName,
+                };
+              } else {
+                // Add as new certification
+                const certName = section.optimized.split('\n')[0]?.trim() || section.optimized.slice(0, 100);
+                updatedResume.certifications.push({
+                  name: certName,
+                  issuer: "",
+                  issueDate: undefined,
+                  expiryDate: undefined,
+                  credentialId: undefined,
+                  credentialUrl: undefined,
+                });
+              }
             }
             break;
         }

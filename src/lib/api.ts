@@ -1,9 +1,12 @@
-import axios from 'axios';
-import dayjs from 'dayjs';
-import type { Resume } from './type';
+import axios from "axios";
+import dayjs from "dayjs";
+import type { Resume } from "./type";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
-const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API === 'true' || !import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api/v1";
+const USE_MOCK_API =
+  import.meta.env.VITE_USE_MOCK_API === "true" ||
+  !import.meta.env.VITE_API_BASE_URL;
 
 // Mock users database (in-memory for testing)
 const mockUsers: Array<{
@@ -12,63 +15,69 @@ const mockUsers: Array<{
   email: string;
   password: string;
 }> = [
-    {
-      id: '1',
-      name: 'Test User',
-      email: 'test@example.com',
-      password: '123456',
-    },
-    {
-      id: '2',
-      name: 'Admin User',
-      email: 'admin@example.com',
-      password: 'admin123',
-    },
-  ];
+  {
+    id: "1",
+    name: "Test User",
+    email: "test@example.com",
+    password: "123456",
+  },
+  {
+    id: "2",
+    name: "Admin User",
+    email: "admin@example.com",
+    password: "admin123",
+  },
+];
 
 // Mock API delay
-const mockDelay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const mockDelay = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
 // Helpers to persist tokens
 const setAccessToken = (token: string | null) => {
-  if (token) localStorage.setItem('token', token);
-  else localStorage.removeItem('token');
+  if (token) localStorage.setItem("token", token);
+  else localStorage.removeItem("token");
 };
 const setRefreshToken = (token: string | null) => {
-  if (token) localStorage.setItem('refreshToken', token);
-  else localStorage.removeItem('refreshToken');
+  if (token) localStorage.setItem("refreshToken", token);
+  else localStorage.removeItem("refreshToken");
 };
 
 // Add token to requests if available
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    // If data is FormData, remove Content-Type header to let axios set it with boundary
+    // This prevents axios from serializing FormData to JSON
+    if (config.data instanceof FormData) {
+      delete config.headers["Content-Type"];
+    }
     return config;
   },
-  (error) => Promise.reject(error),
+  (error) => Promise.reject(error)
 );
 
 let isRefreshing = false;
 let refreshPromise: Promise<string | null> | null = null;
 
 const refreshAccessToken = async (): Promise<string | null> => {
-  const refreshToken = localStorage.getItem('refreshToken');
+  const refreshToken = localStorage.getItem("refreshToken");
   if (!refreshToken) return null;
 
   const res = await axios.post<AuthResponse>(
     `${API_BASE_URL}/auth/refresh-token`,
     null,
-    { headers: { Authorization: `Bearer ${refreshToken}` } },
+    { headers: { Authorization: `Bearer ${refreshToken}` } }
   );
 
   const { accessToken, refreshToken: newRefresh } = res.data;
@@ -85,11 +94,11 @@ api.interceptors.response.use(
     const status = error.response?.status;
 
     if (status === 401 && !originalRequest?._retry) {
-      const storedRefresh = localStorage.getItem('refreshToken');
+      const storedRefresh = localStorage.getItem("refreshToken");
       if (!storedRefresh) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/auth/login';
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = "/auth/login";
         return Promise.reject(error);
       }
 
@@ -107,14 +116,14 @@ api.interceptors.response.use(
         return api(originalRequest);
       }
 
-      localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('user');
-      window.location.href = '/auth/login';
+      localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("user");
+      window.location.href = "/auth/login";
     }
 
     return Promise.reject(error);
-  },
+  }
 );
 
 export interface LoginRequest {
@@ -185,43 +194,59 @@ const toBackendResume = (r: Resume) => {
   const experiences =
     Array.isArray(r.experience) && r.experience.length
       ? r.experience.map((exp) => ({
-        companyName: exp.company ?? '',
-        jobTitle: exp.position ?? '',
-        jobDescription: exp.description ?? '',
-        isCurrent: exp.is_current ?? false,
-        startDate: exp.start_date
-          ? dayjs(exp.start_date, 'MM/YYYY').toISOString()
-          : undefined,
-        endDate: exp.end_date
-          ? dayjs(exp.end_date, 'MM/YYYY').toISOString()
-          : undefined,
-      }))
+          companyName: exp.company ?? "",
+          jobTitle: exp.position ?? "",
+          jobDescription: exp.description ?? "",
+          isCurrent: exp.is_current ?? false,
+          startDate: exp.start_date
+            ? dayjs(exp.start_date, "MM/YYYY").toISOString()
+            : undefined,
+          endDate: exp.end_date
+            ? dayjs(exp.end_date, "MM/YYYY").toISOString()
+            : undefined,
+        }))
       : undefined;
 
   const educations =
     Array.isArray(r.education) && r.education.length
       ? r.education.map((edu) => ({
-        institutionName: edu.institution ?? '',
-        degree: edu.degree ?? '',
-        fieldOfStudy: edu.field ?? '',
-        graduationDate: edu.graduation_date
-          ? dayjs(edu.graduation_date, 'MM/YYYY').toISOString()
-          : undefined,
-        gpa: edu.gpa ?? '',
-      }))
+          institutionName: edu.institution ?? "",
+          degree: edu.degree ?? "",
+          fieldOfStudy: edu.field ?? "",
+          graduationDate: edu.graduation_date
+            ? dayjs(edu.graduation_date, "MM/YYYY").toISOString()
+            : undefined,
+          gpa: edu.gpa ?? "",
+        }))
       : undefined;
 
   const projects =
     Array.isArray(r.project) && r.project.length
       ? r.project.map((p) => ({
-        projectName: p.name ?? '',
-        description: p.description ?? '',
-        technologies: Array.isArray(p.technologies)
-          ? p.technologies.filter(Boolean)
-          : p.technologies
+          projectName: p.name ?? "",
+          description: p.description ?? "",
+          technologies: Array.isArray(p.technologies)
+            ? p.technologies.filter(Boolean)
+            : p.technologies
             ? [String(p.technologies)]
             : [],
-      }))
+        }))
+      : undefined;
+
+  const certifications =
+    Array.isArray(r.certifications) && r.certifications.length
+      ? r.certifications.map((cert) => ({
+          name: cert.name ?? "",
+          issuer: cert.issuer ?? undefined,
+          issueDate: cert.issueDate
+            ? dayjs(cert.issueDate, "MM/YYYY").toISOString()
+            : undefined,
+          expiryDate: cert.expiryDate
+            ? dayjs(cert.expiryDate, "MM/YYYY").toISOString()
+            : undefined,
+          credentialId: cert.credentialId ?? undefined,
+          credentialUrl: cert.credentialUrl ?? undefined,
+        }))
       : undefined;
 
   return {
@@ -230,7 +255,7 @@ const toBackendResume = (r: Resume) => {
     title: r.title,
     avatar: r.personal_info?.image || undefined,
     dateOfBirth: r.personal_info?.birthDate
-      ? dayjs(r.personal_info.birthDate, 'DD/MM/YYYY').toISOString()
+      ? dayjs(r.personal_info.birthDate, "DD/MM/YYYY").toISOString()
       : undefined,
     gender: r.personal_info?.gender,
     email: r.personal_info?.email,
@@ -245,93 +270,118 @@ const toBackendResume = (r: Resume) => {
     ...(experiences ? { experiences } : {}),
     ...(educations ? { educations } : {}),
     ...(projects ? { projects } : {}),
-    template: r.template || 'classic',
-    accentColor: r.accent_color || '#3B82F6',
-    fontFamily: r.font_family || 'inter',
+    ...(certifications ? { certifications } : {}),
+    template: r.template || "classic",
+    accentColor: r.accent_color || "#3B82F6",
+    fontFamily: r.font_family || "inter",
     isPublic: r.public,
   };
 };
 
 const toFrontendResume = (data: any): Resume => ({
-  id: String(data.id ?? ''),
-  title: data.title ?? '',
+  id: String(data.id ?? ""),
+  title: data.title ?? "",
   personal_info: {
-    full_name: data.name ?? '',
+    full_name: data.name ?? "",
     birthDate: data.dateOfBirth
       ? dayjs(data.dateOfBirth).isValid()
-        ? dayjs(data.dateOfBirth).format('DD/MM/YYYY')
-        : ''
-      : '',
-    gender: data.gender ?? '',
-    email: data.email ?? '',
-    phone: data.phoneNumber ?? '',
-    location: data.address ?? '',
-    website: Array.isArray(data.website) ? data.website[0] : data.website ?? '',
-    language: data.language ?? '',
-    image: data.avatar ?? '',
-    profession: data.profession ?? '',
+        ? dayjs(data.dateOfBirth).format("DD/MM/YYYY")
+        : ""
+      : "",
+    gender: data.gender ?? "",
+    email: data.email ?? "",
+    phone: data.phoneNumber ?? "",
+    location: data.address ?? "",
+    website: Array.isArray(data.website) ? data.website[0] : data.website ?? "",
+    language: data.language ?? "",
+    image: data.avatar ?? "",
+    profession: data.profession ?? "",
   },
-  professional_summary: data.summary ?? data.professional ?? '',
+  professional_summary: data.summary ?? data.professional ?? "",
   experience: Array.isArray(data.experiences)
     ? data.experiences.map((e: any) => {
-      const start = e.start_date ?? e.startDate;
-      const end = e.end_date ?? e.endDate;
-      const isCurrent = e.is_current ?? e.isCurrent ?? false;
-      const startStr = start
-        ? dayjs(start).isValid()
-          ? dayjs(start).format('MM/YYYY')
-          : String(start)
-        : '';
-      const endStr = isCurrent
-        ? ''
-        : end
+        const start = e.start_date ?? e.startDate;
+        const end = e.end_date ?? e.endDate;
+        const isCurrent = e.is_current ?? e.isCurrent ?? false;
+        const startStr = start
+          ? dayjs(start).isValid()
+            ? dayjs(start).format("MM/YYYY")
+            : String(start)
+          : "";
+        const endStr = isCurrent
+          ? ""
+          : end
           ? dayjs(end).isValid()
-            ? dayjs(end).format('MM/YYYY')
+            ? dayjs(end).format("MM/YYYY")
             : String(end)
-          : '';
-      return {
-        company: e.company ?? e.companyName ?? '',
-        position: e.position ?? e.jobTitle ?? '',
-        description: e.description ?? e.jobDescription ?? '',
-        is_current: isCurrent,
-        start_date: startStr,
-        end_date: endStr,
-      };
-    })
+          : "";
+        return {
+          company: e.company ?? e.companyName ?? "",
+          position: e.position ?? e.jobTitle ?? "",
+          description: e.description ?? e.jobDescription ?? "",
+          is_current: isCurrent,
+          start_date: startStr,
+          end_date: endStr,
+        };
+      })
     : [],
   education: Array.isArray(data.educations)
     ? data.educations.map((edu: any) => {
-      const grad = edu.graduation_date ?? edu.graduationDate;
-      const gradStr = grad
-        ? dayjs(grad).isValid()
-          ? dayjs(grad).format('MM/YYYY')
-          : String(grad)
-        : '';
-      return {
-        institution: edu.institution ?? edu.institutionName ?? '',
-        degree: edu.degree ?? '',
-        field: edu.field ?? edu.fieldOfStudy ?? '',
-        graduation_date: gradStr,
-        gpa: edu.gpa ?? '',
-      };
-    })
+        const grad = edu.graduation_date ?? edu.graduationDate;
+        const gradStr = grad
+          ? dayjs(grad).isValid()
+            ? dayjs(grad).format("MM/YYYY")
+            : String(grad)
+          : "";
+        return {
+          institution: edu.institution ?? edu.institutionName ?? "",
+          degree: edu.degree ?? "",
+          field: edu.field ?? edu.fieldOfStudy ?? "",
+          graduation_date: gradStr,
+          gpa: edu.gpa ?? "",
+        };
+      })
     : [],
   project: Array.isArray(data.projects)
     ? data.projects.map((p: any) => ({
-      name: p.name ?? p.projectName ?? '',
-      description: p.description ?? '',
-      technologies: Array.isArray(p?.technologies)
-        ? p.technologies.filter(Boolean)
-        : p?.technologies
+        name: p.name ?? p.projectName ?? "",
+        description: p.description ?? "",
+        technologies: Array.isArray(p?.technologies)
+          ? p.technologies.filter(Boolean)
+          : p?.technologies
           ? [String(p.technologies)]
           : [],
-    }))
+      }))
+    : [],
+  certifications: Array.isArray(data.certifications)
+    ? data.certifications.map((cert: any) => {
+        const issue = cert.issue_date ?? cert.issueDate;
+        const issueStr = issue
+          ? dayjs(issue).isValid()
+            ? dayjs(issue).format("MM/YYYY")
+            : String(issue)
+          : "";
+        const expiry = cert.expiry_date ?? cert.expiryDate;
+        const expiryStr = expiry
+          ? dayjs(expiry).isValid()
+            ? dayjs(expiry).format("MM/YYYY")
+            : String(expiry)
+          : "";
+        return {
+          name: cert.name ?? "",
+          issuer: cert.issuer ?? undefined,
+          issueDate: issueStr || undefined,
+          expiryDate: expiryStr || undefined,
+          credentialId: cert.credential_id ?? cert.credentialId ?? undefined,
+          credentialUrl: cert.credential_url ?? cert.credentialUrl ?? undefined,
+        };
+      })
     : [],
   skills: Array.isArray(data.skills) ? data.skills : [],
-  template: data.template ?? 'classic',
-  accent_color: data.accentColor ?? '#3B82F6',
+  template: data.template ?? "classic",
+  accent_color: data.accentColor ?? "#3B82F6",
   public: data.isPublic ?? false,
-  font_family: data.fontFamily ?? 'inter',
+  font_family: data.fontFamily ?? "inter",
   // extra field from BE to use in dashboard card (type widening)
   createdAt: data.createdAt,
   updatedAt: data.updatedAt,
@@ -344,10 +394,12 @@ export const authApi = {
       await mockDelay(800);
 
       // Find user in mock database
-      const user = mockUsers.find(u => u.email === data.email && u.password === data.password);
+      const user = mockUsers.find(
+        (u) => u.email === data.email && u.password === data.password
+      );
 
       if (!user) {
-        throw new Error('Email hoặc mật khẩu không đúng');
+        throw new Error("Email hoặc mật khẩu không đúng");
       }
 
       // Generate mock token
@@ -363,7 +415,7 @@ export const authApi = {
       };
     }
 
-    const response = await api.post<AuthResponse>('/auth/login', data);
+    const response = await api.post<AuthResponse>("/auth/login", data);
     return response.data;
   },
 
@@ -373,9 +425,9 @@ export const authApi = {
       await mockDelay(800);
 
       // Check if email already exists
-      const existingUser = mockUsers.find(u => u.email === data.email);
+      const existingUser = mockUsers.find((u) => u.email === data.email);
       if (existingUser) {
-        throw new Error('Email này đã được sử dụng');
+        throw new Error("Email này đã được sử dụng");
       }
 
       // Create new user
@@ -402,8 +454,12 @@ export const authApi = {
     }
 
     // backend expects /auth/signup with { email, password, name }
-    const payload = { email: data.email, password: data.password, name: data.name };
-    const response = await api.post<AuthResponse>('/auth/signup', payload);
+    const payload = {
+      email: data.email,
+      password: data.password,
+      name: data.name,
+    };
+    const response = await api.post<AuthResponse>("/auth/signup", payload);
     return {
       ...response.data,
       user: response.data.user ?? { email: data.email, name: data.name },
@@ -415,7 +471,7 @@ export const authApi = {
       await mockDelay(600);
       return;
     }
-    await api.post('/auth/forget-password', { email, newPassword });
+    await api.post("/auth/forget-password", { email, newPassword });
   },
 
   verifyOtp: async (email: string, otp: string): Promise<void> => {
@@ -423,47 +479,53 @@ export const authApi = {
       await mockDelay(400);
       return;
     }
-    await api.post('/auth/verify-otp', { email, otp });
+    await api.post("/auth/verify-otp", { email, otp });
   },
 
   // Deprecated in new flow (OTP verify will set password)
-  resetPassword: async (_email: string, _otp: string, _newPassword: string): Promise<void> => {
-    throw new Error('resetPassword is deprecated; use forgotPassword + verifyOtp flow');
+  resetPassword: async (
+    _email: string,
+    _otp: string,
+    _newPassword: string
+  ): Promise<void> => {
+    throw new Error(
+      "resetPassword is deprecated; use forgotPassword + verifyOtp flow"
+    );
   },
 
   me: async (): Promise<MeResponse> => {
-    const res = await api.get('/users/me');
+    const res = await api.get("/users/me");
     return res.data;
   },
 
   logout: async (): Promise<void> => {
     try {
-      await api.post('/auth/logout');
+      await api.post("/auth/logout");
     } catch {
       // ignore error, we'll still clear client state
     } finally {
       setAccessToken(null);
       setRefreshToken(null);
-      localStorage.removeItem('user');
+      localStorage.removeItem("user");
     }
   },
 };
 
 export const userApi = {
   me: async (): Promise<MeResponse> => {
-    const res = await api.get('/user/me');
+    const res = await api.get("/user/me");
     return res.data;
   },
   updateProfile: async (payload: UpdateProfileRequest): Promise<MeResponse> => {
     const body: any = { ...payload };
     if (payload.dateOfBirth) {
-      body.dateOfBirth = dayjs(payload.dateOfBirth, 'DD/MM/YYYY').toISOString();
+      body.dateOfBirth = dayjs(payload.dateOfBirth, "DD/MM/YYYY").toISOString();
     }
-    const res = await api.put('/user/me', body);
+    const res = await api.put("/user/me", body);
     return res.data;
   },
   changePassword: async (payload: ChangePasswordRequest): Promise<void> => {
-    await api.post('/user/change-password', payload);
+    await api.post("/user/change-password", payload);
   },
 };
 
@@ -500,12 +562,20 @@ export const resumeApi = {
     page?: number;
     pageSize?: number;
     lastItemId?: number;
-    sortBy?: 'title' | 'createdAt' | 'updatedAt';
-    sortOrder?: 'asc' | 'desc';
-  }): Promise<{ data: Resume[]; pagination?: { page: number; pageSize: number; total: number; totalPages: number } }> => {
+    sortBy?: "title" | "createdAt" | "updatedAt";
+    sortOrder?: "asc" | "desc";
+  }): Promise<{
+    data: Resume[];
+    pagination?: {
+      page: number;
+      pageSize: number;
+      total: number;
+      totalPages: number;
+    };
+  }> => {
     const orderBy: string[] = [];
     if (params?.sortBy) {
-      orderBy.push(`${params.sortBy}:${params.sortOrder || 'desc'}`);
+      orderBy.push(`${params.sortBy}:${params.sortOrder || "desc"}`);
     }
 
     const query: any = {
@@ -514,7 +584,7 @@ export const resumeApi = {
       ...(params?.lastItemId ? { lastItemId: params.lastItemId } : {}),
       ...(orderBy.length ? { orderBy } : {}),
     };
-    const res = await api.get('/resume', { params: query });
+    const res = await api.get("/resume", { params: query });
     const items = res.data?.data || res.data || [];
     return {
       data: items.map(toFrontendResume),
@@ -531,11 +601,11 @@ export const resumeApi = {
   },
   create: async (resume: Resume): Promise<Resume> => {
     const payload = toBackendResume(resume);
-    const res = await api.post('/resume', payload);
+    const res = await api.post("/resume", payload);
     return toFrontendResume(res.data);
   },
   createWithTitle: async (title: string): Promise<Resume> => {
-    const res = await api.post('/resume', { title });
+    const res = await api.post("/resume", { title });
     return toFrontendResume(res.data);
   },
   update: async (id: string, resume: Resume): Promise<Resume> => {
@@ -543,7 +613,10 @@ export const resumeApi = {
     const res = await api.put(`/resume/${id}`, payload);
     return toFrontendResume(res.data);
   },
-  setVisibility: async (id: string | number, isPublic: boolean): Promise<Resume> => {
+  setVisibility: async (
+    id: string | number,
+    isPublic: boolean
+  ): Promise<Resume> => {
     const res = await api.put(`/resume/${id}/visibility`, { isPublic });
     return toFrontendResume(res.data);
   },
@@ -551,7 +624,7 @@ export const resumeApi = {
     await api.delete(`/resume/${id}`);
   },
   downloadPdf: async (id: string | number): Promise<Blob> => {
-    const res = await api.get(`/resume/${id}/pdf`, { responseType: 'blob' });
+    const res = await api.get(`/resume/${id}/pdf`, { responseType: "blob" });
     return res.data as Blob;
   },
   createScore: async (scoreData: {
@@ -563,19 +636,30 @@ export const resumeApi = {
     weakSections: string[];
     suggestions: string[];
   }): Promise<ResumeScore> => {
-    const res = await api.post('/resume/score', scoreData);
+    const res = await api.post("/resume/score", scoreData);
     return res.data;
   },
-  getScoreList: async (resumeId: number, params?: {
-    page?: number;
-    pageSize?: number;
-  }): Promise<{ data: ResumeScore[]; pagination?: { page: number; pageSize: number; total: number; totalPages: number } }> => {
+  getScoreList: async (
+    resumeId: number,
+    params?: {
+      page?: number;
+      pageSize?: number;
+    }
+  ): Promise<{
+    data: ResumeScore[];
+    pagination?: {
+      page: number;
+      pageSize: number;
+      total: number;
+      totalPages: number;
+    };
+  }> => {
     const query: any = {
       resumeId,
       page: params?.page ?? 1,
       pageSize: Math.min(params?.pageSize ?? 10, 100),
     };
-    const res = await api.get('/resume/score', { params: query });
+    const res = await api.get("/resume/score", { params: query });
     return {
       data: res.data?.data || res.data || [],
       pagination: res.data?.pagination,
@@ -585,13 +669,68 @@ export const resumeApi = {
 
 export const fileApi = {
   uploadImage: async (file: File): Promise<string> => {
+    if (!file || !(file instanceof File)) {
+      throw new Error("Invalid file provided");
+    }
+
     const formData = new FormData();
-    formData.append('file', file);
-    // Don't set Content-Type header manually - let axios set it automatically with boundary
-    const res = await api.post<UploadImageResponse>('/storage/local', formData);
-    const filename = res.data.filename;
-    // public URL to access the stored image
-    return `${API_BASE_URL}/storage/local/${filename}`;
+    formData.append("file", file);
+
+    // Don't set Content-Type header - let axios set it automatically with boundary
+    // The interceptor will remove the default 'application/json' Content-Type for FormData
+    try {
+      const res = await api.post<UploadImageResponse>(
+        "/storage/local",
+        formData
+      );
+
+      // Handle different response formats
+      const responseData = res.data;
+      if (!responseData) {
+        throw new Error("Invalid response from server");
+      }
+
+      // Check if response is wrapped in data property
+      const uploadResponse: UploadImageResponse =
+        (responseData as { data?: UploadImageResponse }).data ||
+        (responseData as UploadImageResponse);
+
+      if (!uploadResponse.filename) {
+        throw new Error("Filename not found in response");
+      }
+
+      // public URL to access the stored image
+      return `${API_BASE_URL}/storage/local/${uploadResponse.filename}`;
+    } catch (error: unknown) {
+      // Log error for debugging
+      console.error("Upload image error:", error);
+
+      // Re-throw with more context
+      const axiosError = error as {
+        response?: {
+          status?: number;
+          statusText?: string;
+          data?: { message?: string; error?: string };
+        };
+        request?: unknown;
+        message?: string;
+      };
+
+      if (axiosError.response) {
+        // Server responded with error
+        const errorMessage =
+          axiosError.response.data?.message ||
+          axiosError.response.data?.error ||
+          `Upload failed: ${axiosError.response.status} ${axiosError.response.statusText}`;
+        throw new Error(errorMessage);
+      } else if (axiosError.request) {
+        // Request made but no response
+        throw new Error("Network error: No response from server");
+      } else {
+        // Error setting up request
+        throw error instanceof Error ? error : new Error(String(error));
+      }
+    }
   },
 };
 
@@ -603,12 +742,14 @@ export const aiApi = {
       return `[Optimized] ${text}`;
     }
     // BE đã có prefix /api và versioning /v1, nên FE chỉ cần gọi /ai/optimize-text
-    const res = await api.post<{ optimizedText: string }>('/ai/optimize-text', { text });
+    const res = await api.post<{ optimizedText: string }>("/ai/optimize-text", {
+      text,
+    });
     return res.data.optimizedText;
   },
   scoreResumeByJD: async (
     resumeText: string,
-    jdText: string,
+    jdText: string
   ): Promise<{
     score: number;
     missingSkills: string[];
@@ -616,34 +757,41 @@ export const aiApi = {
     suggestions: string[];
     matchedRole?: string;
   }> => {
-    const res = await api.post('/ai/score-resume-jd', { resumeText, jdText });
+    const res = await api.post("/ai/score-resume-jd", { resumeText, jdText });
     return res.data;
   },
   generateCoverLetter: async (
     resumeText: string,
     jdText: string,
-    type: 'normal' | 'friendly',
+    type: "normal" | "friendly"
   ): Promise<{
     type: string;
     language: string;
     coverLetter: string;
   }> => {
-    const res = await api.post('/ai/cover-letter', { resumeText, jdText, type });
+    const res = await api.post("/ai/cover-letter", {
+      resumeText,
+      jdText,
+      type,
+    });
     return res.data;
   },
   generateInterviewQuestions: async (
     resumeText: string,
-    jdText: string,
+    jdText: string
   ): Promise<{
     language: string;
     matchedPosition?: string;
     questions: { type: string; question: string; expectedAnswer: string }[];
   }> => {
-    const res = await api.post('/ai/interview-questions', { resumeText, jdText });
+    const res = await api.post("/ai/interview-questions", {
+      resumeText,
+      jdText,
+    });
     return res.data;
   },
   scoreInterviewAnswers: async (
-    qaList: { question: string; answer: string }[],
+    qaList: { question: string; answer: string }[]
   ): Promise<{
     language: string;
     averageScore: number;
@@ -656,12 +804,12 @@ export const aiApi = {
     }[];
     overallFeedback: string;
   }> => {
-    const res = await api.post('/ai/interview-score', { qaList });
+    const res = await api.post("/ai/interview-score", { qaList });
     return res.data;
   },
   tailorResumeByJD: async (
     resumeText: string,
-    jdText: string,
+    jdText: string
   ): Promise<{
     language: string;
     matchedPosition?: string;
@@ -675,10 +823,9 @@ export const aiApi = {
     }[];
     overallSuggestions: string[];
   }> => {
-    const res = await api.post('/ai/tailor-resume-jd', { resumeText, jdText });
+    const res = await api.post("/ai/tailor-resume-jd", { resumeText, jdText });
     return res.data;
   },
 };
 
 export default api;
-

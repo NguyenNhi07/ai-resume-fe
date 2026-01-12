@@ -356,5 +356,17 @@
   "No score history found": "Aucun historique de score trouvé",
   "more": "plus",
   "Show less": "Afficher moins",
-  "Show more": "Afficher plus"
+  "Show more": "Afficher plus",
+  "Certifications": "Certifications",
+  "Add your certifications and credentials": "Ajoutez vos certifications et accréditations",
+  "Add Certification": "Ajouter une certification",
+  "No certifications added yet.": "Aucune certification ajoutée pour le moment.",
+  "Click \"Add Certification\" to get started.": "Cliquez sur \"Ajouter une certification\" pour commencer.",
+  "Certification": "Certification",
+  "Certification Name": "Nom de la certification",
+  "Issuing Organization": "Organisme émetteur",
+  "Issue Date": "Date d'émission",
+  "Expiry Date": "Date d'expiration",
+  "Credential ID": "Identifiant d'accréditation",
+  "Credential URL": "URL d'accréditation"
 }

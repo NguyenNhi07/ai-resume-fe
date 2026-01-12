@@ -160,9 +160,9 @@ export const ProfessionalTemplate = ({
                   </span>
                 </div>
                 {exp.description && (
-                  <p className="text-gray-700 text-sm leading-relaxed">
+                  <div className="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
                     {exp.description}
-                  </p>
+                  </div>
                 )}
               </div>
             ))}
@@ -203,6 +203,48 @@ export const ProfessionalTemplate = ({
         </div>
       )}
 
+      {/* Certifications */}
+      {data.certifications && data.certifications.length > 0 && (
+        <div className="mb-8">
+          <h2
+            className="text-sm font-bold uppercase tracking-widest mb-4"
+            style={{ color: accentColor }}
+          >
+            {t("Certifications")}
+          </h2>
+          <div className="space-y-4">
+            {data.certifications.map((cert, index) => (
+              <div key={index}>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {cert.name}
+                </h3>
+                {cert.issuer && (
+                  <p className="text-gray-600">{cert.issuer}</p>
+                )}
+                {(cert.issueDate || cert.expiryDate || cert.credentialId) && (
+                  <p className="text-sm text-gray-500 pt-2">
+                    {cert.issueDate && `Issued: ${formatDate(cert.issueDate)}`}
+                    {cert.issueDate && cert.expiryDate && " • "}
+                    {cert.expiryDate && `Expires: ${formatDate(cert.expiryDate)}`}
+                    {cert.credentialId && ` • ID: ${cert.credentialId}`}
+                  </p>
+                )}
+                {cert.credentialUrl && (
+                  <a
+                    href={cert.credentialUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-600 hover:underline pt-1 inline-block"
+                  >
+                    {t("View Credential")}
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Projects */}
       {data.project && data.project.length > 0 && (
         <div className="mb-8">
@@ -223,9 +265,9 @@ export const ProfessionalTemplate = ({
                   {project.name}
                 </h3>
                 {project.description && (
-                  <p className="text-gray-700 text-sm leading-relaxed mb-2">
+                  <div className="text-gray-700 text-sm leading-relaxed mb-2 whitespace-pre-line">
                     {project.description}
-                  </p>
+                  </div>
                 )}
                 {project.technologies && project.technologies.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-3">
