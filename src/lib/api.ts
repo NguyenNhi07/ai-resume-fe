@@ -543,16 +543,26 @@ export interface ResumeScore {
   updatedAt: string;
 }
 
-export interface ResumeScore {
+export interface JobSuggestion {
+  jobTitle: string;
+  companyName?: string;
+  jobUrl: string;
+  jobDescription?: string;
+  location?: string;
+  source?: string;
+}
+
+export interface JobApplication {
   id: number;
   resumeId: number;
   userId?: number;
-  score: number;
-  jdText: string;
-  matchedRole?: string;
-  missingSkills: string[];
-  weakSections: string[];
-  suggestions: string[];
+  jobTitle: string;
+  companyName?: string;
+  jobUrl: string;
+  jobDescription?: string;
+  status: "Applied" | "Interviewing" | "Offer" | "Rejected" | "Withdrawn";
+  appliedAt: string;
+  notes?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -664,6 +674,59 @@ export const resumeApi = {
       data: res.data?.data || res.data || [],
       pagination: res.data?.pagination,
     };
+  },
+  createJobApplication: async (application: {
+    resumeId: number;
+    jobTitle: string;
+    companyName?: string;
+    jobUrl: string;
+    jobDescription?: string;
+    status?: "Applied" | "Interviewing" | "Offer" | "Rejected" | "Withdrawn";
+    notes?: string;
+  }): Promise<JobApplication> => {
+    const res = await api.post("/resume/job-application", application);
+    return res.data;
+  },
+  getJobApplicationList: async (
+    resumeId: number,
+    params?: {
+      page?: number;
+      pageSize?: number;
+      status?: string;
+    }
+  ): Promise<{
+    data: JobApplication[];
+    pagination?: {
+      page: number;
+      pageSize: number;
+      total: number;
+      totalPages: number;
+    };
+  }> => {
+    const query: any = {
+      resumeId,
+      page: params?.page ?? 1,
+      pageSize: Math.min(params?.pageSize ?? 10, 100),
+      ...(params?.status ? { status: params.status } : {}),
+    };
+    const res = await api.get("/resume/job-application", { params: query });
+    return {
+      data: res.data?.data || res.data || [],
+      pagination: res.data?.pagination,
+    };
+  },
+  updateJobApplication: async (
+    id: number,
+    updates: {
+      status?: "Applied" | "Interviewing" | "Offer" | "Rejected" | "Withdrawn";
+      notes?: string;
+    }
+  ): Promise<JobApplication> => {
+    const res = await api.put(`/resume/job-application/${id}`, updates);
+    return res.data;
+  },
+  deleteJobApplication: async (id: number): Promise<void> => {
+    await api.delete(`/resume/job-application/${id}`);
   },
 };
 
@@ -824,6 +887,16 @@ export const aiApi = {
     overallSuggestions: string[];
   }> => {
     const res = await api.post("/ai/tailor-resume-jd", { resumeText, jdText });
+    return res.data;
+  },
+  suggestJobs: async (
+    resumeText: string,
+    location?: string
+  ): Promise<{
+    language: string;
+    jobs: JobSuggestion[];
+  }> => {
+    const res = await api.post("/ai/suggest-jobs", { resumeText, location });
     return res.data;
   },
 };

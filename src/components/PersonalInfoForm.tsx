@@ -15,18 +15,13 @@ import {
 import { useTranslation } from "react-i18next";
 import { AllowedCharsInput } from "./AllowedCharsInput";
 import dayjs, { Dayjs } from "dayjs";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { isValidPhoneNumber } from "@/lib/phone-utils";
 import { PhoneInput } from "./PhoneInput";
 import { UploadImage } from "./UploadImage";
 import { fileApi } from "@/lib/api";
 import { useToast } from "@/hooks/useToast";
 
-const genderOptions = [
-  { label: "Male", value: "Male" },
-  { label: "Female", value: "Female" },
-  { label: "Other", value: "Other" },
-];
 const urlRegex = /^(https?:\/\/|www\.)[^\s/$.?#].[^\s]*$/i;
 
 export const PersonalInfoForm = ({
@@ -42,6 +37,14 @@ export const PersonalInfoForm = ({
 }) => {
   const { t } = useTranslation();
   const toast = useToast();
+  const genderOptions = useMemo(
+    () => [
+      { label: t("gender_male"), value: "Male" },
+      { label: t("gender_female"), value: "Female" },
+      { label: t("gender_other"), value: "Other" },
+    ],
+    [t]
+  );
 
   const [errorPhone, setErrorPhone] = useState(false);
   const [isUploading, setIsUploading] = useState(false);

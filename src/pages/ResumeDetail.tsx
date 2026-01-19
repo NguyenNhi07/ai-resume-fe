@@ -1,6 +1,8 @@
 import { ResumePreview } from "@/components/ResumePreview";
 import ShareDialog from "@/components/ShareDialog";
 import ScoreHistoryModal from "@/components/ScoreHistoryModal";
+import JobSuggestionsModal from "@/components/JobSuggestionsModal";
+import JobApplicationHistoryModal from "@/components/JobApplicationHistoryModal";
 import { useToast } from "@/hooks/useToast";
 import { aiApi, resumeApi } from "@/lib/api";
 import type { Experience, Resume } from "@/lib/type";
@@ -20,7 +22,9 @@ import {
     PrinterIcon,
     Share2Icon,
     Sparkles,
-    TrashIcon
+    TrashIcon,
+    Briefcase,
+    Calendar
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -90,6 +94,8 @@ export default function ResumeDetail() {
     } | null>(null);
     const [deleteResume, setDeleteResume] = useState(false);
     const [showHistoryModal, setShowHistoryModal] = useState(false);
+    const [showJobSuggestionsModal, setShowJobSuggestionsModal] = useState(false);
+    const [showJobApplicationHistoryModal, setShowJobApplicationHistoryModal] = useState(false);
 
     const loadExitstingResume = async () => {
         if (!resumeId) return;
@@ -171,6 +177,56 @@ export default function ResumeDetail() {
                 parts.push(`Skills: ${resumeData.skills.join(", ")}`);
             }
             const resumeText = parts.join("\n");
+            
+            // Helper function to convert resume to text
+            const convertResumeToText = (resume: Resume): string => {
+                const parts: string[] = [];
+                if (resume.personal_info?.full_name) {
+                    parts.push(`Name: ${resume.personal_info.full_name}`);
+                }
+                if (resume.personal_info?.profession) {
+                    parts.push(`Profession: ${resume.personal_info.profession}`);
+                }
+                if (resume.professional_summary) {
+                    parts.push(`Summary: ${resume.professional_summary}`);
+                }
+                if (resume.experience?.length) {
+                    parts.push(
+                        "Experience:",
+                        ...resume.experience.map((e) =>
+                            `- ${e.position || ""} at ${e.company || ""} (${e.start_date || ""} - ${e.is_current ? "Present" : e.end_date || ""}) ${e.description || ""}`,
+                        ),
+                    );
+                }
+                if (resume.education?.length) {
+                    parts.push(
+                        "Education:",
+                        ...resume.education.map((ed) =>
+                            `- ${ed.degree || ""} in ${ed.field || ""} at ${ed.institution || ""} (${ed.graduation_date || ""}) GPA: ${ed.gpa || ""}`,
+                        ),
+                    );
+                }
+                if (resume.certifications?.length) {
+                    parts.push(
+                        "Certifications:",
+                        ...resume.certifications.map((cert) =>
+                            `- ${cert.name || ""}${cert.issuer ? ` from ${cert.issuer}` : ""}${cert.issueDate ? ` (${cert.issueDate})` : ""}${cert.credentialId ? ` ID: ${cert.credentialId}` : ""}`,
+                        ),
+                    );
+                }
+                if (resume.project?.length) {
+                    parts.push(
+                        "Projects:",
+                        ...resume.project.map((p) =>
+                            `- ${p.name || ""}: ${p.description || ""} (Tech: ${(p.technologies || []).join(", ")})`,
+                        ),
+                    );
+                }
+                if (resume.skills?.length) {
+                    parts.push(`Skills: ${resume.skills.join(", ")}`);
+                }
+                return parts.join("\n");
+            };
 
             const scored = await aiApi.scoreResumeByJD(resumeText, jdText);
             setScoreResult(scored);
@@ -556,6 +612,20 @@ export default function ResumeDetail() {
                                     <Sparkles className="size-4 text-emerald-600 transition-colors" />
                                     {t("CoverLetterMenu")}
                                 </button>
+                                <button
+                                    onClick={() => setShowJobSuggestionsModal(true)}
+                                    className="flex items-center gap-2 px-3 py-1.5 rounded-md text-blue-600 hover:bg-blue-50 transition-colors"
+                                >
+                                    <Briefcase className="size-4 text-blue-600 transition-colors" />
+                                    {t("Job Suggestions")}
+                                </button>
+                                <button
+                                    onClick={() => setShowJobApplicationHistoryModal(true)}
+                                    className="flex items-center gap-2 px-3 py-1.5 rounded-md text-teal-600 hover:bg-teal-50 transition-colors"
+                                >
+                                    <Calendar className="size-4 text-teal-600 transition-colors" />
+                                    {t("Job Application History")}
+                                </button>
                             </div>
 
                         </div>
@@ -733,6 +803,66 @@ export default function ResumeDetail() {
                 open={showHistoryModal}
                 onCancel={() => setShowHistoryModal(false)}
                 resumeId={resumeId}
+            />
+
+            <JobSuggestionsModal
+                open={showJobSuggestionsModal}
+                onClose={() => setShowJobSuggestionsModal(false)}
+                resumeId={resumeId || ""}
+                resumeText={(() => {
+                    const parts: string[] = [];
+                    if (resumeData.personal_info?.full_name) {
+                        parts.push(`Name: ${resumeData.personal_info.full_name}`);
+                    }
+                    if (resumeData.personal_info?.profession) {
+                        parts.push(`Profession: ${resumeData.personal_info.profession}`);
+                    }
+                    if (resumeData.professional_summary) {
+                        parts.push(`Summary: ${resumeData.professional_summary}`);
+                    }
+                    if (resumeData.experience?.length) {
+                        parts.push(
+                            "Experience:",
+                            ...resumeData.experience.map((e) =>
+                                `- ${e.position || ""} at ${e.company || ""} (${e.start_date || ""} - ${e.is_current ? "Present" : e.end_date || ""}) ${e.description || ""}`,
+                            ),
+                        );
+                    }
+                    if (resumeData.education?.length) {
+                        parts.push(
+                            "Education:",
+                            ...resumeData.education.map((ed) =>
+                                `- ${ed.degree || ""} in ${ed.field || ""} at ${ed.institution || ""} (${ed.graduation_date || ""}) GPA: ${ed.gpa || ""}`,
+                            ),
+                        );
+                    }
+                    if (resumeData.certifications?.length) {
+                        parts.push(
+                            "Certifications:",
+                            ...resumeData.certifications.map((cert) =>
+                                `- ${cert.name || ""}${cert.issuer ? ` from ${cert.issuer}` : ""}${cert.issueDate ? ` (${cert.issueDate})` : ""}${cert.credentialId ? ` ID: ${cert.credentialId}` : ""}`,
+                            ),
+                        );
+                    }
+                    if (resumeData.project?.length) {
+                        parts.push(
+                            "Projects:",
+                            ...resumeData.project.map((p) =>
+                                `- ${p.name || ""}: ${p.description || ""} (Tech: ${(p.technologies || []).join(", ")})`,
+                            ),
+                        );
+                    }
+                    if (resumeData.skills?.length) {
+                        parts.push(`Skills: ${resumeData.skills.join(", ")}`);
+                    }
+                    return parts.join("\n");
+                })()}
+            />
+
+            <JobApplicationHistoryModal
+                open={showJobApplicationHistoryModal}
+                onClose={() => setShowJobApplicationHistoryModal(false)}
+                resumeId={resumeId || ""}
             />
         </div>
     );
