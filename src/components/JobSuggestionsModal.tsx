@@ -1,5 +1,10 @@
 import { useToast } from "@/hooks/useToast";
-import { aiApi, resumeApi, type JobSuggestion } from "@/lib/api";
+import {
+  aiApi,
+  resumeApi,
+  type JobSuggestion,
+  type SuggestJobsResponse,
+} from "@/lib/api";
 import { Button, Empty, Modal, Spin, Tag } from "antd";
 import { ExternalLink, MapPin, Building2, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -23,23 +28,87 @@ export default function JobSuggestionsModal({
   const [loading, setLoading] = useState(false);
   const [jobs, setJobs] = useState<JobSuggestion[]>([]);
   const [location, setLocation] = useState("");
+  const [suggestionMeta, setSuggestionMeta] = useState<
+    Pick<SuggestJobsResponse, "cachedAt" | "location" | "isFromCache"> | null
+  >(null);
 
   useEffect(() => {
-    if (open && resumeText) {
-      handleSuggestJobs();
+    if (open && resumeText && resumeId) {
+      loadSavedSuggestions();
     }
-  }, [open, resumeText]);
+  }, [open, resumeText, resumeId]);
 
-  const handleSuggestJobs = async () => {
+  const loadSavedSuggestions = async () => {
     if (!resumeText.trim()) {
-      toast.error(t("Please provide resume content"));
+      return;
+    }
+
+    const parsedResumeId = Number(resumeId);
+    if (!parsedResumeId) {
+      toast.error(t("Missing resume id"));
       return;
     }
 
     setLoading(true);
     try {
-      const result = await aiApi.suggestJobs(resumeText, location || undefined);
+      const saved = await aiApi.getSavedJobSuggestions(parsedResumeId);
+      if (saved) {
+        setJobs(saved.jobs || []);
+        setLocation(saved.location || "");
+        setSuggestionMeta({
+          cachedAt: saved.cachedAt,
+          location: saved.location,
+          isFromCache: saved.isFromCache,
+        });
+        return;
+      }
+      await handleSuggestJobs(false, { skipLoading: true });
+    } catch (error: any) {
+      console.error("Error loading saved job suggestions:", error);
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          t("Failed to load job suggestions")
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSuggestJobs = async (
+    forceRefresh = false,
+    options?: { skipLoading?: boolean }
+  ) => {
+    if (!resumeText.trim()) {
+      toast.error(t("Please provide resume content"));
+      return;
+    }
+
+    const parsedResumeId = Number(resumeId);
+    if (!parsedResumeId) {
+      toast.error(t("Missing resume id"));
+      return;
+    }
+
+    if (!options?.skipLoading) {
+      setLoading(true);
+    }
+    try {
+      const result = await aiApi.suggestJobs({
+        resumeId: parsedResumeId,
+        resumeText,
+        location: location || undefined,
+        forceRefresh,
+      });
       setJobs(result.jobs || []);
+      setSuggestionMeta({
+        cachedAt: result.cachedAt,
+        location: result.location,
+        isFromCache: result.isFromCache,
+      });
+      if (result.location) {
+        setLocation(result.location);
+      }
     } catch (error: any) {
       console.error("Error suggesting jobs:", error);
       toast.error(
@@ -48,7 +117,9 @@ export default function JobSuggestionsModal({
           t("Failed to suggest jobs")
       );
     } finally {
-      setLoading(false);
+      if (!options?.skipLoading) {
+        setLoading(false);
+      }
     }
   };
 
@@ -142,7 +213,7 @@ export default function JobSuggestionsModal({
           />
           <Button
             type="primary"
-            onClick={handleSuggestJobs}
+            onClick={() => handleSuggestJobs(true)}
             loading={loading}
             disabled={loading}
           >
@@ -150,6 +221,15 @@ export default function JobSuggestionsModal({
             {t("Search Jobs")}
           </Button>
         </div>
+        {suggestionMeta && (
+          <p className="text-xs text-gray-500 mb-2">
+            {suggestionMeta.isFromCache
+              ? t(
+                  "Showing saved suggestions. Click Search Jobs to refresh with AI."
+                )
+              : t("Latest suggestions updated.")}
+          </p>
+        )}
 
         {loading ? (
           <div className="flex justify-center py-12">

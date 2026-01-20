@@ -137,12 +137,12 @@ export default function CoverLetter() {
           <ArrowLeftIcon className="size-4" /> {t("Back")}
         </Button>
         <div className="flex items-center gap-2">
-          <Button
+          {/* <Button
             onClick={handlePrint}
             className="!bg-gradient-to-br !from-slate-100 !to-slate-200 !text-slate-700 hover:!border-slate-300"
           >
             <PrinterIcon className="size-4" /> {t("Print")}
-          </Button>
+          </Button> */}
           <Button
             onClick={handleDownload}
             className="!bg-gradient-to-br !from-green-100 !to-green-200 !text-green-700 hover:!border-green-400"

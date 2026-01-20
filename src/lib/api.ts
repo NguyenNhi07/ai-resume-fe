@@ -552,6 +552,16 @@ export interface JobSuggestion {
   source?: string;
 }
 
+export interface SuggestJobsResponse {
+  cacheId: number;
+  resumeId: number;
+  language: string;
+  location?: string;
+  cachedAt?: string;
+  isFromCache?: boolean;
+  jobs: JobSuggestion[];
+}
+
 export interface JobApplication {
   id: number;
   resumeId: number;
@@ -889,14 +899,28 @@ export const aiApi = {
     const res = await api.post("/ai/tailor-resume-jd", { resumeText, jdText });
     return res.data;
   },
-  suggestJobs: async (
-    resumeText: string,
-    location?: string
-  ): Promise<{
-    language: string;
-    jobs: JobSuggestion[];
-  }> => {
-    const res = await api.post("/ai/suggest-jobs", { resumeText, location });
+  getSavedJobSuggestions: async (
+    resumeId: number
+  ): Promise<SuggestJobsResponse | null> => {
+    try {
+      const res = await api.get("/ai/suggest-jobs/latest", {
+        params: { resumeId },
+      });
+      return res.data;
+    } catch (error: any) {
+      if (error?.response?.status === 404) {
+        return null;
+      }
+      throw error;
+    }
+  },
+  suggestJobs: async (payload: {
+    resumeId: number;
+    resumeText: string;
+    location?: string;
+    forceRefresh?: boolean;
+  }): Promise<SuggestJobsResponse> => {
+    const res = await api.post("/ai/suggest-jobs", payload);
     return res.data;
   },
 };
