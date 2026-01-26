@@ -228,7 +228,7 @@ export default function Dashboard() {
                           <FileTextIcon className="size-6 text-gray-500" />
                         </div>
                         <span className="text-base text-black/70">{resume.title}</span>
-                        <span className="text-sm text-gray-500">{t('Updated on ')}{resume.updatedAt ? new Date(resume.updatedAt).toLocaleDateString() : ''}</span>
+                        <span className="text-sm text-gray-500">{t('Updated on ')}{resume.updatedAt ? new Date(resume.updatedAt).toLocaleDateString('vi-VN') : ''}</span>
                         <div
                           onClick={(e) => e.stopPropagation()}
                           className="absolute top-1 right-1 hidden group-hover:flex items-center "
@@ -350,7 +350,9 @@ export default function Dashboard() {
                 key="createdAt"
                 sorter
                 sortOrder={tableSort.field === 'createdAt' ? tableSort.order : null}
-                render={(value) => value ? new Date(value).toLocaleDateString() : ''}
+                render={(value) =>
+                  value ? new Date(value).toLocaleDateString('vi-VN') : ''
+                }
               />
               <Table.Column
                 width={200}
@@ -359,7 +361,9 @@ export default function Dashboard() {
                 key="updatedAt"
                 sorter
                 sortOrder={tableSort.field === 'updatedAt' ? tableSort.order : null}
-                render={(value) => value ? new Date(value).toLocaleDateString() : ''}
+                render={(value) =>
+                  value ? new Date(value).toLocaleDateString('vi-VN') : ''
+                }
               />
               <Table.Column width={100} title={t("Actions")} key="actions" render={(_, record) => (
                 <div className="flex gap-4">
