@@ -28,9 +28,10 @@ export default function JobSuggestionsModal({
   const [loading, setLoading] = useState(false);
   const [jobs, setJobs] = useState<JobSuggestion[]>([]);
   const [location, setLocation] = useState("");
-  const [suggestionMeta, setSuggestionMeta] = useState<
-    Pick<SuggestJobsResponse, "cachedAt" | "location" | "isFromCache"> | null
-  >(null);
+  const [suggestionMeta, setSuggestionMeta] = useState<Pick<
+    SuggestJobsResponse,
+    "cachedAt" | "location" | "isFromCache"
+  > | null>(null);
 
   useEffect(() => {
     if (open && resumeText && resumeId) {
@@ -68,7 +69,7 @@ export default function JobSuggestionsModal({
       toast.error(
         error?.response?.data?.message ||
           error?.message ||
-          t("Failed to load job suggestions")
+          t("Failed to load job suggestions"),
       );
     } finally {
       setLoading(false);
@@ -77,7 +78,7 @@ export default function JobSuggestionsModal({
 
   const handleSuggestJobs = async (
     forceRefresh = false,
-    options?: { skipLoading?: boolean }
+    options?: { skipLoading?: boolean },
   ) => {
     if (!resumeText.trim()) {
       toast.error(t("Please provide resume content"));
@@ -114,7 +115,7 @@ export default function JobSuggestionsModal({
       toast.error(
         error?.response?.data?.message ||
           error?.message ||
-          t("Failed to suggest jobs")
+          t("Failed to suggest jobs"),
       );
     } finally {
       if (!options?.skipLoading) {
@@ -140,14 +141,14 @@ export default function JobSuggestionsModal({
       toast.error(
         error?.response?.data?.message ||
           error?.message ||
-          t("Failed to save job application")
+          t("Failed to save job application"),
       );
     }
   };
 
   const getSafeJobUrl = (job: JobSuggestion) => {
     const fallbackSearch = `https://www.google.com/search?q=${encodeURIComponent(
-      `${job.jobTitle} ${job.companyName || ""} ${job.location || ""} jobs`
+      `${job.jobTitle} ${job.companyName || ""} ${job.location || ""} jobs`,
     )}`;
 
     if (!job.jobUrl) return fallbackSearch;
@@ -209,7 +210,7 @@ export default function JobSuggestionsModal({
             placeholder={t("Location (optional)")}
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            className="flex-1 rounded-md border border-gray-300 px-3 py-2"
+            className="flex-1 rounded-md border border-gray-300 h-8 px-3"
           />
           <Button
             type="primary"
@@ -222,10 +223,10 @@ export default function JobSuggestionsModal({
           </Button>
         </div>
         {suggestionMeta && (
-          <p className="text-xs text-gray-500 mb-2">
+          <p className="text-xs text-gray-500 pb-2">
             {suggestionMeta.isFromCache
               ? t(
-                  "Showing saved suggestions. Click Search Jobs to refresh with AI."
+                  "Showing saved suggestions. Click Search Jobs to refresh with AI.",
                 )
               : t("Latest suggestions updated.")}
           </p>
@@ -265,9 +266,7 @@ export default function JobSuggestionsModal({
                           <span>{job.location}</span>
                         </div>
                       )}
-                      {job.source && (
-                        <Tag color="blue">{job.source}</Tag>
-                      )}
+                      {job.source && <Tag color="blue">{job.source}</Tag>}
                     </div>
                     {job.jobDescription && (
                       <p className="text-sm text-gray-600 line-clamp-2 mb-3">
@@ -299,4 +298,3 @@ export default function JobSuggestionsModal({
     </Modal>
   );
 }
-
