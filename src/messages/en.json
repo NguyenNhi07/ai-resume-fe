@@ -312,6 +312,12 @@
   "Add new resume": "Add new resume",
   "Create resume success": "Create resume success",
   "Create resume failed": "Create resume failed",
+  "Resume saved successfully": "Resume saved successfully",
+  "Resume created successfully": "Resume created successfully",
+  "Failed to save resume": "Failed to save resume",
+  "Failed to create resume": "Failed to create resume",
+  "Failed to delete resume": "Failed to delete resume",
+  "deleteResumeSuccess": "Resume deleted successfully",
   "Update resume title success": "Update resume title success",
   "Update resume title failed": "Update resume title failed",
   "Updated on ": "Updated on ",
@@ -401,5 +407,14 @@
   "Failed to suggest jobs": "Failed to suggest jobs",
   "Failed to save job application": "Failed to save job application",
   "Please provide resume content": "Please provide resume content",
-  "Input language": "Input language"
+  "Input language": "Input language",
+  "Failed to upload avatar": "Failed to upload avatar",
+  "Avatar updated successfully": "Avatar updated successfully",
+  "Created at": "Created at",
+  "Updated at": "Updated at",
+  "Clean two-column layout with prominent profile image header": "Clean two-column layout with prominent profile image header",
+  "Two-column layout with colored sidebar for profile and skills": "Two-column layout with colored sidebar for profile and skills",
+  "Vertical timeline focus on work experience and education": "Vertical timeline focus on work experience and education",
+  "Single-column compact layout optimized to fit more content on one page": "Single-column compact layout optimized to fit more content on one page",
+  "Bordered card-style layout with subtle accents and serif typography": "Bordered card-style layout with subtle accents and serif typography"
 }

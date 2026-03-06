@@ -151,7 +151,7 @@ export const ModernTemplate = ({
                   ></div>
                   {t("About Me")}
                 </h2>
-                <p className="text-gray-700 leading-relaxed text-lg">
+                <p className="text-gray-700 leading-relaxed text-lg whitespace-pre-line">
                   {data.professional_summary}
                 </p>
               </div>

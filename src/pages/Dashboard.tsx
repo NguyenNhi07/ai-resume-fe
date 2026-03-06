@@ -14,7 +14,7 @@ import {
   PlusIcon,
   SearchIcon,
   TrashIcon,
-  UploadCloud
+  UploadCloud,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -35,15 +35,17 @@ export default function Dashboard() {
   const [deleteResumeId, setDeleteResumeId] = useState<number | undefined>();
   const [deleteResume, setDeleteResume] = useState(false);
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
-  const [duplicateResumeId, setDuplicateResumeId] = useState<string | null>(null);
+  const [duplicateResumeId, setDuplicateResumeId] = useState<string | null>(
+    null,
+  );
   const [recentResumes, setRecentResumes] = useState<Resume[]>([]);
   const [search, setSearch] = useState("");
   const [loadingTable, setLoadingTable] = useState(false);
   const [loadingRecent, setLoadingRecent] = useState(false);
-  const [view, setView] = useState<'list' | 'grid'>('list');
+  const [view, setView] = useState<"list" | "grid">("list");
   const [tableSort, setTableSort] = useState<{
-    field?: 'title' | 'createdAt' | 'updatedAt';
-    order?: 'ascend' | 'descend';
+    field?: "title" | "createdAt" | "updatedAt";
+    order?: "ascend" | "descend";
   }>({});
   const [pagination, setPagination] = useState<{
     current: number;
@@ -57,17 +59,17 @@ export default function Dashboard() {
 
   const loadAllResumes = async (options?: {
     page?: number;
-    sortField?: 'title' | 'createdAt' | 'updatedAt';
-    sortOrder?: 'ascend' | 'descend';
+    sortField?: "title" | "createdAt" | "updatedAt";
+    sortOrder?: "ascend" | "descend";
   }) => {
     setLoadingTable(true);
     try {
-      let sortBy: 'title' | 'createdAt' | 'updatedAt' | undefined;
-      let sortOrder: 'asc' | 'desc' | undefined;
+      let sortBy: "title" | "createdAt" | "updatedAt" | undefined;
+      let sortOrder: "asc" | "desc" | undefined;
 
       if (options?.sortField) {
         sortBy = options.sortField;
-        sortOrder = options.sortOrder === 'ascend' ? 'asc' : 'desc';
+        sortOrder = options.sortOrder === "ascend" ? "asc" : "desc";
       }
 
       const page = options?.page ?? pagination.current;
@@ -97,8 +99,8 @@ export default function Dashboard() {
       const result = await resumeApi.list({
         page: 1,
         pageSize: 5,
-        sortBy: 'updatedAt',
-        sortOrder: 'desc',
+        sortBy: "updatedAt",
+        sortOrder: "desc",
       });
       setRecentResumes(result.data);
     } catch (e) {
@@ -128,6 +130,7 @@ export default function Dashboard() {
       navigate(`/app/builder/${created.id}`);
     } catch (e) {
       console.error(e);
+      toast.error(t("Failed to create resume"));
     }
   };
 
@@ -141,7 +144,9 @@ export default function Dashboard() {
     event.preventDefault();
     if (!editResumeId || !title.trim()) return;
     try {
-      const target = allResumes.find((r) => String(r.id) === String(editResumeId));
+      const target = allResumes.find(
+        (r) => String(r.id) === String(editResumeId),
+      );
       if (!target) return;
       const updatedResume: Resume = { ...target, title: title.trim() };
       await resumeApi.update(String(updatedResume.id), updatedResume);
@@ -163,10 +168,12 @@ export default function Dashboard() {
       // Reload current page
       loadAllResumes({ page: pagination.current });
       setRecentResumes((prev) =>
-        prev.filter((resume) => Number(resume.id) !== resumeId)
+        prev.filter((resume) => Number(resume.id) !== resumeId),
       );
+      toast.success(t("deleteResumeSuccess"));
     } catch (e) {
       console.error(e);
+      toast.error(t("Failed to delete resume"));
     } finally {
       setDeleteResume(false);
     }
@@ -185,14 +192,18 @@ export default function Dashboard() {
 
   return (
     <div className="h-full">
-      <div className="h-[200px] flex items-center justify-betweenq flex-col gap-6 pt-6" style={{ background: "linear-gradient(to bottom, rgba(255,255,255,0) 0%, #f9fafb), linear-gradient(to right,rgb(212, 249, 255),rgb(236, 211, 255))" }}>
-        <span className="text-[50px] font-medium text-black/70">{t("All Resumes")}</span>
-        <div
-          className="p-[1px] rounded-full bg-gradient-to-r from-cyan-300 to-purple-400 w-[600px]"
-        >
-          <div
-            className="flex items-center gap-3 bg-white rounded-full px-5 py-4"
-          >
+      <div
+        className="h-[200px] flex items-center justify-betweenq flex-col gap-6 pt-6"
+        style={{
+          background:
+            "linear-gradient(to bottom, rgba(255,255,255,0) 0%, #f9fafb), linear-gradient(to right,rgb(212, 249, 255),rgb(236, 211, 255))",
+        }}
+      >
+        <span className="text-[50px] font-medium text-black/70">
+          {t("All Resumes")}
+        </span>
+        <div className="p-[1px] rounded-full bg-gradient-to-r from-cyan-300 to-purple-400 w-[600px]">
+          <div className="flex items-center gap-3 bg-white rounded-full px-5 py-4">
             <SearchIcon className="size-4 text-gray-500" />
             <input
               className="flex-1 outline-none text-sm"
@@ -206,14 +217,34 @@ export default function Dashboard() {
 
       <div className="p-6 flex flex-col gap-3">
         <div className="flex justify-end gap-2">
-          <Tooltip title={view === 'grid' ? t("List View") : t("Grid View")}><Button variant="text" onClick={() => { setView(view === 'list' ? 'grid' : 'list') }}>{view === 'grid' ? <List /> : <LayoutGrid />}</Button></Tooltip>
-          <Tooltip title={t("Add new resume")}><Button variant="text" onClick={() => { setShowCreateResume(true) }}><PlusIcon /></Button></Tooltip>
+          <Tooltip title={view === "grid" ? t("List View") : t("Grid View")}>
+            <Button
+              variant="text"
+              onClick={() => {
+                setView(view === "list" ? "grid" : "list");
+              }}
+            >
+              {view === "grid" ? <List /> : <LayoutGrid />}
+            </Button>
+          </Tooltip>
+          <Tooltip title={t("Add new resume")}>
+            <Button
+              variant="text"
+              onClick={() => {
+                setShowCreateResume(true);
+              }}
+            >
+              <PlusIcon />
+            </Button>
+          </Tooltip>
         </div>
 
         <div className="flex flex-col gap-2">
           {recentResumes.length > 0 && (
             <>
-              <span className="text-[32px] font-medium text-black/70">{t('Recents')}</span>
+              <span className="text-[32px] font-medium text-black/70">
+                {t("Recents")}
+              </span>
               <div className="flex gap-2 items-center">
                 {loadingRecent && (
                   <div className="w-full flex justify-center py-6">
@@ -221,14 +252,30 @@ export default function Dashboard() {
                   </div>
                 )}
                 {recentResumes.map(
-                  (resume: Resume & { updatedAt?: string | Date }, index: number) => {
+                  (
+                    resume: Resume & { updatedAt?: string | Date },
+                    index: number,
+                  ) => {
                     return (
-                      <div onClick={() => navigate(`/app/builder/${resume.id}`)} key={index} className="flex flex-col cursor-pointer relative group group-hover:shadow-lg transition-all duration-300">
+                      <div
+                        onClick={() => navigate(`/app/builder/${resume.id}`)}
+                        key={index}
+                        className="flex flex-col cursor-pointer relative group group-hover:shadow-lg transition-all duration-300"
+                      >
                         <div className="mb-2 bg-gray-100 rounded-xl p-2 w-[150px] h-[150px] flex items-center justify-center">
                           <FileTextIcon className="size-6 text-gray-500" />
                         </div>
-                        <span className="text-base text-black/70">{resume.title}</span>
-                        <span className="text-sm text-gray-500">{t('Updated on ')}{resume.updatedAt ? new Date(resume.updatedAt).toLocaleDateString('vi-VN') : ''}</span>
+                        <span className="text-base text-black/70 max-w-[150px] truncate">
+                          {resume.title}
+                        </span>
+                        <span className="text-sm text-gray-500">
+                          {t("Updated on ")}
+                          {resume.updatedAt
+                            ? new Date(resume.updatedAt).toLocaleDateString(
+                                "vi-VN",
+                              )
+                            : ""}
+                        </span>
                         <div
                           onClick={(e) => e.stopPropagation()}
                           className="absolute top-1 right-1 hidden group-hover:flex items-center "
@@ -236,11 +283,18 @@ export default function Dashboard() {
                           <Popover
                             open={openPopoverId === `recent-${resume.id}`}
                             onOpenChange={(visible) =>
-                              setOpenPopoverId(visible ? `recent-${resume.id}` : null)
+                              setOpenPopoverId(
+                                visible ? `recent-${resume.id}` : null,
+                              )
                             }
-                            getPopupContainer={(trigger) => trigger.parentElement || document.body}
+                            getPopupContainer={(trigger) =>
+                              trigger.parentElement || document.body
+                            }
                             content={
-                              <div className="flex flex-col gap-1 py-1" onClick={(e) => e.stopPropagation()}>
+                              <div
+                                className="flex flex-col gap-1 py-1"
+                                onClick={(e) => e.stopPropagation()}
+                              >
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -272,7 +326,9 @@ export default function Dashboard() {
                                     e.stopPropagation();
                                     // TODO: implement duplicate logic
                                     setDuplicateResumeId(resume.id ?? "");
-                                    setTitle(`${resume.title || t("enterResumeTitle")} (copy)`);
+                                    setTitle(
+                                      `${resume.title || t("enterResumeTitle")} (copy)`,
+                                    );
                                     setOpenPopoverId(null);
                                   }}
                                   className="flex items-center gap-2 px-3 py-1.5 rounded-md text-purple-600 hover:bg-purple-50 transition-colors"
@@ -290,8 +346,8 @@ export default function Dashboard() {
                           </Popover>
                         </div>
                       </div>
-                    )
-                  }
+                    );
+                  },
                 )}
               </div>
             </>
@@ -299,8 +355,10 @@ export default function Dashboard() {
         </div>
 
         <div className="bg-white rounded-xl mt-5 gap-2 flex flex-col">
-          <div className="text-[32px] font-medium text-black/70 p-4">{t('Resumes')}</div>
-          {view === 'list' ? (
+          <div className="text-[32px] font-medium text-black/70 p-4">
+            {t("Resumes")}
+          </div>
+          {view === "list" ? (
             <Table
               onRow={(record) => ({
                 onClick: () => {
@@ -312,7 +370,9 @@ export default function Dashboard() {
               pagination={{
                 current: pagination.current,
                 pageSize: pagination.pageSize,
-                total: search.trim() ? filteredResumes.length : pagination.total,
+                total: search.trim()
+                  ? filteredResumes.length
+                  : pagination.total,
                 showSizeChanger: false,
                 onChange: (page) => {
                   if (!search.trim()) {
@@ -321,13 +381,25 @@ export default function Dashboard() {
                 },
               }}
               onChange={(_, __, sorter: any) => {
-                const field = sorter.field as 'title' | 'createdAt' | 'updatedAt' | undefined;
-                const order = sorter.order as 'ascend' | 'descend' | undefined;
+                const field = sorter.field as
+                  | "title"
+                  | "createdAt"
+                  | "updatedAt"
+                  | undefined;
+                const order = sorter.order as "ascend" | "descend" | undefined;
                 if (field && order) {
                   setTableSort({ field, order });
-                  const sortField: 'title' | 'createdAt' | 'updatedAt' =
-                    field === 'title' ? 'title' : field === 'createdAt' ? 'createdAt' : 'updatedAt';
-                  loadAllResumes({ page: pagination.current, sortField, sortOrder: order });
+                  const sortField: "title" | "createdAt" | "updatedAt" =
+                    field === "title"
+                      ? "title"
+                      : field === "createdAt"
+                        ? "createdAt"
+                        : "updatedAt";
+                  loadAllResumes({
+                    page: pagination.current,
+                    sortField,
+                    sortOrder: order,
+                  });
                 } else {
                   setTableSort({});
                   loadAllResumes({ page: pagination.current });
@@ -340,18 +412,26 @@ export default function Dashboard() {
                 dataIndex="title"
                 key="title"
                 sorter
-                sortOrder={tableSort.field === 'title' ? tableSort.order : null}
+                sortOrder={tableSort.field === "title" ? tableSort.order : null}
               />
-              <Table.Column width={200} title={t("Status")} dataIndex="isPublic" key="isPublic" render={(value) => !value ? t("Private") : t("Public")} />
+              <Table.Column
+                width={200}
+                title={t("Status")}
+                dataIndex="isPublic"
+                key="isPublic"
+                render={(value) => (!value ? t("Private") : t("Public"))}
+              />
               <Table.Column
                 width={200}
                 title={t("Created on")}
                 dataIndex="createdAt"
                 key="createdAt"
                 sorter
-                sortOrder={tableSort.field === 'createdAt' ? tableSort.order : null}
+                sortOrder={
+                  tableSort.field === "createdAt" ? tableSort.order : null
+                }
                 render={(value) =>
-                  value ? new Date(value).toLocaleDateString('vi-VN') : ''
+                  value ? new Date(value).toLocaleDateString("vi-VN") : ""
                 }
               />
               <Table.Column
@@ -360,60 +440,94 @@ export default function Dashboard() {
                 dataIndex="updatedAt"
                 key="updatedAt"
                 sorter
-                sortOrder={tableSort.field === 'updatedAt' ? tableSort.order : null}
+                sortOrder={
+                  tableSort.field === "updatedAt" ? tableSort.order : null
+                }
                 render={(value) =>
-                  value ? new Date(value).toLocaleDateString('vi-VN') : ''
+                  value ? new Date(value).toLocaleDateString("vi-VN") : ""
                 }
               />
-              <Table.Column width={100} title={t("Actions")} key="actions" render={(_, record) => (
-                <div className="flex gap-4">
-                  <Tooltip title={t("Edit")}><button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setEditResumeId(record.id ?? "");
-                      setTitle(record.title ?? "");
-                    }}
-                  >
-                    <PencilIcon className="size-4 text-blue-600 transition-colors cursor-pointer" />
-                  </button></Tooltip>
-                  <Tooltip title={t("Delete")}><button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setDeleteResume(true);
-                      setDeleteResumeId(Number(record.id));
-                    }}
-                  >
-                    <TrashIcon className="size-4 text-red-700 transition-colors cursor-pointer" />
-                  </button></Tooltip>
-                  <Tooltip title={t("Duplicate")}><button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      // TODO: implement duplicate logic
-                      setDuplicateResumeId(record.id ?? "");
-                      setTitle(`${record.title || t("enterResumeTitle")} (copy)`);
-                    }}
-                  >
-                    <Copy className="size-4 text-purple-600 transition-colors cursor-pointer" />
-                  </button></Tooltip>
-                </div>
-              )} />
+              <Table.Column
+                width={100}
+                title={t("Actions")}
+                key="actions"
+                render={(_, record) => (
+                  <div className="flex gap-4">
+                    <Tooltip title={t("Edit")}>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditResumeId(record.id ?? "");
+                          setTitle(record.title ?? "");
+                        }}
+                      >
+                        <PencilIcon className="size-4 text-blue-600 transition-colors cursor-pointer" />
+                      </button>
+                    </Tooltip>
+                    <Tooltip title={t("Delete")}>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteResume(true);
+                          setDeleteResumeId(Number(record.id));
+                        }}
+                      >
+                        <TrashIcon className="size-4 text-red-700 transition-colors cursor-pointer" />
+                      </button>
+                    </Tooltip>
+                    <Tooltip title={t("Duplicate")}>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // TODO: implement duplicate logic
+                          setDuplicateResumeId(record.id ?? "");
+                          setTitle(
+                            `${record.title || t("enterResumeTitle")} (copy)`,
+                          );
+                        }}
+                      >
+                        <Copy className="size-4 text-purple-600 transition-colors cursor-pointer" />
+                      </button>
+                    </Tooltip>
+                  </div>
+                )}
+              />
             </Table>
           ) : (
-            <div className={cn("flex gap-2 items-center", view === 'grid' ? 'px-4 pb-4' : undefined)}>
+            <div
+              className={cn(
+                "flex gap-2 items-center",
+                view === "grid" ? "px-4 pb-4" : undefined,
+              )}
+            >
               {loadingTable && (
                 <div className="w-full flex justify-center py-6">
                   <Spin />
                 </div>
               )}
               {filteredResumes.map(
-                (resume: Resume & { updatedAt?: string | Date }, index: number) => {
+                (
+                  resume: Resume & { updatedAt?: string | Date },
+                  index: number,
+                ) => {
                   return (
-                    <div onClick={() => navigate(`/app/builder/${resume.id}`)} key={index} className="flex flex-col cursor-pointer relative group group-hover:shadow-lg transition-all duration-300">
+                    <div
+                      onClick={() => navigate(`/app/builder/${resume.id}`)}
+                      key={index}
+                      className="flex flex-col cursor-pointer relative group group-hover:shadow-lg transition-all duration-300"
+                    >
                       <div className="mb-2 bg-gray-100 rounded-xl p-2 w-[150px] h-[150px] flex items-center justify-center">
                         <FileTextIcon className="size-6 text-gray-500" />
                       </div>
-                      <span className="text-base text-black/70">{resume.title}</span>
-                      <span className="text-sm text-gray-500">{t('Updated on ')}{resume.updatedAt ? new Date(resume.updatedAt).toLocaleDateString() : ''}</span>
+                      <span className="text-base text-black/70 max-w-[150px] truncate">
+                        {resume.title}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        {t("Updated on ")}
+                        {resume.updatedAt
+                          ? new Date(resume.updatedAt).toLocaleDateString()
+                          : ""}
+                      </span>
                       <div
                         onClick={(e) => e.stopPropagation()}
                         className="absolute top-1 right-1 hidden group-hover:flex items-center "
@@ -421,11 +535,18 @@ export default function Dashboard() {
                         <Popover
                           open={openPopoverId === `grid-${resume.id}`}
                           onOpenChange={(visible) =>
-                            setOpenPopoverId(visible ? `grid-${resume.id}` : null)
+                            setOpenPopoverId(
+                              visible ? `grid-${resume.id}` : null,
+                            )
                           }
-                          getPopupContainer={(trigger) => trigger.parentElement || document.body}
+                          getPopupContainer={(trigger) =>
+                            trigger.parentElement || document.body
+                          }
                           content={
-                            <div className="flex flex-col gap-1 py-1" onClick={(e) => e.stopPropagation()}>
+                            <div
+                              className="flex flex-col gap-1 py-1"
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -457,7 +578,9 @@ export default function Dashboard() {
                                   e.stopPropagation();
                                   // TODO: implement duplicate logic
                                   setDuplicateResumeId(resume.id ?? "");
-                                  setTitle(`${resume.title || t("enterResumeTitle")} (copy)`);
+                                  setTitle(
+                                    `${resume.title || t("enterResumeTitle")} (copy)`,
+                                  );
                                   setOpenPopoverId(null);
                                 }}
                                 className="flex items-center gap-2 px-3 py-1.5 rounded-md text-purple-600 hover:bg-purple-50 transition-colors"
@@ -475,8 +598,8 @@ export default function Dashboard() {
                         </Popover>
                       </div>
                     </div>
-                  )
-                }
+                  );
+                },
               )}
             </div>
           )}
@@ -495,6 +618,7 @@ export default function Dashboard() {
             style: { backgroundColor: "#9810fa" },
           }}
           okText={t("createResume")}
+          cancelText={t("Cancel")}
         >
           <Input
             placeholder={t("enterResumeTitle")}
@@ -518,6 +642,7 @@ export default function Dashboard() {
             style: { backgroundColor: "#9810fa" },
           }}
           okText={t("Upload Resume")}
+          cancelText={t("Cancel")}
         >
           <Input
             placeholder={t("Enter resume title")}
@@ -568,6 +693,7 @@ export default function Dashboard() {
             style: { backgroundColor: "#9810fa" },
           }}
           okText={t("update")}
+          cancelText={t("Cancel")}
         >
           <Input
             placeholder={t("enterResumeTitle")}
@@ -595,6 +721,7 @@ export default function Dashboard() {
           okButtonProps={{
             style: { backgroundColor: "#dc2626" },
           }}
+          cancelText={t("Cancel")}
           okText={t("delete")}
         >
           <p>{t("areYouSureYouWantToDeleteThisResume")}</p>
@@ -640,6 +767,7 @@ export default function Dashboard() {
             style: { backgroundColor: "#9810fa" },
           }}
           okText={t("createResume")}
+          cancelText={t("Cancel")}
         >
           <Input
             placeholder={t("enterResumeTitle")}

@@ -97,6 +97,24 @@ export default function ResumeDetail() {
     const [showJobSuggestionsModal, setShowJobSuggestionsModal] = useState(false);
     const [showJobApplicationHistoryModal, setShowJobApplicationHistoryModal] = useState(false);
 
+    const hasResumeContent = (resume: Resume | null): boolean => {
+        if (!resume) return false;
+        const info = resume.personal_info || {};
+        const hasBasicInfo =
+            !!info.full_name ||
+            !!info.email ||
+            !!info.phone ||
+            !!info.location ||
+            !!info.profession;
+        const hasSummary = !!resume.professional_summary?.trim();
+        const hasExperience = Array.isArray(resume.experience) && resume.experience.length > 0;
+        const hasEducation = Array.isArray(resume.education) && resume.education.length > 0;
+        const hasProjects = Array.isArray(resume.project) && resume.project.length > 0;
+        const hasSkills = Array.isArray(resume.skills) && resume.skills.length > 0;
+
+        return hasBasicInfo || hasSummary || hasExperience || hasEducation || hasProjects || hasSkills;
+    };
+
     const loadExitstingResume = async () => {
         if (!resumeId) return;
         try {
@@ -129,6 +147,10 @@ export default function ResumeDetail() {
 
     const handleScoreByJD = async () => {
         if (!jdText.trim()) return;
+        if (!hasResumeContent(resumeData)) {
+            toast.error(t("Please provide resume content"));
+            return;
+        }
         setIsScoring(true);
         try {
             const parts: string[] = [];
@@ -579,7 +601,13 @@ export default function ResumeDetail() {
 
                             <div className="flex flex-col gap-2">
                                 <button
-                                    onClick={() => setShowScoreModal(true)}
+                                    onClick={() => {
+                                        if (!hasResumeContent(resumeData)) {
+                                            toast.error(t("Please provide resume content"));
+                                            return;
+                                        }
+                                        setShowScoreModal(true);
+                                    }}
                                     className="flex items-center gap-2 px-3 py-1.5 rounded-md text-orange-600 hover:bg-orange-50 transition-colors"
                                 >
                                     <Sparkles className="size-4 text-orange-600 transition-colors" />
@@ -587,6 +615,10 @@ export default function ResumeDetail() {
                                 </button>
                                 <button
                                     onClick={() => {
+                                        if (!hasResumeContent(resumeData)) {
+                                            toast.error(t("Please provide resume content"));
+                                            return;
+                                        }
                                         navigate(`/app/tailor/${resumeId}`);
                                     }}
                                     className="flex items-center gap-2 px-3 py-1.5 rounded-md text-violet-600 hover:bg-violet-50 transition-colors"
@@ -596,6 +628,10 @@ export default function ResumeDetail() {
                                 </button>
                                 <button
                                     onClick={() => {
+                                        if (!hasResumeContent(resumeData)) {
+                                            toast.error(t("Please provide resume content"));
+                                            return;
+                                        }
                                         navigate(`/app/mock-interview/${resumeId}`);
                                     }}
                                     className="flex items-center gap-2 px-3 py-1.5 rounded-md text-indigo-600 hover:bg-indigo-50 transition-colors"
@@ -605,6 +641,10 @@ export default function ResumeDetail() {
                                 </button>
                                 <button
                                     onClick={() => {
+                                        if (!hasResumeContent(resumeData)) {
+                                            toast.error(t("Please provide resume content"));
+                                            return;
+                                        }
                                         navigate(`/app/cover-letter/${resumeId}`);
                                     }}
                                     className="flex items-center gap-2 px-3 py-1.5 rounded-md text-emerald-600 hover:bg-emerald-50 transition-colors"
@@ -613,14 +653,26 @@ export default function ResumeDetail() {
                                     {t("CoverLetterMenu")}
                                 </button>
                                 <button
-                                    onClick={() => setShowJobSuggestionsModal(true)}
+                                    onClick={() => {
+                                        if (!hasResumeContent(resumeData)) {
+                                            toast.error(t("Please provide resume content"));
+                                            return;
+                                        }
+                                        setShowJobSuggestionsModal(true);
+                                    }}
                                     className="flex items-center gap-2 px-3 py-1.5 rounded-md text-blue-600 hover:bg-blue-50 transition-colors"
                                 >
                                     <Briefcase className="size-4 text-blue-600 transition-colors" />
                                     {t("Job Suggestions")}
                                 </button>
                                 <button
-                                    onClick={() => setShowJobApplicationHistoryModal(true)}
+                                    onClick={() => {
+                                        if (!hasResumeContent(resumeData)) {
+                                            toast.error(t("Please provide resume content"));
+                                            return;
+                                        }
+                                        setShowJobApplicationHistoryModal(true);
+                                    }}
                                     className="flex items-center gap-2 px-3 py-1.5 rounded-md text-teal-600 hover:bg-teal-50 transition-colors"
                                 >
                                     <Calendar className="size-4 text-teal-600 transition-colors" />

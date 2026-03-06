@@ -4,6 +4,11 @@ import { MinimalTemplate } from "./template/MinimalTemplate";
 import { ModernTemplate } from "./template/ModernTemplate";
 import { ProfessionalTemplate } from "./template/ProfessionalTemplate";
 import { ClassicTemplate } from "./template/ClassicTemplate";
+import { MinimalImageTemplate } from "./template/MinimalImageTemplate";
+import { SidebarTemplate } from "./template/SidebarTemplate";
+import { TimelineTemplate } from "./template/TimelineTemplate";
+import { CompactTemplate } from "./template/CompactTemplate";
+import { ElegantTemplate } from "./template/ElegantTemplate";
 
 export const ResumePreview = ({
   data,
@@ -47,6 +52,16 @@ export const ResumePreview = ({
         return <BoldTemplate data={data} accentColor={accentColor} />;
       case "professional":
         return <ProfessionalTemplate data={data} accentColor={accentColor} />;
+      case "minimal-image":
+        return <MinimalImageTemplate data={data} accentColor={accentColor} />;
+      case "sidebar":
+        return <SidebarTemplate data={data} accentColor={accentColor} />;
+      case "timeline":
+        return <TimelineTemplate data={data} accentColor={accentColor} />;
+      case "compact":
+        return <CompactTemplate data={data} accentColor={accentColor} />;
+      case "elegant":
+        return <ElegantTemplate data={data} accentColor={accentColor} />;
       default:
         return <ClassicTemplate data={data} accentColor={accentColor} />;
     }

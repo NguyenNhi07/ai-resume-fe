@@ -393,5 +393,14 @@
   "Failed to suggest jobs": "채용 공고 검색에 실패했습니다",
   "Failed to save job application": "지원 내역 저장에 실패했습니다",
   "Please provide resume content": "이력서 내용을 제공해주세요",
-  "Input language": "언어 입력"
+  "Input language": "언어 입력",
+  "Failed to upload avatar": "아바타 업로드에 실패했습니다",
+  "Avatar updated successfully": "아바타 업데이트 성공",
+  "Created at": "생성 날짜",
+  "Updated at": "업데이트 날짜",
+  "Clean two-column layout with prominent profile image header": "프로필 이미지 헤더가 강조된 2열 레이아웃",
+  "Two-column layout with colored sidebar for profile and skills": "프로필 및 기술을 위한 색상 사이드바가 있는 2열 레이아웃",
+  "Vertical timeline focus on work experience and education": "작업 경험 및 교육을 위한 수직 타임라인",
+  "Single-column compact layout optimized to fit more content on one page": "하나의 페이지에 더 많은 내용을 맞추기 위한 1열 컴팩트 레이아웃",
+  "Bordered card-style layout with subtle accents and serif typography": "부드럽고 세리프 타이포그래피가 있는 보더드 카드 스타일 레이아웃"
 }

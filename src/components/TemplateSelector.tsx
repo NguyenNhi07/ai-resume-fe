@@ -46,6 +46,41 @@ export const TemplateSelector = ({
       name: t("Bold"),
       preview: t("Bold and modern design with modern sans-serif typography"),
     },
+    {
+      id: "minimal-image",
+      name: t("Minimal Image"),
+      preview: t(
+        "Clean two-column layout with prominent profile image header"
+      ),
+    },
+    {
+      id: "sidebar",
+      name: t("Sidebar"),
+      preview: t(
+        "Two-column layout with colored sidebar for profile and skills"
+      ),
+    },
+    {
+      id: "timeline",
+      name: t("Timeline"),
+      preview: t(
+        "Vertical timeline focus on work experience and education"
+      ),
+    },
+    {
+      id: "compact",
+      name: t("Compact"),
+      preview: t(
+        "Single-column compact layout optimized to fit more content on one page"
+      ),
+    },
+    {
+      id: "elegant",
+      name: t("Elegant"),
+      preview: t(
+        "Bordered card-style layout with subtle accents and serif typography"
+      ),
+    },
   ];
 
   const [open, setOpen] = useState(false);

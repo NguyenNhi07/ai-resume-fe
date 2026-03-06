@@ -5,6 +5,7 @@ import type { Resume } from "@/lib/type";
 import { ResumePreview } from "./ResumePreview";
 import { useTranslation } from "react-i18next";
 import { formatResumeText } from "@/lib/utils";
+import { MarkdownText } from "./MarkdownText";
 
 const { Panel } = Collapse;
 
@@ -368,7 +369,7 @@ export const TailoredResumePreview = ({
               {t("Original")}:
             </p>
             <div className="p-2 bg-slate-100 rounded text-sm text-slate-700 border border-slate-200">
-              {original || t("NoContent")}
+              <MarkdownText content={original || t("NoContent")} />
             </div>
           </div>
           <div>
@@ -382,7 +383,7 @@ export const TailoredResumePreview = ({
                   : "bg-blue-50 text-blue-900 border-blue-200"
               }`}
             >
-              {optimized || t("NoContent")}
+              <MarkdownText content={optimized || t("NoContent")} />
             </div>
           </div>
         </div>

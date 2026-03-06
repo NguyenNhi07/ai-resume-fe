@@ -393,5 +393,14 @@
   "Failed to suggest jobs": "Échec de la recherche d'emplois",
   "Failed to save job application": "Échec de l'enregistrement de la candidature",
   "Please provide resume content": "Veuillez fournir le contenu du CV",
-  "Input language": "Entrer la langue"
+  "Input language": "Entrer la langue",
+  "Failed to upload avatar": "Échec du téléchargement de l'avatar",
+  "Avatar updated successfully": "Avatar mis à jour avec succès",
+  "Created at": "Date de création",
+  "Updated at": "Date de mise à jour",
+  "Clean two-column layout with prominent profile image header": "Disposition à deux colonnes avec avatar de profil en tête",
+  "Two-column layout with colored sidebar for profile and skills": "Disposition à deux colonnes avec sidebar colorée pour le profil et les compétences",
+  "Vertical timeline focus on work experience and education": "Timeline verticale axée sur l'expérience professionnelle et l'éducation",
+  "Single-column compact layout optimized to fit more content on one page": "Disposition à une colonne compacte optimisée pour ajuster plus de contenu sur une page",
+  "Bordered card-style layout with subtle accents and serif typography": "Disposition de carte avec accents subtils et typographie serif"
 }

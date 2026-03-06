@@ -356,9 +356,11 @@ export default function ResumeBuilder() {
       setResumeData(updated);
       initialFormData.current = { ...updated };
       setIsDirty(false);
+      toast.success(t(payload.id ? "Resume saved successfully" : "Resume created successfully"));
       navigate(-1);
     } catch (e) {
       console.error(e);
+      toast.error(t("Failed to save resume"));
     }
   };
 

@@ -363,44 +363,39 @@ export function scoreInterviewAnswers(
 
 // Giả lập AI: sinh cover letter từ CV + JD + tone
 /**
- * Format text with markdown-like formatting for resume display
- * Converts markdown bullet points to clean text with proper line breaks
+ * Format text for resume storage: strip markdown syntax to plain text.
+ * - Removes **bold** markers (keeps text)
+ * - Converts bullet points to clean lines with newlines
+ * - Used when saving AI-tailored content to resume fields
  */
 export function formatResumeText(text: string): string {
   if (!text) return "";
 
+  // Strip **bold** and *italic* markers (keep inner text)
+  let cleaned = text.replace(/\*\*([^*]+)\*\*/g, "$1").replace(/\*([^*]+)\*/g, "$1");
+
   // Split by lines and process each line
-  const lines = text.split("\n");
+  const lines = cleaned.split("\n");
   const processedLines: string[] = [];
 
   for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed) {
-      // Preserve empty lines for spacing
       processedLines.push("");
       continue;
     }
 
-    // Check if line is a markdown bullet point
     if (/^[-*•]\s/.test(trimmed)) {
-      // Remove bullet marker and keep content
-      const cleaned = trimmed.replace(/^[-*•]\s+/, "").trim();
-      if (cleaned) {
-        processedLines.push(cleaned);
-      }
+      const bulletRemoved = trimmed.replace(/^[-*•]\s+/, "").trim();
+      if (bulletRemoved) processedLines.push(bulletRemoved);
     } else if (/^\d+\.\s/.test(trimmed)) {
-      // Remove numbered list marker
-      const cleaned = trimmed.replace(/^\d+\.\s+/, "").trim();
-      if (cleaned) {
-        processedLines.push(cleaned);
-      }
+      const numRemoved = trimmed.replace(/^\d+\.\s+/, "").trim();
+      if (numRemoved) processedLines.push(numRemoved);
     } else {
-      // Regular line, keep as-is
       processedLines.push(trimmed);
     }
   }
 
-  // Join lines with newlines (will be rendered as line breaks in HTML)
   return processedLines.join("\n");
 }
 

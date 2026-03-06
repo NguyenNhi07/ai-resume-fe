@@ -17,7 +17,7 @@ const getSavedLanguage = (): string => {
   } catch (e) {
     console.error("Failed to get saved language:", e);
   }
-  return "en";
+  return "vi";
 };
 
 const savedLanguage = getSavedLanguage();

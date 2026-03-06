@@ -122,7 +122,7 @@ export const BoldTemplate = ({
         </div>
 
         {data.professional_summary && (
-          <p className="text-lg leading-relaxed max-w-2xl text-gray-300">
+          <p className="text-lg leading-relaxed max-w-2xl text-gray-300 whitespace-pre-line">
             {data.professional_summary}
           </p>
         )}

@@ -39,6 +39,7 @@ export default function JobApplicationHistoryModal({
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editStatus, setEditStatus] = useState<string>("");
   const [editNotes, setEditNotes] = useState<string>("");
+  const [deleteId, setDeleteId] = useState<number | null>(null);
 
   useEffect(() => {
     if (open && resumeId) {
@@ -58,11 +59,15 @@ export default function JobApplicationHistoryModal({
         status: statusFilter,
       });
       setApplications(result.data);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to load job applications:", error);
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+        message?: string;
+      };
       toast.error(
-        error?.response?.data?.message ||
-          error?.message ||
+        axiosError.response?.data?.message ||
+          axiosError.message ||
           t("Failed to load job applications")
       );
     } finally {
@@ -70,19 +75,26 @@ export default function JobApplicationHistoryModal({
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm(t("Are you sure you want to delete this application?"))) {
-      return;
-    }
+  const handleDeleteClick = (id: number) => {
+    setDeleteId(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (deleteId == null) return;
     try {
-      await resumeApi.deleteJobApplication(id);
+      await resumeApi.deleteJobApplication(deleteId);
       toast.success(t("Application deleted successfully"));
+      setDeleteId(null);
       loadApplications();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to delete application:", error);
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+        message?: string;
+      };
       toast.error(
-        error?.response?.data?.message ||
-          error?.message ||
+        axiosError.response?.data?.message ||
+          axiosError.message ||
           t("Failed to delete application")
       );
     }
@@ -103,17 +115,21 @@ export default function JobApplicationHistoryModal({
   const handleSaveEdit = async (id: number) => {
     try {
       await resumeApi.updateJobApplication(id, {
-        status: editStatus as any,
+        status: editStatus as JobApplication["status"],
         notes: editNotes,
       });
       toast.success(t("Application updated successfully"));
       handleCancelEdit();
       loadApplications();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to update application:", error);
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+        message?: string;
+      };
       toast.error(
-        error?.response?.data?.message ||
-          error?.message ||
+        axiosError.response?.data?.message ||
+          axiosError.message ||
           t("Failed to update application")
       );
     }
@@ -265,7 +281,7 @@ export default function JobApplicationHistoryModal({
                       <Button
                         danger
                         icon={<TrashIcon className="size-4" />}
-                        onClick={() => handleDelete(app.id)}
+                        onClick={() => handleDeleteClick(app.id)}
                       >
                         {t("Delete")}
                       </Button>
@@ -277,6 +293,15 @@ export default function JobApplicationHistoryModal({
           </div>
         )}
       </div>
+      <Modal
+        open={deleteId !== null}
+        onCancel={() => setDeleteId(null)}
+        title={t("Are you sure you want to delete this application?")}
+        okText={t("Delete")}
+        cancelText={t("Cancel")}
+        okButtonProps={{ danger: true }}
+        onOk={handleConfirmDelete}
+      />
     </Modal>
   );
 }

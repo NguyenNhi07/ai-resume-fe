@@ -135,8 +135,8 @@ export const ClassicTemplate = ({
           <h2 className="text-xl font-bold mb-3" style={{ color: accentColor }}>
             {t("Professional Summary")}
           </h2>
-          <p className="text-gray-700 leading-relaxed">
-            {data.professional_summary}
+<p className="text-gray-700 leading-relaxed whitespace-pre-line">
+          {data.professional_summary}
           </p>
         </div>
       )}

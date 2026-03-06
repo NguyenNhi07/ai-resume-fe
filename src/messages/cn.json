@@ -309,6 +309,12 @@
   "Add new resume": "添加新简历",
   "Create resume success": "创建简历成功",
   "Create resume failed": "创建简历失败",
+  "Resume saved successfully": "简历保存成功",
+  "Resume created successfully": "简历创建成功",
+  "Failed to save resume": "简历保存失败",
+  "Failed to create resume": "创建简历失败",
+  "Failed to delete resume": "删除简历失败",
+  "deleteResumeSuccess": "删除简历成功",
   "Update resume title success": "更新简历标题成功",
   "Update resume title failed": "更新简历标题失败",
   "Updated on ": "更新于 ",
@@ -393,5 +399,14 @@
   "Failed to suggest jobs": "搜索职位失败",
   "Failed to save job application": "保存申请失败",
   "Please provide resume content": "请提供简历内容",
-  "Input language": "输入语言"
+  "Input language": "输入语言",
+  "Failed to upload avatar": "上传头像失败",
+  "Avatar updated successfully": "头像更新成功",
+  "Created at": "创建于",
+  "Updated at": "更新于",
+  "Clean two-column layout with prominent profile image header": "双栏布局，带突出头像的头部",
+  "Two-column layout with colored sidebar for profile and skills": "双栏布局，带彩色侧边栏的个人信息和技能",
+  "Vertical timeline focus on work experience and education": "垂直时间轴，专注于工作经历和教育",
+  "Single-column compact layout optimized to fit more content on one page": "单栏紧凑布局，优化在一页上容纳更多内容",
+  "Bordered card-style layout with subtle accents and serif typography": "带细微修饰和衬线字体的边框卡片样式布局"
 }

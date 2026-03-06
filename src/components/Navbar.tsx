@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils"
-import { authApi } from "@/lib/api"
+import { authApi, userApi } from "@/lib/api"
 import {
     DownOutlined
 } from '@ant-design/icons'
@@ -12,16 +12,33 @@ export const Navbar = () => {
     const { t } = useTranslation()
     const navigate = useNavigate()
     const [open, setOpen] = useState(false)
-    const [user, setUser] = useState<{ name: string; email: string; avatarUrl?: string } | null>(null)
+    const [user, setUser] = useState<{ fullName: string; email: string; avatarUrl?: string } | null>(null)
 
     useEffect(() => {
-        const userStr = localStorage.getItem('user')
-        if (userStr) {
-            try {
-                setUser(JSON.parse(userStr))
-            } catch (error) {
-                console.error('Error parsing user data:', error)
-            }
+        let cancelled = false
+
+        userApi
+            .me()
+            .then((me) => {
+                if (cancelled) return
+                const fullName =
+                    me.fullName ||
+                    [me.firstName, me.lastName].filter(Boolean).join(" ") ||
+                    me.email
+
+                setUser({
+                    fullName,
+                    email: me.email,
+                    avatarUrl: me.imageLink || undefined,
+                })
+            })
+            .catch(() => {
+                if (cancelled) return
+                setUser(null)
+            })
+
+        return () => {
+            cancelled = true
         }
     }, [])
 
@@ -42,7 +59,7 @@ export const Navbar = () => {
                 <div className="flex">
                     <div className="flex items-center gap-4 text-sm">
                         {user && (
-                            <p className="max-sm:hidden !mb-0">{t('hi')}, {user.name}</p>
+                            <p className="max-sm:hidden !mb-0">{t('hi')}, {user.fullName}</p>
                         )}
                     </div>
                     <Popover
@@ -95,7 +112,7 @@ export const Navbar = () => {
                                     alt="profilePhotoUrl"
                                     size={24}
                                 >
-                                    {user?.name?.charAt(0) || ""}
+                                    {user?.fullName?.charAt(0) || ""}
                                 </Avatar>
                             </div>
                             <DownOutlined style={{ fontSize: 12, color: '#00000080' }} />

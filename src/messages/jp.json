@@ -393,5 +393,14 @@
   "Failed to suggest jobs": "求人検索に失敗しました",
   "Failed to save job application": "応募の保存に失敗しました",
   "Please provide resume content": "履歴書の内容を提供してください",
-  "Input language": "言語入力"
+  "Input language": "言語入力",
+  "Failed to upload avatar": "アバターのアップロードに失敗しました",
+  "Avatar updated successfully": "アバターの更新に成功しました",
+  "Created at": "作成日",
+  "Updated at": "更新日",
+  "Clean two-column layout with prominent profile image header": "プロフィール画像ヘッダーが強調された2列レイアウト",
+  "Two-column layout with colored sidebar for profile and skills": "プロフィールとスキルを備えた色付きサイドバーのある2列レイアウト",
+  "Vertical timeline focus on work experience and education": "作業経験と教育を中心とした垂直タイムライン",
+  "Single-column compact layout optimized to fit more content on one page": "1列コンパクトレイアウトは、1ページにより多くのコンテンツを収めるよう最適化されています",
+  "Bordered card-style layout with subtle accents and serif typography": "サブルーシュでセリフ体のタイポグラフィを備えた境界付きカードスタイルレイアウト"
 }
